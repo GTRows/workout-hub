@@ -172,13 +172,13 @@ Commands are placeholders until the PHASE 0 scaffolding lands. Update this secti
 The following files are protected by a pre-edit hook and require explicit user confirmation to edit:
 
 - `PROJECT.yaml`, `CHANGELOG.md`, `RELEASE.md`
-- `pom.xml` (backend Maven), `build.gradle` / `build.gradle.kts` if added later
+- `pom.xml` (backend Maven); `build.gradle` / `build.gradle.kts` / `gradlew` / `gradlew.bat` if Gradle is ever added
 - `package.json`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` (frontend)
-- `Dockerfile`, `docker-compose.yml`
+- `Dockerfile`, `docker-compose.yml`, `docker-compose.yaml`, `compose.yml`, `compose.yaml`
 - Anything under `.github/workflows/`
 - Anything under `scripts/`
 
-When the PHASE 0 scaffolding lands Maven or Gradle files, extend `PROTECTED_EXACT` in `.claude/hooks/pre_guard_release_files.py` accordingly (`pom.xml`, `build.gradle`, `build.gradle.kts`, `gradlew`, `gradlew.bat`). Do not edit the hook without user confirmation.
+Keep the `PROTECTED_EXACT` set in `.claude/hooks/pre_guard_release_files.py` in sync with this list. Do not edit the hook without user confirmation.
 
 ## Git and Commits
 

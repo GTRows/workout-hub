@@ -28,6 +28,11 @@ PROTECTED_EXACT = {
     "cargo.lock",
     "go.mod",
     "go.sum",
+    "pom.xml",
+    "build.gradle",
+    "build.gradle.kts",
+    "gradlew",
+    "gradlew.bat",
     "project.yaml",
     "changelog.md",
     "release.md",
@@ -36,6 +41,8 @@ PROTECTED_EXACT = {
     "dockerfile",
     "docker-compose.yml",
     "docker-compose.yaml",
+    "compose.yml",
+    "compose.yaml",
 }
 
 # File suffixes that are always protected
