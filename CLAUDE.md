@@ -51,19 +51,62 @@ See `ProjectBrief.md` for the phase-by-phase build plan (phases 0-8) and data-mo
 
 ## Architecture
 
-See open TODO tasks (`setup-1`..`setup-3`) -- filled once PHASE 0 lands actual code.
+Two deployable services (`backend`, `frontend`) plus one stateful service (`db`), all composed by `compose.yml` at repo root. No service ever talks to the database directly except `backend`; the frontend calls only the public REST API.
 
 ### Entry Flow
 
-TODO: documented in `setup-1`.
+1. `docker compose up -d` reads `compose.yml` and `.env` at repo root.
+2. `db` (`postgres:16-alpine`) starts first; the healthcheck polls `pg_isready` until the cluster accepts connections.
+3. `backend` builds from `backend/Dockerfile` (multi-stage: Maven build -> Eclipse Temurin 21 JRE). It only starts once `db` reports healthy (`depends_on: condition: service_healthy`). Boot sequence:
+   - `WorkoutHubApplication.main` -> Spring Boot `SpringApplication.run`.
+   - `application.yml` (profile `docker` by default from `.env`) is merged with environment variables. `spring.datasource.*`, `app.jwt.*`, and `app.cors.allowed-origins` are all env-driven.
+   - Flyway applies every migration under `classpath:db/migration/V*__*.sql` in order. `spring.jpa.hibernate.ddl-auto=validate` ensures schema matches entities; migrations are the only way to change the schema.
+   - Spring Security wires the JWT filter (PHASE 1) and CORS config; actuator publishes `/actuator/health` and `/actuator/info`.
+   - Tomcat listens on `SERVER_PORT` (default `8080`), published to the host as `${SERVER_PORT}:8080`.
+4. `frontend` builds from `frontend/Dockerfile` (multi-stage Node 22 with pnpm + Next.js `output: standalone`). It starts after `backend` (dependency-only, no healthcheck on backend yet). The server listens on port `3000`, published as `3000:3000`.
+5. Browser loads `http://localhost:3000`. The Next.js 15 App Router renders Server Components first; client code uses `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8080`) for API calls via TanStack Query.
+6. Offline: inside the workout-execution flow (PHASE 4), unposted sets are persisted to IndexedDB via Dexie.js and flushed to `backend` when the network returns.
 
 ### Module Breakdown
 
-TODO: documented in `setup-2`.
+Backend (`backend/src/main/java/com/workouthub/`) is feature-sliced. Each feature package owns its Controller, Service, Repository, DTOs, and domain types. Planned packages (materialize phase-by-phase):
+
+| Package | Responsibility | Lands in |
+|---------|----------------|----------|
+| `common/` | Shared config: `SecurityConfig`, `CorsConfig`, `JacksonConfig`, global `@ControllerAdvice` error handler, `JwtService`, `Clock` provider | PHASE 1 |
+| `auth/` | `/api/auth/register`, `/login`, `/refresh`; `UserDetailsService`; password hashing | PHASE 1 |
+| `users/` | `/api/users/me` profile read/update; `UserProfile` aggregate | PHASE 1 |
+| `exercises/` | Master catalog: `/api/exercises`, `/exercises/:id`, search; admin CRUD | PHASE 2 |
+| `workouts/` | `WorkoutPlan`, `WorkoutDay`, `WorkoutDayExercise` -- weekly plan CRUD + activation | PHASE 3 |
+| `sessions/` | Live sessions: `/sessions/start`, `/sessions/:id/sets`, `/finish`; per-exercise last-performance and progress queries | PHASE 4 |
+| `metrics/` | Body metrics (weight, measurements), progress photos | PHASE 5 |
+| `export/` | `/api/export/claude-summary` and import endpoint | PHASE 5 |
+
+Frontend (`frontend/src/app/`) uses App Router with route groups. Planned groups:
+
+| Route group | Purpose | Lands in |
+|-------------|---------|----------|
+| `(auth)/login`, `(auth)/register` | Unauthenticated entry pages | PHASE 5 |
+| `(app)/dashboard` | "Today's workout" card + weekly summary + quick actions | PHASE 5 |
+| `(app)/plan` | Weekly plan viewer + editor (drag-and-drop) | PHASE 5 |
+| `(app)/session/[id]` | Active workout execution screen; the app's core surface | PHASE 4-5 |
+| `(app)/history` | Calendar + per-session detail | PHASE 5 |
+| `(app)/exercises` | Catalog with filters, search, detail modal | PHASE 5 |
+| `(app)/metrics` | Body metrics + charts | PHASE 5-6 |
+| `(app)/profile` | Settings, health notes, supplements | PHASE 5 |
+| `(app)/export` | JSON export / import | PHASE 5 |
+
+Cross-cutting frontend modules: `src/lib/` for API client and Zod schemas shared across features; `src/components/ui/` for shadcn-style primitives; `src/i18n/` for `next-intl` messages (default locale `tr`); no generic `utils/` dump file.
 
 ### Data Storage
 
-TODO: documented in `setup-3`.
+- **Relational data (authoritative):** PostgreSQL 16 inside the `db` service. Named Docker volume `db_data` persists the cluster across recreates.
+- **Schema source of truth:** Flyway migrations in `backend/src/main/resources/db/migration/`. Filenames follow `V<n>__<snake_case_description>.sql`. Once merged, a migration is immutable -- changes ship as a new `V<n+1>` file. `ddl-auto: validate` guarantees JPA entities cannot silently drift from the schema.
+- **Testing:** Testcontainers spins up a real Postgres per test run. H2 is intentionally excluded.
+- **Uploaded media** (exercise GIFs, progress photos): planned to live on a host-bind volume mounted into `backend`, path controlled by an env var added in PHASE 5. MinIO is deferred (see `DEFERRED.md` when the decision lands).
+- **Client-side offline store:** IndexedDB via Dexie.js, scoped to the `(app)/session` flow. Unposted sets queue under a single object store keyed by session id; a sync routine drains it to `POST /sessions/:id/sets` when the browser regains connectivity (PHASE 4).
+- **Exports:** generated on demand by `export/` endpoints. Not persisted server-side beyond the HTTP response.
+- **Secrets:** `.env` at repo root (never committed). `.env.example` enumerates every variable both services read.
 
 ## Development Commands
 
