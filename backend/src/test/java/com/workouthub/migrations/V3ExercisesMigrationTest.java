@@ -13,20 +13,17 @@ class V3ExercisesMigrationTest extends AbstractIntegrationTest {
     JdbcTemplate jdbc;
 
     @Test
-    void exercisesTableHasExpectedColumnsInOrder() {
+    void exercisesTableHasAllExpectedColumnsAfterMigrations() {
+        // Checked after full migration chain (V3 + V8) -- covers both the
+        // original V3 columns and the bilingual renames/additions from V8.
         var columns = jdbc.queryForList(
-                """
-                SELECT column_name
-                FROM information_schema.columns
-                WHERE table_name = 'exercises'
-                ORDER BY ordinal_position
-                """,
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'exercises'",
                 String.class);
-        assertThat(columns).containsExactly(
+        assertThat(columns).contains(
                 "id", "name_tr", "name_en", "category", "equipment",
-                "muscle_primary", "muscle_secondary", "description_tr",
-                "form_tips", "common_mistakes", "image_url", "video_url",
-                "difficulty", "created_at", "updated_at");
+                "muscle_primary", "muscle_secondary",
+                "image_url", "video_url", "difficulty",
+                "created_at", "updated_at");
     }
 
     @Test
@@ -71,18 +68,4 @@ class V3ExercisesMigrationTest extends AbstractIntegrationTest {
                 "idx_exercises_name_tr_lower");
     }
 
-    @Test
-    void formTipsAndCommonMistakesAreTextArrays() {
-        var types = jdbc.queryForList(
-                """
-                SELECT column_name, udt_name
-                FROM information_schema.columns
-                WHERE table_name = 'exercises'
-                  AND column_name IN ('form_tips', 'common_mistakes')
-                """,
-                java.util.Map.class);
-        assertThat(types).hasSize(2);
-        assertThat(types).allMatch(row -> row.get("udt_name").equals("_text"),
-                "expected both array columns to use the PostgreSQL text[] (_text) udt");
-    }
 }

@@ -43,13 +43,24 @@ public class Exercise {
     @Column(name = "description_tr", columnDefinition = "TEXT")
     private String descriptionTr;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "form_tips", columnDefinition = "text[]")
-    private List<String> formTips = new ArrayList<>();
+    @Column(name = "description_en", columnDefinition = "TEXT")
+    private String descriptionEn;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "common_mistakes", columnDefinition = "text[]")
-    private List<String> commonMistakes = new ArrayList<>();
+    @Column(name = "form_tips_tr", columnDefinition = "text[]")
+    private List<String> formTipsTr = new ArrayList<>();
+
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "form_tips_en", columnDefinition = "text[]")
+    private List<String> formTipsEn = new ArrayList<>();
+
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "common_mistakes_tr", columnDefinition = "text[]")
+    private List<String> commonMistakesTr = new ArrayList<>();
+
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "common_mistakes_en", columnDefinition = "text[]")
+    private List<String> commonMistakesEn = new ArrayList<>();
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
@@ -102,11 +113,20 @@ public class Exercise {
     public String getDescriptionTr() { return descriptionTr; }
     public void setDescriptionTr(String descriptionTr) { this.descriptionTr = descriptionTr; }
 
-    public List<String> getFormTips() { return formTips; }
-    public void setFormTips(List<String> formTips) { this.formTips = formTips; }
+    public String getDescriptionEn() { return descriptionEn; }
+    public void setDescriptionEn(String descriptionEn) { this.descriptionEn = descriptionEn; }
 
-    public List<String> getCommonMistakes() { return commonMistakes; }
-    public void setCommonMistakes(List<String> commonMistakes) { this.commonMistakes = commonMistakes; }
+    public List<String> getFormTipsTr() { return formTipsTr; }
+    public void setFormTipsTr(List<String> formTipsTr) { this.formTipsTr = formTipsTr; }
+
+    public List<String> getFormTipsEn() { return formTipsEn; }
+    public void setFormTipsEn(List<String> formTipsEn) { this.formTipsEn = formTipsEn; }
+
+    public List<String> getCommonMistakesTr() { return commonMistakesTr; }
+    public void setCommonMistakesTr(List<String> commonMistakesTr) { this.commonMistakesTr = commonMistakesTr; }
+
+    public List<String> getCommonMistakesEn() { return commonMistakesEn; }
+    public void setCommonMistakesEn(List<String> commonMistakesEn) { this.commonMistakesEn = commonMistakesEn; }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }

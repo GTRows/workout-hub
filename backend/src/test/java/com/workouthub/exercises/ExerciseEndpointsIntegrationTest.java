@@ -125,8 +125,8 @@ class ExerciseEndpointsIntegrationTest extends AbstractIntegrationTest {
         e.setEquipment(equipment);
         e.setMusclePrimary("chest");
         e.setDifficulty(difficulty);
-        e.setFormTips(tips);
-        e.setCommonMistakes(mistakes);
+        e.setFormTipsEn(tips);
+        e.setCommonMistakesEn(mistakes);
         return e;
     }
 }

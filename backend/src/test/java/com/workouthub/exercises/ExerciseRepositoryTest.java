@@ -22,19 +22,23 @@ class ExerciseRepositoryTest extends AbstractIntegrationTest {
 
     @Test
     void roundTripPreservesEnumsAsLowercaseInDbAndUppercaseInJava() {
-        Exercise pushUp = newExercise("Sinav", "Push-up", Category.PUSH, Equipment.BODYWEIGHT,
-                Difficulty.BEGINNER);
-        pushUp.setFormTips(List.of("Keep core tight", "Elbows 45 degrees"));
-        pushUp.setCommonMistakes(List.of("Flared elbows"));
+        long tag = System.nanoTime();
+        Exercise pushUp = newExercise("Sinav-" + tag, "Push-up-" + tag,
+                Category.PUSH, Equipment.BODYWEIGHT, Difficulty.BEGINNER);
+        pushUp.setFormTipsTr(List.of("Govdeyi sik tut", "Dirsekler 45 derece"));
+        pushUp.setFormTipsEn(List.of("Keep core tight", "Elbows 45 degrees"));
+        pushUp.setCommonMistakesTr(List.of("Dirsek acik"));
+        pushUp.setCommonMistakesEn(List.of("Flared elbows"));
 
         Exercise saved = repo.saveAndFlush(pushUp);
         repo.findById(saved.getId()).ifPresent(e -> {
             assertThat(e.getCategory()).isEqualTo(Category.PUSH);
             assertThat(e.getEquipment()).isEqualTo(Equipment.BODYWEIGHT);
             assertThat(e.getDifficulty()).isEqualTo(Difficulty.BEGINNER);
-            assertThat(e.getFormTips()).containsExactly(
-                    "Keep core tight", "Elbows 45 degrees");
-            assertThat(e.getCommonMistakes()).containsExactly("Flared elbows");
+            assertThat(e.getFormTipsTr()).containsExactly("Govdeyi sik tut", "Dirsekler 45 derece");
+            assertThat(e.getFormTipsEn()).containsExactly("Keep core tight", "Elbows 45 degrees");
+            assertThat(e.getCommonMistakesTr()).containsExactly("Dirsek acik");
+            assertThat(e.getCommonMistakesEn()).containsExactly("Flared elbows");
         });
     }
 

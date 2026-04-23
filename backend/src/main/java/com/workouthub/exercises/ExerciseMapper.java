@@ -17,8 +17,11 @@ public final class ExerciseMapper {
                 e.getMusclePrimary(),
                 e.getMuscleSecondary(),
                 e.getDescriptionTr(),
-                e.getFormTips(),
-                e.getCommonMistakes(),
+                e.getDescriptionEn(),
+                e.getFormTipsTr(),
+                e.getFormTipsEn(),
+                e.getCommonMistakesTr(),
+                e.getCommonMistakesEn(),
                 e.getImageUrl(),
                 e.getVideoUrl(),
                 e.getDifficulty().name().toLowerCase());

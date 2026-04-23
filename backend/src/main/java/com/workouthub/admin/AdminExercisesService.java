@@ -9,6 +9,7 @@ import com.workouthub.exercises.domain.Exercise;
 import com.workouthub.exercises.domain.ExerciseRepository;
 import com.workouthub.exercises.dto.ExerciseDto;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -36,9 +37,11 @@ public class AdminExercisesService {
         e.setMusclePrimary(req.musclePrimary());
         e.setMuscleSecondary(req.muscleSecondary());
         e.setDescriptionTr(req.descriptionTr());
-        e.setFormTips(req.formTips() == null ? new ArrayList<>() : new ArrayList<>(req.formTips()));
-        e.setCommonMistakes(req.commonMistakes() == null
-                ? new ArrayList<>() : new ArrayList<>(req.commonMistakes()));
+        e.setDescriptionEn(req.descriptionEn());
+        e.setFormTipsTr(copyOrEmpty(req.formTipsTr()));
+        e.setFormTipsEn(copyOrEmpty(req.formTipsEn()));
+        e.setCommonMistakesTr(copyOrEmpty(req.commonMistakesTr()));
+        e.setCommonMistakesEn(copyOrEmpty(req.commonMistakesEn()));
         e.setImageUrl(req.imageUrl());
         e.setVideoUrl(req.videoUrl());
         e.setDifficulty(req.difficulty());
@@ -60,8 +63,11 @@ public class AdminExercisesService {
         if (req.musclePrimary() != null) e.setMusclePrimary(req.musclePrimary());
         if (req.muscleSecondary() != null) e.setMuscleSecondary(req.muscleSecondary());
         if (req.descriptionTr() != null) e.setDescriptionTr(req.descriptionTr());
-        if (req.formTips() != null) e.setFormTips(new ArrayList<>(req.formTips()));
-        if (req.commonMistakes() != null) e.setCommonMistakes(new ArrayList<>(req.commonMistakes()));
+        if (req.descriptionEn() != null) e.setDescriptionEn(req.descriptionEn());
+        if (req.formTipsTr() != null) e.setFormTipsTr(new ArrayList<>(req.formTipsTr()));
+        if (req.formTipsEn() != null) e.setFormTipsEn(new ArrayList<>(req.formTipsEn()));
+        if (req.commonMistakesTr() != null) e.setCommonMistakesTr(new ArrayList<>(req.commonMistakesTr()));
+        if (req.commonMistakesEn() != null) e.setCommonMistakesEn(new ArrayList<>(req.commonMistakesEn()));
         if (req.imageUrl() != null) e.setImageUrl(req.imageUrl());
         if (req.videoUrl() != null) e.setVideoUrl(req.videoUrl());
         if (req.difficulty() != null) e.setDifficulty(req.difficulty());
@@ -81,5 +87,9 @@ public class AdminExercisesService {
     private Exercise findOrThrow(UUID id) {
         return repo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Exercise not found: " + id));
+    }
+
+    private static List<String> copyOrEmpty(List<String> source) {
+        return source == null ? new ArrayList<>() : new ArrayList<>(source);
     }
 }

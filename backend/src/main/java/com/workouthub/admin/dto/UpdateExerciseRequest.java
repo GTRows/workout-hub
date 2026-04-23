@@ -14,8 +14,11 @@ public record UpdateExerciseRequest(
         @Size(max = 40) String musclePrimary,
         @Size(max = 40) String muscleSecondary,
         String descriptionTr,
-        List<String> formTips,
-        List<String> commonMistakes,
+        String descriptionEn,
+        List<String> formTipsTr,
+        List<String> formTipsEn,
+        List<String> commonMistakesTr,
+        List<String> commonMistakesEn,
         @Size(max = 500) String imageUrl,
         @Size(max = 500) String videoUrl,
         Difficulty difficulty) {}
