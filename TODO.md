@@ -13,21 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-37] [p6] Backend analytics endpoints
-  - Acceptance: /api/analytics/volume (weekly totals), /analytics/one-rm/:exerciseId (Epley), /analytics/streak, /analytics/prs, /analytics/heatmap return Zod-validated payloads; integration tests cover empty-data and populated cases
-
-- [t-38] [p6] (app)/insights page with volume + 1RM charts
-  - Acceptance: Recharts-based weekly volume bar and per-exercise 1RM line chart; reads from analytics endpoints; RTL test covers render with mocked payload
-
-- [t-39] [p6] PR detection + PR list component
-  - Acceptance: Backend detects PR (max weight x reps volume) on set save and emits a marker; frontend PR list page shows per-exercise best set; backend unit test covers detection; RTL covers list render
-
-- [t-40] [p6] Streak calculator + heatmap component
-  - Acceptance: Heatmap shows last 12 weeks with per-day session count; current streak + longest streak chips; unit tests cover streak math (edge cases: today, yesterday, broken)
-
-- [t-41] [p7] Push subscription backend
-  - Acceptance: VAPID keys read from env; POST /api/push/subscribe stores endpoint + keys; Flyway migration for push_subscriptions table; integration test covers subscribe and duplicate-idempotent insert
-
 - [t-42] [p7] Notification triggers
   - Acceptance: Scheduled job fires workout-day reminder at configurable hour; weight-missing nudge after 7 days without body_metrics entry; supplement reminder per user-defined time; integration tests use a fake clock
 
@@ -117,3 +102,8 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-34] 2026-04-23 -- Metrics: body_metrics CRUD + weight chart (photo upload deferred)
 - [t-35] 2026-04-23 -- (app)/profile page editing /users/me (supplements + full-export/import carved into t-52 and t-53)
 - [t-36] 2026-04-23 -- PWA manifest + service worker + offline fallback (placeholder icons pending setup-icon)
+- [t-37] 2026-04-23 -- Backend analytics endpoints (volume / one-rm / streak / prs / heatmap)
+- [t-38] 2026-04-23 -- (app)/insights page with weekly volume bar + 1RM line chart
+- [t-39] 2026-04-23 -- PR detection on set save + /prs list page
+- [t-40] 2026-04-23 -- StreakCalculator + heatmap component + streak chips
+- [t-41] 2026-04-23 -- Push subscription module (V10 migration, /api/push/subscribe, VAPID env)
