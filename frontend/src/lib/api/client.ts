@@ -39,7 +39,10 @@ type ClientDeps = {
 
 export function createApiClient(deps: ClientDeps = {}) {
   const baseUrl = deps.baseUrl ?? DEFAULT_BASE_URL;
-  const fetchImpl = deps.fetchImpl ?? fetch;
+  // Late-binding: resolve fetch on every call so tests can stub globalThis.fetch
+  // after module load without having to rebuild the client.
+  const fetchImpl: typeof fetch = (input, init) =>
+    (deps.fetchImpl ?? (globalThis as { fetch: typeof fetch }).fetch)(input, init);
 
   let refreshPromise: Promise<string | null> | null = null;
 
