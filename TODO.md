@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-42] [p7] Notification triggers
-  - Acceptance: Scheduled job fires workout-day reminder at configurable hour; weight-missing nudge after 7 days without body_metrics entry; supplement reminder per user-defined time; integration tests use a fake clock
-
 - [t-43] [p7] Frontend push UX + rest-timer OS notification
   - Acceptance: Notification permission flow on dashboard; rest timer posts OS notification via service worker when it elapses; RTL test covers permission prompt state rendering
 
@@ -45,6 +42,9 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 - [t-53] [p5] Full-JSON export + restore import
   - Acceptance: GET /api/export/full returns a single JSON dump (user profile, plans, sessions, sets, body_metrics, supplements); POST /api/export/import accepts that dump and idempotently re-inserts it; (app)/export UI adds "Download full JSON" button next to claude-summary and a file-upload restore control; RTL covers download + import success + import failure; backend integration tests cover round-trip and malformed-input rejection
+
+- [t-54] [p7] Notification triggers remainder (webpush-java wiring + supplement reminder)
+  - Acceptance: webpush-java (or equivalent) added to pom.xml with user approval; WebPushNotificationDispatcher replaces LoggingNotificationDispatcher and signs payloads with VAPID; supplement reminder trigger fires at each supplement's user-defined reminder_time (after t-52 lands the entity); integration tests cover signed-send success and expired-subscription pruning
 
 ## Blocked
 
@@ -107,3 +107,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-39] 2026-04-23 -- PR detection on set save + /prs list page
 - [t-40] 2026-04-23 -- StreakCalculator + heatmap component + streak chips
 - [t-41] 2026-04-23 -- Push subscription module (V10 migration, /api/push/subscribe, VAPID env)
+- [t-42] 2026-04-23 -- Reminder scheduler + logging dispatcher (workout + weight triggers; webpush sender + supplement trigger carved into t-54)
