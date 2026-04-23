@@ -1,0 +1,60 @@
+package com.workouthub.workouts;
+
+import com.workouthub.common.web.NotFoundException;
+import com.workouthub.workouts.domain.WorkoutPlan;
+import com.workouthub.workouts.domain.WorkoutPlanRepository;
+import com.workouthub.workouts.dto.CreateWorkoutPlanRequest;
+import com.workouthub.workouts.dto.UpdateWorkoutPlanRequest;
+import com.workouthub.workouts.dto.WorkoutPlanDto;
+import com.workouthub.workouts.dto.WorkoutPlanSummaryDto;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+public class WorkoutPlansService {
+
+    private final WorkoutPlanRepository plans;
+
+    public WorkoutPlansService(WorkoutPlanRepository plans) {
+        this.plans = plans;
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkoutPlanSummaryDto> list(UUID userId) {
+        return plans.findByUserIdOrderByCreatedAtAsc(userId).stream()
+                .map(WorkoutPlanMapper::toSummary)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public WorkoutPlanDto get(UUID userId, UUID planId) {
+        return WorkoutPlanMapper.toDto(findOwnedOrThrow(userId, planId));
+    }
+
+    public WorkoutPlanDto create(UUID userId, CreateWorkoutPlanRequest req) {
+        WorkoutPlan plan = new WorkoutPlan();
+        plan.setUserId(userId);
+        plan.setName(req.name());
+        plan.setActive(false);
+        return WorkoutPlanMapper.toDto(plans.save(plan));
+    }
+
+    public WorkoutPlanDto update(UUID userId, UUID planId, UpdateWorkoutPlanRequest req) {
+        WorkoutPlan plan = findOwnedOrThrow(userId, planId);
+        if (req.name() != null) plan.setName(req.name());
+        return WorkoutPlanMapper.toDto(plan);
+    }
+
+    public void delete(UUID userId, UUID planId) {
+        WorkoutPlan plan = findOwnedOrThrow(userId, planId);
+        plans.delete(plan);
+    }
+
+    WorkoutPlan findOwnedOrThrow(UUID userId, UUID planId) {
+        return plans.findByIdAndUserId(planId, userId)
+                .orElseThrow(() -> new NotFoundException("Workout plan not found: " + planId));
+    }
+}
