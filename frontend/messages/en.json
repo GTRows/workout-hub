@@ -4,6 +4,7 @@
     "plan": "Plan",
     "history": "History",
     "exercises": "Exercises",
+    "insights": "Insights",
     "metrics": "Metrics",
     "profile": "Profile",
     "export": "Export",
@@ -87,6 +88,16 @@
     "saveSuccess": "Saved",
     "deleteAction": "Delete",
     "deleteConfirm": "Delete this entry?"
+  },
+  "insights": {
+    "title": "Insights",
+    "loading": "Loading...",
+    "volumeTitle": "Weekly volume",
+    "volumeDescription": "Total weight x reps over the last 12 weeks.",
+    "oneRmTitle": "Estimated 1RM",
+    "oneRmDescription": "Calculated with the Epley formula.",
+    "oneRmEmpty": "Not enough data yet.",
+    "exerciseLabel": "Exercise"
   },
   "plan": {
     "title": "Weekly plan",

@@ -4,6 +4,7 @@
     "plan": "Plan",
     "history": "Gecmis",
     "exercises": "Hareketler",
+    "insights": "Analiz",
     "metrics": "Metrikler",
     "profile": "Profil",
     "export": "Disa Aktar",
@@ -87,6 +88,16 @@
     "saveSuccess": "Kaydedildi",
     "deleteAction": "Sil",
     "deleteConfirm": "Bu kaydi sil?"
+  },
+  "insights": {
+    "title": "Analiz",
+    "loading": "Yukleniyor...",
+    "volumeTitle": "Haftalik volume",
+    "volumeDescription": "Son 12 haftanin toplam agirlik x tekrar degeri.",
+    "oneRmTitle": "Tahmini 1RM",
+    "oneRmDescription": "Epley formulu ile hesaplanir.",
+    "oneRmEmpty": "Yeterli veri yok.",
+    "exerciseLabel": "Hareket"
   },
   "plan": {
     "title": "Haftalik plan",

@@ -167,6 +167,50 @@ export const bodyMetricSchema = z.object({
 
 export const bodyMetricListSchema = z.array(bodyMetricSchema);
 
+export const weeklyVolumeSchema = z.object({
+  weekStart: z.string(),
+  totalVolumeKg: z.number(),
+  sessionCount: z.number().int(),
+});
+export const weeklyVolumeListSchema = z.array(weeklyVolumeSchema);
+
+export const oneRmPointSchema = z.object({
+  date: z.string(),
+  estimatedOneRmKg: z.number(),
+  repsDone: z.number().int(),
+  weightKg: z.number().nullable(),
+});
+export const oneRmPointListSchema = z.array(oneRmPointSchema);
+
+export const streakSchema = z.object({
+  currentStreakDays: z.number().int(),
+  longestStreakDays: z.number().int(),
+  lastSessionDate: z.string().nullable(),
+});
+
+export const personalRecordSchema = z.object({
+  exerciseId: z.string().uuid(),
+  exerciseNameTr: z.string(),
+  exerciseNameEn: z.string(),
+  estimatedOneRmKg: z.number(),
+  weightKg: z.number().nullable(),
+  repsDone: z.number().int(),
+  achievedAt: z.string(),
+});
+export const personalRecordListSchema = z.array(personalRecordSchema);
+
+export const heatmapDaySchema = z.object({
+  date: z.string(),
+  sessionCount: z.number().int(),
+});
+export const heatmapListSchema = z.array(heatmapDaySchema);
+
+export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
+export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
+export type Streak = z.infer<typeof streakSchema>;
+export type PersonalRecord = z.infer<typeof personalRecordSchema>;
+export type HeatmapDay = z.infer<typeof heatmapDaySchema>;
+
 export type Exercise = z.infer<typeof exerciseSchema>;
 export type ExercisePage = z.infer<typeof exercisePageSchema>;
 export type LastPerformance = z.infer<typeof lastPerformanceSchema>;

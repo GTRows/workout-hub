@@ -5,22 +5,32 @@ import {
   bodyMetricSchema,
   exercisePageSchema,
   exerciseSchema,
+  heatmapListSchema,
   lastPerformanceSchema,
+  oneRmPointListSchema,
+  personalRecordListSchema,
   sessionDetailSchema,
   sessionSetSchema,
   sessionSummaryPageSchema,
+  streakSchema,
   userMeSchema,
+  weeklyVolumeListSchema,
   workoutDaySchema,
   workoutPlanSchema,
   type AuthResponse,
   type BodyMetric,
   type Exercise,
   type ExercisePage,
+  type HeatmapDay,
   type LastPerformance,
+  type OneRmPoint,
+  type PersonalRecord,
   type SessionDetail,
   type SessionSet,
   type SessionSummaryPage,
+  type Streak,
   type UserMe,
+  type WeeklyVolume,
   type WorkoutDay,
   type WorkoutPlan,
 } from "@/lib/api/schemas";
@@ -241,6 +251,43 @@ export async function deleteMetric(id: string): Promise<void> {
   await api.request({
     method: "DELETE",
     path: `/api/metrics/${id}`,
+  });
+}
+
+export async function fetchWeeklyVolume(weeks = 12): Promise<WeeklyVolume[]> {
+  return api.request({
+    path: "/api/analytics/volume",
+    query: { weeks },
+    schema: weeklyVolumeListSchema,
+  });
+}
+
+export async function fetchOneRepMax(exerciseId: string): Promise<OneRmPoint[]> {
+  return api.request({
+    path: `/api/analytics/one-rm/${exerciseId}`,
+    schema: oneRmPointListSchema,
+  });
+}
+
+export async function fetchStreak(): Promise<Streak> {
+  return api.request({
+    path: "/api/analytics/streak",
+    schema: streakSchema,
+  });
+}
+
+export async function fetchPersonalRecords(): Promise<PersonalRecord[]> {
+  return api.request({
+    path: "/api/analytics/prs",
+    schema: personalRecordListSchema,
+  });
+}
+
+export async function fetchHeatmap(weeks = 12): Promise<HeatmapDay[]> {
+  return api.request({
+    path: "/api/analytics/heatmap",
+    query: { weeks },
+    schema: heatmapListSchema,
   });
 }
 
