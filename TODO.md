@@ -13,17 +13,14 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-52] [p5] Supplements CRUD (backend + (app)/profile list)
-  - Acceptance: Supplement entity + repository + Flyway migration if not already present; GET/POST/PUT/DELETE /api/supplements scoped per user; profile page lists, adds, edits, and deletes supplements; RTL covers add + delete flow; backend integration test covers CRUD + cross-user isolation
-
-- [t-53] [p5] Full-JSON export + restore import
-  - Acceptance: GET /api/export/full returns a single JSON dump (user profile, plans, sessions, sets, body_metrics, supplements); POST /api/export/import accepts that dump and idempotently re-inserts it; (app)/export UI adds "Download full JSON" button next to claude-summary and a file-upload restore control; RTL covers download + import success + import failure; backend integration tests cover round-trip and malformed-input rejection
-
 - [t-54] [p7] Notification triggers remainder (webpush-java wiring + supplement reminder)
   - Acceptance: webpush-java (or equivalent) added to pom.xml with user approval; WebPushNotificationDispatcher replaces LoggingNotificationDispatcher and signs payloads with VAPID; supplement reminder trigger fires at each supplement's user-defined reminder_time (after t-52 lands the entity); integration tests cover signed-send success and expired-subscription pruning
 
 - [t-55] [p8] Wire ESLint and add pnpm lint to CI (closes the lint gap from t-49)
   - Acceptance: eslint + eslint-config-next installed under frontend/ with a working flat config; pnpm lint runs non-interactively and passes; .github/workflows/ci.yml runs pnpm lint in the frontend job; setup-ci's remaining "lint" acceptance criterion is covered
+
+- [t-56] [p5] Full-JSON import: plans + sessions path
+  - Acceptance: POST /api/export/import accepts plans and sessions slices of a full dump and idempotently replaces them (delete user-owned rows first, then bulk insert preserving UUIDs); FullImportService lifts the current HTTP 422 on plans/sessions; integration test covers round-trip replace for plans+days+day_exercises and sessions+sets; existing schema-version rejection remains
 
 ## Blocked
 
@@ -91,3 +88,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-50] 2026-04-23 -- Release workflow live: GHCR images on v*.*.* tag + compose bundle in draft GitHub Release
 - [setup-ci] 2026-04-23 -- Superseded by t-49 (CI active on main; pnpm lint follow-up carved into t-55)
 - [setup-release] 2026-04-23 -- Superseded by t-50 (GHCR+compose-bundle path recorded in RELEASE.md)
+- [t-52] 2026-04-23 -- Supplements CRUD (backend + /profile section) with bilingual timing options
+- [t-53] 2026-04-23 -- Full-JSON export (all slices) + import for profile/metrics/supplements (plans+sessions carved into t-56)
