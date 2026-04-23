@@ -139,3 +139,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-16] 2026-04-23 -- WorkoutPlan / Day / DayExercise entities + repository
 - [t-17] 2026-04-23 -- Plan CRUD endpoints with ownership guard
 - [t-18] 2026-04-23 -- Plan activation semantics
+- [t-19] 2026-04-23 -- Day + exercise nested CRUD with reorder
+- [t-20] 2026-04-23 -- Default "Baslangic Plani" seeded on admin-driven user creation
