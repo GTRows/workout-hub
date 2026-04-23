@@ -6,11 +6,14 @@ import com.workouthub.sessions.domain.WorkoutSession;
 import com.workouthub.sessions.domain.WorkoutSessionRepository;
 import com.workouthub.sessions.dto.FinishSessionRequest;
 import com.workouthub.sessions.dto.SessionDto;
+import com.workouthub.sessions.dto.SessionSummaryDto;
 import com.workouthub.sessions.dto.StartSessionRequest;
 import com.workouthub.workouts.domain.WorkoutDayRepository;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +47,20 @@ public class SessionsService {
     @Transactional(readOnly = true)
     public Optional<SessionDto> getActive(UUID userId) {
         return sessions.findByUserIdAndEndedAtIsNull(userId).map(SessionsMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<SessionSummaryDto> history(UUID userId, Pageable pageable) {
+        return sessions.findByUserIdOrderByStartedAtDesc(userId, pageable)
+                .map(SessionsMapper::toSummary);
+    }
+
+    @Transactional(readOnly = true)
+    public SessionDto detail(UUID userId, UUID sessionId) {
+        return SessionsMapper.toDto(
+                sessions.findByIdAndUserId(sessionId, userId)
+                        .orElseThrow(() -> new NotFoundException(
+                                "Session not found: " + sessionId)));
     }
 
     public SessionDto finish(UUID userId, UUID sessionId, FinishSessionRequest req) {

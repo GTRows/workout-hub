@@ -3,9 +3,13 @@ package com.workouthub.sessions;
 import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.sessions.dto.FinishSessionRequest;
 import com.workouthub.sessions.dto.SessionDto;
+import com.workouthub.sessions.dto.SessionSummaryDto;
 import com.workouthub.sessions.dto.StartSessionRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -48,5 +52,19 @@ public class SessionsController {
             @PathVariable UUID id,
             @Valid @RequestBody(required = false) FinishSessionRequest req) {
         return service.finish(principal.userId(), id, req);
+    }
+
+    @GetMapping("/history")
+    public Page<SessionSummaryDto> history(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return service.history(principal.userId(), pageable);
+    }
+
+    @GetMapping("/{id}")
+    public SessionDto detail(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @PathVariable UUID id) {
+        return service.detail(principal.userId(), id);
     }
 }

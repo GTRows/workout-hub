@@ -4,6 +4,7 @@ import com.workouthub.sessions.domain.SessionSet;
 import com.workouthub.sessions.domain.WorkoutSession;
 import com.workouthub.sessions.dto.SessionDto;
 import com.workouthub.sessions.dto.SessionSetDto;
+import com.workouthub.sessions.dto.SessionSummaryDto;
 import java.util.Comparator;
 
 public final class SessionsMapper {
@@ -27,6 +28,18 @@ public final class SessionsMapper {
                 s.getEnergyLevel(),
                 s.isFinished(),
                 sets);
+    }
+
+    public static SessionSummaryDto toSummary(WorkoutSession s) {
+        return new SessionSummaryDto(
+                s.getId(),
+                s.getWorkoutDayId(),
+                s.getStartedAt(),
+                s.getEndedAt(),
+                s.isFinished(),
+                s.getSets() == null ? 0 : s.getSets().size(),
+                s.getMood(),
+                s.getEnergyLevel());
     }
 
     public static SessionSetDto toSetDto(SessionSet set) {
