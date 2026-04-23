@@ -23,9 +23,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-32] [p5] (app)/history
   - Acceptance: Calendar view with completed days highlighted; tap day to open session-detail drawer; RTL test covers month navigation and empty-day vs populated-day render
 
-- [t-33] [p5] (app)/exercises catalog
-  - Acceptance: Grid with filters (category, equipment, difficulty), search input (debounced), detail modal with how-to/form tips/common mistakes and personal-record chip; RTL test covers filter + search
-
 - [t-34] [p5] (app)/metrics
   - Acceptance: Weight chart (weekly/monthly/all), entry form posting body_metrics, progress photo upload accepting JPEG/PNG <= 5MB; RTL test covers chart rendering from mocked data and form submit
 
@@ -125,3 +122,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-29] 2026-04-23 -- Dashboard (Resume / Start today / Rest day) + GET /api/workout-plans/active
 - [t-31] 2026-04-23 -- Session execution screen (planned cards + addSet + finish) + GET /api/workout-days/{id}
   Notes: rest-timer UI and exercise-detail modal deferred -- MVP ships without them; revisit in a follow-up if Fatih asks
+- [t-33] 2026-04-23 -- Exercises catalog grid + filters + debounced search + detail page (bilingual)
+  Notes: PR chip deferred to t-39 which owns PR detection end-to-end
