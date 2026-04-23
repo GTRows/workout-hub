@@ -13,8 +13,8 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-54] [p7] Notification triggers remainder (webpush-java wiring + supplement reminder)
-  - Acceptance: webpush-java (or equivalent) added to pom.xml with user approval; WebPushNotificationDispatcher replaces LoggingNotificationDispatcher and signs payloads with VAPID; supplement reminder trigger fires at each supplement's user-defined reminder_time (after t-52 lands the entity); integration tests cover signed-send success and expired-subscription pruning
+- [t-57] [p7] Real Web Push sender (replaces LoggingNotificationDispatcher)
+  - Acceptance: webpush-java (or equivalent, ~nl.martijndwars:web-push:5.1.x plus BouncyCastle runtime) added to pom.xml with user approval; WebPushNotificationDispatcher signs payloads with the VAPID keypair and POSTs per subscription; failing subscriptions (410/404) are auto-pruned from push_subscriptions; LoggingNotificationDispatcher remains as a fallback when vapid.private-key is unset; integration tests cover signed-send + expired-subscription pruning
 
 ## Blocked
 
@@ -86,3 +86,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-53] 2026-04-23 -- Full-JSON export (all slices) + import for profile/metrics/supplements (plans+sessions carved into t-56)
 - [t-55] 2026-04-23 -- ESLint 9 flat config + pnpm lint wired into CI
 - [t-56] 2026-04-23 -- Full-import plans + sessions path (replace semantics preserving UUIDs; multi-active-plan guard)
+- [t-54] 2026-04-23 -- Supplement reminder trigger + V11 reminder_time (webpush sender carved into t-57)
