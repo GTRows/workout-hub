@@ -13,8 +13,7 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-57] [p7] Real Web Push sender (replaces LoggingNotificationDispatcher)
-  - Acceptance: webpush-java (or equivalent, ~nl.martijndwars:web-push:5.1.x plus BouncyCastle runtime) added to pom.xml with user approval; WebPushNotificationDispatcher signs payloads with the VAPID keypair and POSTs per subscription; failing subscriptions (410/404) are auto-pruned from push_subscriptions; LoggingNotificationDispatcher remains as a fallback when vapid.private-key is unset; integration tests cover signed-send + expired-subscription pruning
+(none)
 
 ## Blocked
 
@@ -87,3 +86,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-55] 2026-04-23 -- ESLint 9 flat config + pnpm lint wired into CI
 - [t-56] 2026-04-23 -- Full-import plans + sessions path (replace semantics preserving UUIDs; multi-active-plan guard)
 - [t-54] 2026-04-23 -- Supplement reminder trigger + V11 reminder_time (webpush sender carved into t-57)
+- [t-57] 2026-04-23 -- Real Web Push sender via nl.martijndwars:web-push 5.1.1 (VAPID sign + 404/410 pruning; activated when private-key is set)
