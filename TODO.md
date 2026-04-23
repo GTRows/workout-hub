@@ -13,17 +13,12 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-24] [p4] Session history endpoints
-  - Acceptance: GET /api/sessions/history returns paginated list scoped to the user; GET /api/sessions/:id returns full detail; integration tests cover pagination and ownership
-
-- [t-25] [p4] Per-exercise analytics queries
-  - Acceptance: GET /api/exercises/:id/last-performance returns last session's sets; GET /api/exercises/:id/progress returns time series (weight, reps, volume) for last N sessions; integration tests cover empty-history and populated cases
-
-- [t-26] [p4] Frontend Dexie offline queue for session sets
-  - Acceptance: src/lib/offline/ stores unposted sets keyed by session id; flush-on-online drains them to POST /api/sessions/:id/sets with idempotency key; vitest unit tests cover enqueue, flush, and retry
-
 - [t-27] [p5] Frontend foundations
   - Acceptance: API client (fetch wrapper + TanStack Query provider + Zod-validated response types), auth token storage with refresh interceptor, next-intl configured with tr messages + en fallback, shadcn/ui initialised, authenticated layout shell with nav and protected-route guard; vitest covers the refresh interceptor
+
+- [t-26] [p5] Frontend Dexie offline queue for session sets
+  - Acceptance: src/lib/offline/ stores unposted sets keyed by session id; flush-on-online drains them to POST /api/sessions/:id/sets with idempotency key; vitest unit tests cover enqueue, flush, and retry
+  - Notes: moved from p4 to p5 -- depends on frontend foundations (TanStack Query + API client) landing first in t-27
 
 - [t-28] [p5] (auth)/login and (auth)/register pages
   - Acceptance: react-hook-form + zod forms hitting /api/auth/*; correct error surfacing for 400/401; redirect to /dashboard on success; RTL test covers validation errors and successful submit
@@ -135,3 +130,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-21] 2026-04-23 -- WorkoutSession + SessionSet entities + repositories
 - [t-22] 2026-04-23 -- Session lifecycle endpoints (start / active / finish)
 - [t-23] 2026-04-23 -- Set capture endpoints with finished-session gate
+- [t-24] 2026-04-23 -- Session history list + detail endpoints
+- [t-25] 2026-04-23 -- Per-exercise last-performance + progress analytics
