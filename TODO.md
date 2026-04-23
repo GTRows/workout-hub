@@ -13,18 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-8] [p1] Common config: SecurityConfig, CorsConfig, JacksonConfig, GlobalExceptionHandler
-  - Acceptance: Context loads; 401 on protected endpoint; CORS allows configured origin; error responses follow the documented error DTO; tests cover each
-
-- [t-9] [p1] JwtService + JwtAuthenticationFilter
-  - Acceptance: Service signs and validates HS512 tokens using APP_JWT_SECRET; filter populates SecurityContext for valid token and rejects tampered/expired tokens; unit tests cover both paths
-
-- [t-10] [p1] auth module: /api/auth/register, /login, /refresh
-  - Acceptance: Register creates user + profile with BCrypt hash; login returns access+refresh pair; refresh rotates refresh token and invalidates the old one; integration tests cover happy path and bad-credentials
-
-- [t-11] [p1] users module: GET/PUT /api/users/me
-  - Acceptance: Authenticated user reads and updates own profile (height, weight, birth, gender, health_notes, goals); returns 401 without token; integration tests cover both
-
 - [t-12] [p2] Exercise JPA entity, repository, DTO, mapper
   - Acceptance: Entity matches V3 schema; repository has findByCategory/findByEquipment/searchByName; unit tests pass
 
@@ -166,3 +154,7 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-4] 2026-04-23 -- Flyway V4: workout_plans + workout_days + workout_day_exercises
 - [t-5] 2026-04-23 -- Flyway V5: workout_sessions + session_sets
 - [t-6] 2026-04-23 -- Flyway V6: body_metrics + supplements
+- [t-8] 2026-04-23 -- Common config: SecurityConfig, CorsConfig, JacksonConfig, GlobalExceptionHandler
+- [t-9] 2026-04-23 -- JwtService + JwtAuthenticationFilter
+- [t-10] 2026-04-23 -- auth module: /api/auth/register, /login, /refresh
+- [t-11] 2026-04-23 -- users module: GET/PUT /api/users/me
