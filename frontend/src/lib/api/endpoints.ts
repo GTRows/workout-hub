@@ -185,3 +185,16 @@ export async function fetchClaudeSummary(days = 30): Promise<unknown> {
     query: { days },
   });
 }
+
+export async function reorderDayExercises(
+  planId: string,
+  dayId: string,
+  itemIdsInOrder: string[]
+): Promise<WorkoutDay> {
+  return api.request({
+    method: "POST",
+    path: `/api/workout-plans/${planId}/days/${dayId}/exercises/reorder`,
+    body: { itemIdsInOrder },
+    schema: workoutDaySchema,
+  });
+}

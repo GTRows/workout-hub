@@ -48,6 +48,25 @@
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
     "finished": "Tamamlandi"
   },
+  "plan": {
+    "title": "Haftalik plan",
+    "loading": "Yukleniyor...",
+    "noPlan": "Aktif plan yok",
+    "emptyDay": "Bu gun icin hareket yok",
+    "moveUp": "Yukari tasi",
+    "moveDown": "Asagi tasi",
+    "weekday": {
+      "1": "Pazartesi",
+      "2": "Sali",
+      "3": "Carsamba",
+      "4": "Persembe",
+      "5": "Cuma",
+      "6": "Cumartesi",
+      "7": "Pazar"
+    },
+    "setsReps": "{sets} set x {min}-{max} tekrar",
+    "setsOnly": "{sets} set"
+  },
   "export": {
     "title": "Disa Aktar",
     "claudeTitle": "Claude icin ozet JSON",

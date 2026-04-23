@@ -13,10 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-26] [p5] Frontend Dexie offline queue for session sets
-  - Acceptance: src/lib/offline/ stores unposted sets keyed by session id; flush-on-online drains them to POST /api/sessions/:id/sets with idempotency key; vitest unit tests cover enqueue, flush, and retry
-  - Notes: moved from p4 to p5 -- depends on frontend foundations (TanStack Query + API client) landing first in t-27
-
 - [t-30] [p5] (app)/plan viewer + editor
   - Acceptance: Weekly Pzt-Pzr view; tap a day to see exercises; editor supports drag-and-drop reorder of days and exercises via dnd-kit; RTL test covers the reorder mutation firing PUT
 
@@ -123,3 +119,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-33] 2026-04-23 -- Exercises catalog grid + filters + debounced search + detail page (bilingual)
   Notes: PR chip deferred to t-39 which owns PR detection end-to-end
 - [t-32] 2026-04-23 -- History calendar (Monday-first grid) + session-detail drawer
+- [t-26] 2026-04-23 -- Dexie offline queue for session sets (enqueue, drain, subscribeOnline)

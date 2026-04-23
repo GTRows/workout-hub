@@ -48,6 +48,25 @@
     "finishConfirm": "Finish this workout?",
     "finished": "Finished"
   },
+  "plan": {
+    "title": "Weekly plan",
+    "loading": "Loading...",
+    "noPlan": "No active plan",
+    "emptyDay": "No exercises on this day",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "weekday": {
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday",
+      "7": "Sunday"
+    },
+    "setsReps": "{sets} sets x {min}-{max} reps",
+    "setsOnly": "{sets} sets"
+  },
   "export": {
     "title": "Export",
     "claudeTitle": "Claude summary JSON",
