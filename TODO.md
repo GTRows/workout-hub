@@ -13,24 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-7] [p1] Testcontainers harness + replace trivial smoke test
-  - Acceptance: AbstractIntegrationTest base class with a shared PostgreSQLContainer; WorkoutHubApplicationTests now boots full Spring context against it and passes
-
-- [t-2] [p1] Flyway V2: users + user_profile tables
-  - Acceptance: Migration applies cleanly from empty Postgres; Testcontainers test asserts both tables and expected columns/indexes exist
-
-- [t-3] [p1] Flyway V3: exercises master catalog table
-  - Acceptance: Migration applies; test asserts columns, uniqueness of (name_en) and required indexes
-
-- [t-4] [p1] Flyway V4: workout_plans + workout_days + workout_day_exercises
-  - Acceptance: Migration applies; test asserts FK cascades on plan delete and unique (plan_id, day_of_week)
-
-- [t-5] [p1] Flyway V5: workout_sessions + session_sets
-  - Acceptance: Migration applies; test asserts FK (session_id -> workout_sessions) and set_number uniqueness per (session_id, exercise_id)
-
-- [t-6] [p1] Flyway V6: body_metrics + supplements
-  - Acceptance: Migration applies; test asserts both tables; date index on body_metrics.recorded_date
-
 - [t-8] [p1] Common config: SecurityConfig, CorsConfig, JacksonConfig, GlobalExceptionHandler
   - Acceptance: Context loads; 401 on protected endpoint; CORS allows configured origin; error responses follow the documented error DTO; tests cover each
 
@@ -178,3 +160,9 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [setup-3] 2026-04-22 -- Document Data Storage in CLAUDE.md
 - [setup-icon] 2026-04-22 -- Moved to DEFERRED.md (needs design input and graphics tooling)
 - [setup-protected-maven] 2026-04-22 -- Extend PROTECTED_EXACT now that Maven files exist
+- [t-7] 2026-04-23 -- Testcontainers harness + replace trivial smoke test
+- [t-2] 2026-04-23 -- Flyway V2: users + user_profile tables
+- [t-3] 2026-04-23 -- Flyway V3: exercises master catalog table
+- [t-4] 2026-04-23 -- Flyway V4: workout_plans + workout_days + workout_day_exercises
+- [t-5] 2026-04-23 -- Flyway V5: workout_sessions + session_sets
+- [t-6] 2026-04-23 -- Flyway V6: body_metrics + supplements
