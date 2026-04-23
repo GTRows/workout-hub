@@ -13,15 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-21] [p4] WorkoutSession + SessionSet entities + repositories
-  - Acceptance: Entities mirror V5 schema; repositories with findActiveByUser, findBySessionAndExercise; unit tests pass
-
-- [t-22] [p4] Session lifecycle endpoints
-  - Acceptance: POST /api/sessions/start creates a session tied to a workout_day_id; GET /api/sessions/active returns at most one; POST /api/sessions/:id/finish stamps ended_at and locks edits; integration tests cover each transition
-
-- [t-23] [p4] Set capture endpoints
-  - Acceptance: POST /api/sessions/:id/sets creates a set with reps, weight_kg, rpe, completed; PUT updates; only within a non-finished session; 409 if session is finished; integration tests cover validation and state gate
-
 - [t-24] [p4] Session history endpoints
   - Acceptance: GET /api/sessions/history returns paginated list scoped to the user; GET /api/sessions/:id returns full detail; integration tests cover pagination and ownership
 
@@ -141,3 +132,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-18] 2026-04-23 -- Plan activation semantics
 - [t-19] 2026-04-23 -- Day + exercise nested CRUD with reorder
 - [t-20] 2026-04-23 -- Default "Baslangic Plani" seeded on admin-driven user creation
+- [t-21] 2026-04-23 -- WorkoutSession + SessionSet entities + repositories
+- [t-22] 2026-04-23 -- Session lifecycle endpoints (start / active / finish)
+- [t-23] 2026-04-23 -- Set capture endpoints with finished-session gate
