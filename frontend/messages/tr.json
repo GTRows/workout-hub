@@ -48,6 +48,29 @@
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
     "finished": "Tamamlandi"
   },
+  "history": {
+    "title": "Gecmis",
+    "loading": "Yukleniyor...",
+    "prevMonth": "Onceki ay",
+    "nextMonth": "Sonraki ay",
+    "today": "Bugun",
+    "noSession": "Bu gun icin kayit yok",
+    "selectDayHint": "Bir gune tiklayin",
+    "sessionTitle": "Antrenman",
+    "sessionStartedAt": "Basladi: {time}",
+    "sessionFinishedAt": "Bitti: {time}",
+    "setCount": "{count} set",
+    "viewFullDetail": "Tum detaylar",
+    "weekday": {
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Car",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt",
+      "sun": "Paz"
+    }
+  },
   "exercises": {
     "title": "Hareket kataloğu",
     "searchPlaceholder": "Hareket ara...",

@@ -137,6 +137,21 @@ export function pageSchema<T extends z.ZodTypeAny>(item: T) {
 
 export const exercisePageSchema = pageSchema(exerciseSchema);
 
+export const sessionSummarySchema = z.object({
+  id: z.string().uuid(),
+  workoutDayId: z.string().uuid().nullable(),
+  startedAt: z.string(),
+  endedAt: z.string().nullable(),
+  finished: z.boolean(),
+  setCount: z.number().int(),
+  mood: z.number().int().nullable().optional(),
+  energyLevel: z.number().int().nullable().optional(),
+});
+
+export const sessionSummaryPageSchema = pageSchema(sessionSummarySchema);
+
 export type Exercise = z.infer<typeof exerciseSchema>;
 export type ExercisePage = z.infer<typeof exercisePageSchema>;
 export type LastPerformance = z.infer<typeof lastPerformanceSchema>;
+export type SessionSummary = z.infer<typeof sessionSummarySchema>;
+export type SessionSummaryPage = z.infer<typeof sessionSummaryPageSchema>;

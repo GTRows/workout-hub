@@ -6,6 +6,7 @@ import {
   lastPerformanceSchema,
   sessionDetailSchema,
   sessionSetSchema,
+  sessionSummaryPageSchema,
   userMeSchema,
   workoutDaySchema,
   workoutPlanSchema,
@@ -15,6 +16,7 @@ import {
   type LastPerformance,
   type SessionDetail,
   type SessionSet,
+  type SessionSummaryPage,
   type UserMe,
   type WorkoutDay,
   type WorkoutPlan,
@@ -161,5 +163,16 @@ export async function fetchExerciseDetail(id: string): Promise<Exercise> {
   return api.request({
     path: `/api/exercises/${id}`,
     schema: exerciseSchema,
+  });
+}
+
+export async function fetchSessionHistory(
+  page = 0,
+  size = 200
+): Promise<SessionSummaryPage> {
+  return api.request({
+    path: "/api/sessions/history",
+    query: { page, size },
+    schema: sessionSummaryPageSchema,
   });
 }

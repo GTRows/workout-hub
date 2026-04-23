@@ -48,6 +48,29 @@
     "finishConfirm": "Finish this workout?",
     "finished": "Finished"
   },
+  "history": {
+    "title": "History",
+    "loading": "Loading...",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "today": "Today",
+    "noSession": "No session for this day",
+    "selectDayHint": "Tap a day",
+    "sessionTitle": "Session",
+    "sessionStartedAt": "Started: {time}",
+    "sessionFinishedAt": "Ended: {time}",
+    "setCount": "{count} sets",
+    "viewFullDetail": "View full detail",
+    "weekday": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
   "exercises": {
     "title": "Exercise catalog",
     "searchPlaceholder": "Search exercises...",
