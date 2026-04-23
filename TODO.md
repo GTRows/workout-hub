@@ -20,9 +20,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-30] [p5] (app)/plan viewer + editor
   - Acceptance: Weekly Pzt-Pzr view; tap a day to see exercises; editor supports drag-and-drop reorder of days and exercises via dnd-kit; RTL test covers the reorder mutation firing PUT
 
-- [t-32] [p5] (app)/history
-  - Acceptance: Calendar view with completed days highlighted; tap day to open session-detail drawer; RTL test covers month navigation and empty-day vs populated-day render
-
 - [t-34] [p5] (app)/metrics
   - Acceptance: Weight chart (weekly/monthly/all), entry form posting body_metrics, progress photo upload accepting JPEG/PNG <= 5MB; RTL test covers chart rendering from mocked data and form submit
 
@@ -124,3 +121,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
   Notes: rest-timer UI and exercise-detail modal deferred -- MVP ships without them; revisit in a follow-up if Fatih asks
 - [t-33] 2026-04-23 -- Exercises catalog grid + filters + debounced search + detail page (bilingual)
   Notes: PR chip deferred to t-39 which owns PR detection end-to-end
+- [t-32] 2026-04-23 -- History calendar (Monday-first grid) + session-detail drawer
