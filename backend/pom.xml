@@ -23,6 +23,8 @@
         <testcontainers.version>1.20.4</testcontainers.version>
         <jacoco.version>0.8.12</jacoco.version>
         <jacoco.line.coverage.min>0.70</jacoco.line.coverage.min>
+        <webpush.version>5.1.1</webpush.version>
+        <bouncycastle.version>1.77</bouncycastle.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +91,17 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.martijndwars</groupId>
+            <artifactId>web-push</artifactId>
+            <version>${webpush.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
         </dependency>
 
         <dependency>
