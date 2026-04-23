@@ -35,6 +35,7 @@ public class SupplementsService {
         s.setDosage(req.dosage());
         s.setTiming(req.timing());
         s.setActive(true);
+        s.setReminderTime(req.reminderTime());
         return toDto(repo.save(s));
     }
 
@@ -45,6 +46,7 @@ public class SupplementsService {
         if (req.dosage() != null) s.setDosage(req.dosage());
         if (req.timing() != null) s.setTiming(req.timing());
         if (req.active() != null) s.setActive(req.active());
+        if (req.reminderTime() != null) s.setReminderTime(req.reminderTime());
         return toDto(s);
     }
 
@@ -61,6 +63,7 @@ public class SupplementsService {
                 s.getDosage(),
                 s.getTiming(),
                 s.isActive(),
+                s.getReminderTime(),
                 s.getCreatedAt(),
                 s.getUpdatedAt());
     }

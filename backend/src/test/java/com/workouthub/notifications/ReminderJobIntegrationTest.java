@@ -10,6 +10,9 @@ import static org.mockito.Mockito.verify;
 
 import com.workouthub.metrics.domain.BodyMetric;
 import com.workouthub.metrics.domain.BodyMetricRepository;
+import com.workouthub.supplements.domain.Supplement;
+import com.workouthub.supplements.domain.SupplementRepository;
+import com.workouthub.supplements.domain.SupplementTiming;
 import com.workouthub.support.AbstractIntegrationTest;
 import com.workouthub.support.TestAuthHelpers;
 import com.workouthub.support.TestAuthHelpers.SeededUser;
@@ -21,6 +24,7 @@ import com.workouthub.workouts.domain.WorkoutPlanRepository;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +43,7 @@ class ReminderJobIntegrationTest extends AbstractIntegrationTest {
     @Autowired TestAuthHelpers helpers;
     @Autowired WorkoutPlanRepository plans;
     @Autowired BodyMetricRepository metrics;
+    @Autowired SupplementRepository supplements;
 
     @MockitoBean NotificationDispatcher dispatcher;
 
@@ -100,6 +105,49 @@ class ReminderJobIntegrationTest extends AbstractIntegrationTest {
                 .send(eq(idle.id()), anyString(), anyString(), eq("/metrics"));
         verify(dispatcher, never())
                 .send(eq(recent.id()), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void supplementReminderFiresForSupplementsInsideTheOneMinuteWindow() {
+        SeededUser u = helpers.seed(
+                "sup-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+
+        Supplement s = new Supplement();
+        s.setUserId(u.id());
+        s.setName("Creatine");
+        s.setDosage("5g");
+        s.setTiming(SupplementTiming.MORNING);
+        s.setActive(true);
+        s.setReminderTime(LocalTime.of(8, 0));
+        supplements.save(s);
+
+        // Window is [08:00 - 1 min, 08:00] inclusive.
+        int fired = job.runSupplementRemindersAt(LocalTime.of(8, 0));
+
+        assertThat(fired).isGreaterThanOrEqualTo(1);
+        verify(dispatcher, atLeastOnce())
+                .send(eq(u.id()), anyString(), anyString(), eq("/profile"));
+    }
+
+    @Test
+    void supplementReminderDoesNotFireOutsideTheWindow() {
+        SeededUser u = helpers.seed(
+                "sup2-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+
+        Supplement s = new Supplement();
+        s.setUserId(u.id());
+        s.setName("D3");
+        s.setTiming(SupplementTiming.MORNING);
+        s.setActive(true);
+        s.setReminderTime(LocalTime.of(9, 0));
+        supplements.save(s);
+
+        int fired = job.runSupplementRemindersAt(LocalTime.of(14, 0));
+
+        verify(dispatcher, never())
+                .send(eq(u.id()), anyString(), anyString(), anyString());
+        // Other tests may leave entries, but this specific user must not fire.
+        assertThat(fired).isGreaterThanOrEqualTo(0);
     }
 
     private void seedActivePlanOn(UUID userId, DayOfWeek dow) {

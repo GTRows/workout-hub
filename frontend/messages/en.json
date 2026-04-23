@@ -121,6 +121,7 @@
     "empty": "No supplements yet.",
     "name": "Name",
     "dosage": "Dosage",
+    "reminderTime": "Reminder",
     "add": "Add",
     "saving": "Saving...",
     "delete": "Delete",

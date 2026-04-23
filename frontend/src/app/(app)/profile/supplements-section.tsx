@@ -18,9 +18,19 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type FormState = { name: string; dosage: string; timing: SupplementTiming };
+type FormState = {
+  name: string;
+  dosage: string;
+  timing: SupplementTiming;
+  reminderTime: string;
+};
 
-const EMPTY: FormState = { name: "", dosage: "", timing: "morning" };
+const EMPTY: FormState = {
+  name: "",
+  dosage: "",
+  timing: "morning",
+  reminderTime: "",
+};
 
 export function SupplementsSection() {
   const t = useTranslations("supplements");
@@ -52,6 +62,7 @@ export function SupplementsSection() {
       name: form.name.trim(),
       dosage: form.dosage.trim() || undefined,
       timing: form.timing,
+      reminderTime: form.reminderTime || undefined,
     });
   };
 
@@ -73,6 +84,7 @@ export function SupplementsSection() {
                 {s.dosage ? ` - ${s.dosage}` : ""}
                 <span className="ml-2 text-xs text-muted-foreground">
                   {t(`timing.${s.timing}`)}
+                  {s.reminderTime ? ` ${s.reminderTime.slice(0, 5)}` : ""}
                 </span>
               </span>
               <Button
@@ -91,7 +103,7 @@ export function SupplementsSection() {
         </ul>
       )}
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto_auto]">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto_auto_auto]">
         <div>
           <Label htmlFor="supp-name">{t("name")}</Label>
           <Input
@@ -127,6 +139,17 @@ export function SupplementsSection() {
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <Label htmlFor="supp-reminder">{t("reminderTime")}</Label>
+          <Input
+            id="supp-reminder"
+            type="time"
+            value={form.reminderTime}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, reminderTime: e.target.value }))
+            }
+          />
         </div>
         <div className="flex items-end">
           <Button onClick={submit} disabled={createMutation.isPending}>

@@ -322,6 +322,7 @@ export type CreateSupplementPayload = {
   name: string;
   dosage?: string;
   timing: SupplementTiming;
+  reminderTime?: string;
 };
 
 export type UpdateSupplementPayload = Partial<CreateSupplementPayload> & {

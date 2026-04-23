@@ -7,6 +7,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalTime;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -32,6 +33,9 @@ public class Supplement {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(name = "reminder_time")
+    private LocalTime reminderTime;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -68,6 +72,9 @@ public class Supplement {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public LocalTime getReminderTime() { return reminderTime; }
+    public void setReminderTime(LocalTime reminderTime) { this.reminderTime = reminderTime; }
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

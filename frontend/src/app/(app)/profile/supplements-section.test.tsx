@@ -21,6 +21,7 @@ const messages = {
     empty: "No supplements yet.",
     name: "Name",
     dosage: "Dosage",
+    reminderTime: "Reminder",
     add: "Add",
     saving: "Saving...",
     delete: "Delete",
@@ -62,6 +63,7 @@ function supplement(id: string, name: string) {
     dosage: "5g",
     timing: "morning",
     active: true,
+    reminderTime: null,
     createdAt: "2026-04-23T00:00:00Z",
     updatedAt: "2026-04-23T00:00:00Z",
   };

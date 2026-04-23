@@ -222,6 +222,7 @@ export const supplementSchema = z.object({
   dosage: z.string().nullable().optional(),
   timing: supplementTimingSchema,
   active: z.boolean(),
+  reminderTime: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

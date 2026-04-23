@@ -48,6 +48,7 @@ app:
   reminders:
     workout-cron: ${APP_REMINDERS_WORKOUT_CRON:-}
     weight-cron: ${APP_REMINDERS_WEIGHT_CRON:-}
+    supplement-cron: ${APP_REMINDERS_SUPPLEMENT_CRON:-}
 
 management:
   endpoints:

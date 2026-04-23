@@ -121,6 +121,7 @@
     "empty": "Henuz takviye eklenmedi.",
     "name": "Ad",
     "dosage": "Doz",
+    "reminderTime": "Hatirlatici",
     "add": "Ekle",
     "saving": "Kaydediliyor...",
     "delete": "Sil",

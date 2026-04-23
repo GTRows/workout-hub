@@ -1,9 +1,12 @@
 package com.workouthub.notifications;
 
 import com.workouthub.metrics.domain.BodyMetricRepository;
+import com.workouthub.supplements.domain.Supplement;
+import com.workouthub.supplements.domain.SupplementRepository;
 import com.workouthub.workouts.domain.WorkoutPlanRepository;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -21,16 +24,19 @@ public class ReminderJob {
     private final NotificationDispatcher dispatcher;
     private final WorkoutPlanRepository plans;
     private final BodyMetricRepository metrics;
+    private final SupplementRepository supplements;
     private final Clock clock;
 
     public ReminderJob(
             NotificationDispatcher dispatcher,
             WorkoutPlanRepository plans,
             BodyMetricRepository metrics,
+            SupplementRepository supplements,
             Clock clock) {
         this.dispatcher = dispatcher;
         this.plans = plans;
         this.metrics = metrics;
+        this.supplements = supplements;
         this.clock = clock;
     }
 
@@ -44,6 +50,12 @@ public class ReminderJob {
     @Transactional(readOnly = true)
     public void runWeightNudge() {
         runWeightNudgeAt(LocalDate.now(clock));
+    }
+
+    @Scheduled(cron = "${app.reminders.supplement-cron:-}")
+    @Transactional(readOnly = true)
+    public void runSupplementReminders() {
+        runSupplementRemindersAt(LocalTime.now(clock).withSecond(0).withNano(0));
     }
 
     @Transactional(readOnly = true)
@@ -74,5 +86,26 @@ public class ReminderJob {
         }
         log.info("weight-nudge fired userCount={} since={}", userIds.size(), since);
         return userIds.size();
+    }
+
+    /**
+     * Fires one notification per supplement whose reminder_time falls inside
+     * the one-minute window ending at {@code now} (inclusive). Schedule
+     * this trigger at a matching minute-cron (for example "0 * * * * *").
+     */
+    @Transactional(readOnly = true)
+    public int runSupplementRemindersAt(LocalTime now) {
+        LocalTime from = now.minusMinutes(1);
+        List<Supplement> due = supplements.findActiveWithReminderBetween(from, now);
+        for (Supplement s : due) {
+            dispatcher.send(
+                    s.getUserId(),
+                    "Supplement: " + s.getName(),
+                    s.getDosage() == null ? "Time to take your supplement." :
+                            "Time to take " + s.getDosage() + " of " + s.getName() + ".",
+                    "/profile");
+        }
+        log.info("supplement reminder fired count={} window={}..{}", due.size(), from, now);
+        return due.size();
     }
 }
