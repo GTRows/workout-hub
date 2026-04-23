@@ -48,6 +48,45 @@
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
     "finished": "Tamamlandi"
   },
+  "exercises": {
+    "title": "Hareket kataloğu",
+    "searchPlaceholder": "Hareket ara...",
+    "filterCategoryLabel": "Kategori",
+    "filterEquipmentLabel": "Ekipman",
+    "filterDifficultyLabel": "Zorluk",
+    "filterAny": "Hepsi",
+    "category": {
+      "push": "İtme",
+      "pull": "Çekme",
+      "legs": "Bacak",
+      "cardio": "Kardiyo",
+      "core": "Core",
+      "forearm": "Ön Kol"
+    },
+    "equipment": {
+      "bodyweight": "Vücut ağırlığı",
+      "dumbbell": "Dumbbell",
+      "zbar": "Z-bar",
+      "bar": "Çubuk",
+      "wrist_tool": "Bilek aleti",
+      "machine": "Makine",
+      "other": "Diğer"
+    },
+    "difficulty": {
+      "beginner": "Başlangıç",
+      "intermediate": "Orta",
+      "advanced": "İleri"
+    },
+    "loading": "Yükleniyor...",
+    "empty": "Eşleşen hareket yok.",
+    "notFound": "Hareket bulunamadı",
+    "formTips": "Form ipuçları",
+    "commonMistakes": "Yaygın hatalar",
+    "noDescription": "Açıklama henüz girilmemiş.",
+    "backToCatalog": "Kataloğa dön",
+    "musclePrimary": "Ana kas",
+    "muscleSecondary": "Yardımcı kas"
+  },
   "common": {
     "loading": "Yukleniyor...",
     "save": "Kaydet",

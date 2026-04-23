@@ -48,6 +48,45 @@
     "finishConfirm": "Finish this workout?",
     "finished": "Finished"
   },
+  "exercises": {
+    "title": "Exercise catalog",
+    "searchPlaceholder": "Search exercises...",
+    "filterCategoryLabel": "Category",
+    "filterEquipmentLabel": "Equipment",
+    "filterDifficultyLabel": "Difficulty",
+    "filterAny": "Any",
+    "category": {
+      "push": "Push",
+      "pull": "Pull",
+      "legs": "Legs",
+      "cardio": "Cardio",
+      "core": "Core",
+      "forearm": "Forearm"
+    },
+    "equipment": {
+      "bodyweight": "Bodyweight",
+      "dumbbell": "Dumbbell",
+      "zbar": "Z-bar",
+      "bar": "Bar",
+      "wrist_tool": "Wrist tool",
+      "machine": "Machine",
+      "other": "Other"
+    },
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "loading": "Loading...",
+    "empty": "No exercises match.",
+    "notFound": "Exercise not found",
+    "formTips": "Form tips",
+    "commonMistakes": "Common mistakes",
+    "noDescription": "No description yet.",
+    "backToCatalog": "Back to catalog",
+    "musclePrimary": "Primary",
+    "muscleSecondary": "Secondary"
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",

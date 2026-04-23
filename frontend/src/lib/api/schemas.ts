@@ -106,4 +106,37 @@ export type WorkoutDay = z.infer<typeof workoutDaySchema>;
 export type WorkoutPlan = z.infer<typeof workoutPlanSchema>;
 export type SessionSet = z.infer<typeof sessionSetSchema>;
 export type SessionDetail = z.infer<typeof sessionDetailSchema>;
+export const exerciseSchema = z.object({
+  id: z.string().uuid(),
+  nameTr: z.string(),
+  nameEn: z.string(),
+  category: z.string(),
+  equipment: z.string(),
+  musclePrimary: z.string(),
+  muscleSecondary: z.string().nullable().optional(),
+  descriptionTr: z.string().nullable().optional(),
+  descriptionEn: z.string().nullable().optional(),
+  formTipsTr: z.array(z.string()),
+  formTipsEn: z.array(z.string()),
+  commonMistakesTr: z.array(z.string()),
+  commonMistakesEn: z.array(z.string()),
+  imageUrl: z.string().nullable().optional(),
+  videoUrl: z.string().nullable().optional(),
+  difficulty: z.string(),
+});
+
+export function pageSchema<T extends z.ZodTypeAny>(item: T) {
+  return z.object({
+    content: z.array(item),
+    totalElements: z.number().int(),
+    totalPages: z.number().int(),
+    number: z.number().int(),
+    size: z.number().int(),
+  });
+}
+
+export const exercisePageSchema = pageSchema(exerciseSchema);
+
+export type Exercise = z.infer<typeof exerciseSchema>;
+export type ExercisePage = z.infer<typeof exercisePageSchema>;
 export type LastPerformance = z.infer<typeof lastPerformanceSchema>;

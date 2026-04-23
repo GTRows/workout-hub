@@ -1,6 +1,8 @@
 import { api } from "@/lib/api/client";
 import {
   authResponseSchema,
+  exercisePageSchema,
+  exerciseSchema,
   lastPerformanceSchema,
   sessionDetailSchema,
   sessionSetSchema,
@@ -8,6 +10,8 @@ import {
   workoutDaySchema,
   workoutPlanSchema,
   type AuthResponse,
+  type Exercise,
+  type ExercisePage,
   type LastPerformance,
   type SessionDetail,
   type SessionSet,
@@ -121,4 +125,41 @@ export async function fetchLastPerformance(
     schema: lastPerformanceSchema,
   });
   return (res as LastPerformance | undefined) ?? null;
+}
+
+export type ExerciseListFilters = {
+  category?: string;
+  equipment?: string;
+  difficulty?: string;
+  page?: number;
+  size?: number;
+};
+
+export async function fetchExercises(
+  filters: ExerciseListFilters = {}
+): Promise<ExercisePage> {
+  return api.request({
+    path: "/api/exercises",
+    query: filters,
+    schema: exercisePageSchema,
+  });
+}
+
+export async function searchExercises(
+  q: string,
+  page = 0,
+  size = 20
+): Promise<ExercisePage> {
+  return api.request({
+    path: "/api/exercises/search",
+    query: { q, page, size },
+    schema: exercisePageSchema,
+  });
+}
+
+export async function fetchExerciseDetail(id: string): Promise<Exercise> {
+  return api.request({
+    path: `/api/exercises/${id}`,
+    schema: exerciseSchema,
+  });
 }
