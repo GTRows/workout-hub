@@ -17,9 +17,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
   - Acceptance: src/lib/offline/ stores unposted sets keyed by session id; flush-on-online drains them to POST /api/sessions/:id/sets with idempotency key; vitest unit tests cover enqueue, flush, and retry
   - Notes: moved from p4 to p5 -- depends on frontend foundations (TanStack Query + API client) landing first in t-27
 
-- [t-28] [p5] (auth)/login and (auth)/register pages
-  - Acceptance: react-hook-form + zod forms hitting /api/auth/*; correct error surfacing for 400/401; redirect to /dashboard on success; RTL test covers validation errors and successful submit
-
 - [t-29] [p5] (app)/dashboard
   - Acceptance: "Today's workout" card (from active plan + current day), weekly summary (done vs planned), last-weight chip, quick actions; RTL test covers rendering with mocked data
 
@@ -130,3 +127,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-24] 2026-04-23 -- Session history list + detail endpoints
 - [t-25] 2026-04-23 -- Per-exercise last-performance + progress analytics
 - [t-27] 2026-04-23 -- Frontend foundations (TanStack Query + Zod client + i18n + shadcn + vitest)
+- [t-28] 2026-04-23 -- Login page (react-hook-form + zod + mutation) -- /register removed per t-51
