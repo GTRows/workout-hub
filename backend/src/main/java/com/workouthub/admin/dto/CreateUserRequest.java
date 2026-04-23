@@ -1,10 +1,13 @@
-package com.workouthub.auth.dto;
+package com.workouthub.admin.dto;
 
+import com.workouthub.users.domain.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record RegisterRequest(
+public record CreateUserRequest(
         @NotBlank @Email @Size(max = 255) String email,
         @NotBlank @Size(min = 8, max = 72) String password,
-        @NotBlank @Size(max = 100) String displayName) {}
+        @NotBlank @Size(max = 100) String displayName,
+        @NotNull Role role) {}

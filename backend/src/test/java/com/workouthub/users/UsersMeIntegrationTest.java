@@ -1,30 +1,27 @@
 package com.workouthub.users;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.workouthub.support.AbstractIntegrationTest;
+import com.workouthub.support.TestAuthHelpers;
+import com.workouthub.support.TestAuthHelpers.SeededUser;
+import com.workouthub.users.domain.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 @AutoConfigureMockMvc
 class UsersMeIntegrationTest extends AbstractIntegrationTest {
 
     private static final String STRONG_SECRET = "Str0ngPass!";
 
-    @Autowired
-    MockMvc mvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
+    @Autowired MockMvc mvc;
+    @Autowired TestAuthHelpers helpers;
 
     @Test
     void getMeRequiresAuth() throws Exception {
@@ -34,20 +31,19 @@ class UsersMeIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void getMeReturnsAuthenticatedUser() throws Exception {
-        String email = "me-" + System.nanoTime() + "@test.local";
-        String token = registerAndExtractAccessToken(email, STRONG_SECRET, "Me User");
+        SeededUser u = helpers.seed(
+                "me-" + System.nanoTime() + "@test.local", STRONG_SECRET, Role.USER);
 
-        mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + token))
+        mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + u.accessToken()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(email))
-                .andExpect(jsonPath("$.displayName").value("Me User"))
+                .andExpect(jsonPath("$.email").value(u.email()))
                 .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test
     void updateMePersistsProfileChanges() throws Exception {
-        String email = "upd-" + System.nanoTime() + "@test.local";
-        String token = registerAndExtractAccessToken(email, STRONG_SECRET, "Upd User");
+        SeededUser u = helpers.seed(
+                "upd-" + System.nanoTime() + "@test.local", STRONG_SECRET, Role.USER);
 
         String body = """
                 {
@@ -60,7 +56,7 @@ class UsersMeIntegrationTest extends AbstractIntegrationTest {
                 """;
 
         mvc.perform(put("/api/users/me")
-                        .header("Authorization", "Bearer " + token)
+                        .header("Authorization", "Bearer " + u.accessToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -70,8 +66,7 @@ class UsersMeIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.profile.healthNotes").value("NAFLD"))
                 .andExpect(jsonPath("$.profile.goals").value("Fit body"));
 
-        // Read back to confirm persistence.
-        mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + token))
+        mvc.perform(get("/api/users/me").header("Authorization", "Bearer " + u.accessToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.displayName").value("Updated Name"))
                 .andExpect(jsonPath("$.profile.heightCm").value(178));
@@ -79,29 +74,14 @@ class UsersMeIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void updateMeRejectsOutOfRangeWeight() throws Exception {
-        String email = "range-" + System.nanoTime() + "@test.local";
-        String token = registerAndExtractAccessToken(email, STRONG_SECRET, "Range User");
-
-        String body = "{\"weightKg\": 5.0}";
+        SeededUser u = helpers.seed(
+                "range-" + System.nanoTime() + "@test.local", STRONG_SECRET, Role.USER);
 
         mvc.perform(put("/api/users/me")
-                        .header("Authorization", "Bearer " + token)
+                        .header("Authorization", "Bearer " + u.accessToken())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
+                        .content("{\"weightKg\": 5.0}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("weightKg"));
-    }
-
-    private String registerAndExtractAccessToken(String email, String secret, String displayName)
-            throws Exception {
-        String body = "{\"email\":\"" + email + "\",\"password\":\"" + secret
-                + "\",\"displayName\":\"" + displayName + "\"}";
-        MvcResult result = mvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("accessToken").asText();
     }
 }

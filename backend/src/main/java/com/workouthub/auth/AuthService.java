@@ -5,13 +5,8 @@ import com.workouthub.auth.domain.RefreshTokenRepository;
 import com.workouthub.auth.dto.AuthResponse;
 import com.workouthub.auth.dto.LoginRequest;
 import com.workouthub.auth.dto.RefreshRequest;
-import com.workouthub.auth.dto.RegisterRequest;
 import com.workouthub.common.security.JwtService;
-import com.workouthub.common.web.ConflictException;
-import com.workouthub.users.domain.Role;
 import com.workouthub.users.domain.User;
-import com.workouthub.users.domain.UserProfile;
-import com.workouthub.users.domain.UserProfileRepository;
 import com.workouthub.users.domain.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -31,40 +26,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository users;
-    private final UserProfileRepository profiles;
     private final RefreshTokenRepository refreshTokens;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     public AuthService(
             UserRepository users,
-            UserProfileRepository profiles,
             RefreshTokenRepository refreshTokens,
             PasswordEncoder passwordEncoder,
             JwtService jwtService) {
         this.users = users;
-        this.profiles = profiles;
         this.refreshTokens = refreshTokens;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
-    }
-
-    public AuthResponse register(RegisterRequest req) {
-        if (users.existsByEmailIgnoreCase(req.email())) {
-            throw new ConflictException("Email already registered");
-        }
-        User user = new User();
-        user.setEmail(req.email());
-        user.setPasswordHash(passwordEncoder.encode(req.password()));
-        user.setDisplayName(req.displayName());
-        user.setRole(Role.USER);
-        user = users.save(user);
-
-        UserProfile profile = new UserProfile();
-        profile.setUser(user);
-        profiles.save(profile);
-
-        return issueTokens(user);
     }
 
     public AuthResponse login(LoginRequest req) {

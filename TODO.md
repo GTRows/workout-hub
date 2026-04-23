@@ -13,6 +13,9 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
+- [t-51] [p1] Lock down auth: env-seeded admin + admin user management (no public register)
+  - Acceptance: POST /api/auth/register is removed (404); boot-time AdminSeeder creates a single ADMIN user from APP_ADMIN_EMAIL + APP_ADMIN_PASSWORD_HASH if the row does not yet exist; /api/admin/users supports POST (create user with role), GET (list), GET/:id, PUT/:id (change displayName/role), DELETE/:id and all require ROLE_ADMIN; scripts/hash-password.sh produces a BCrypt hash suitable for the env var; existing login + refresh + /users/me tests seed through a repository helper (no /register call); .env.example documents the new env vars
+
 - [t-12] [p2] Exercise JPA entity, repository, DTO, mapper
   - Acceptance: Entity matches V3 schema; repository has findByCategory/findByEquipment/searchByName; unit tests pass
 

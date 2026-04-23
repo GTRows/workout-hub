@@ -33,6 +33,10 @@ app:
     refresh-ttl-seconds: ${APP_JWT_REFRESH_TTL_SECONDS:1209600}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  admin:
+    email: ${APP_ADMIN_EMAIL:}
+    password-hash: ${APP_ADMIN_PASSWORD_HASH:}
+    display-name: ${APP_ADMIN_DISPLAY_NAME:Admin}
 
 management:
   endpoints:
