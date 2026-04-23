@@ -48,6 +48,22 @@
     "finishConfirm": "Finish this workout?",
     "finished": "Finished"
   },
+  "profile": {
+    "title": "Profile",
+    "loading": "Loading...",
+    "displayName": "Name",
+    "email": "Email",
+    "heightCm": "Height (cm)",
+    "weightKg": "Weight (kg)",
+    "birthDate": "Birth date",
+    "gender": "Gender",
+    "healthNotes": "Health notes",
+    "goals": "Goals",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "error": "Save failed"
+  },
   "metrics": {
     "title": "Body metrics",
     "loading": "Loading...",

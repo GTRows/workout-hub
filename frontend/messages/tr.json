@@ -48,6 +48,22 @@
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
     "finished": "Tamamlandi"
   },
+  "profile": {
+    "title": "Profil",
+    "loading": "Yukleniyor...",
+    "displayName": "Isim",
+    "email": "E-posta",
+    "heightCm": "Boy (cm)",
+    "weightKg": "Kilo (kg)",
+    "birthDate": "Dogum tarihi",
+    "gender": "Cinsiyet",
+    "healthNotes": "Saglik notlari",
+    "goals": "Hedefler",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor...",
+    "saved": "Kaydedildi",
+    "error": "Kaydetme basarisiz"
+  },
   "metrics": {
     "title": "Vucut metrikleri",
     "loading": "Yukleniyor...",

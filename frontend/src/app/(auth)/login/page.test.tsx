@@ -63,7 +63,7 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /log in/i }));
     const alerts = await screen.findAllByRole("alert");
-    expect(alerts.length).toBeGreaterThanOrEqualTo(2);
+    expect(alerts.length).toBeGreaterThanOrEqual(2);
   });
 
   it("stores tokens and navigates on success", async () => {

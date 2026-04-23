@@ -43,6 +43,25 @@ export async function fetchMe(): Promise<UserMe> {
   });
 }
 
+export type UpdateProfilePayload = {
+  displayName?: string;
+  heightCm?: number;
+  weightKg?: number;
+  birthDate?: string;
+  gender?: string;
+  healthNotes?: string;
+  goals?: string;
+};
+
+export async function updateMe(payload: UpdateProfilePayload): Promise<UserMe> {
+  return api.request({
+    method: "PUT",
+    path: "/api/users/me",
+    body: payload,
+    schema: userMeSchema,
+  });
+}
+
 export async function fetchActiveWorkoutPlan(): Promise<WorkoutPlan | null> {
   const res = await api.request<WorkoutPlan>({
     path: "/api/workout-plans/active",
