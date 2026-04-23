@@ -15,11 +15,14 @@ import {
   YAxis,
 } from "recharts";
 import {
+  fetchHeatmap,
   fetchOneRepMax,
   fetchPersonalRecords,
+  fetchStreak,
   fetchWeeklyVolume,
 } from "@/lib/api/endpoints";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Heatmap } from "@/components/heatmap";
 import { Label } from "@/components/ui/label";
 
 export function InsightsClient() {
@@ -35,6 +38,16 @@ export function InsightsClient() {
     queryFn: fetchPersonalRecords,
   });
 
+  const streakQuery = useQuery({
+    queryKey: ["analytics", "streak"],
+    queryFn: fetchStreak,
+  });
+
+  const heatmapQuery = useQuery({
+    queryKey: ["analytics", "heatmap", 12],
+    queryFn: () => fetchHeatmap(12),
+  });
+
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const effectiveExerciseId =
     selectedExerciseId || prsQuery.data?.[0]?.exerciseId || "";
@@ -48,6 +61,33 @@ export function InsightsClient() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+
+      <Card className="space-y-3">
+        <CardTitle>{t("streakTitle")}</CardTitle>
+        <div className="flex flex-wrap gap-2">
+          <span
+            data-testid="streak-current"
+            className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+          >
+            {t("streakCurrent", {
+              days: streakQuery.data?.currentStreakDays ?? 0,
+            })}
+          </span>
+          <span
+            data-testid="streak-longest"
+            className="rounded-full bg-muted px-3 py-1 text-sm font-medium text-muted-foreground"
+          >
+            {t("streakLongest", {
+              days: streakQuery.data?.longestStreakDays ?? 0,
+            })}
+          </span>
+        </div>
+        {heatmapQuery.data && heatmapQuery.data.length > 0 ? (
+          <Heatmap days={heatmapQuery.data} />
+        ) : (
+          <p className="text-muted-foreground">{t("loading")}</p>
+        )}
+      </Card>
 
       <Card className="space-y-3">
         <CardTitle>{t("volumeTitle")}</CardTitle>

@@ -29,6 +29,9 @@ const messages = {
   insights: {
     title: "Insights",
     loading: "Loading...",
+    streakTitle: "Streak",
+    streakCurrent: "Current: {days} days",
+    streakLongest: "Longest: {days} days",
     volumeTitle: "Weekly volume",
     volumeDescription: "Total weight x reps over the last 12 weeks.",
     oneRmTitle: "Estimated 1RM",
@@ -37,6 +40,20 @@ const messages = {
     exerciseLabel: "Exercise",
   },
 };
+
+function sampleHeatmap(weeks = 12) {
+  const out = [];
+  const start = new Date("2026-02-09");
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    out.push({
+      date: d.toISOString().slice(0, 10),
+      sessionCount: i === weeks * 7 - 1 ? 1 : 0,
+    });
+  }
+  return out;
+}
 
 function renderClient(ui: ReactElement) {
   const client = new QueryClient({
@@ -93,6 +110,16 @@ describe("InsightsClient", () => {
             },
           ]);
         }
+        if (url.endsWith("/api/analytics/streak")) {
+          return jsonResponse(200, {
+            currentStreakDays: 3,
+            longestStreakDays: 7,
+            lastSessionDate: "2026-04-23",
+          });
+        }
+        if (url.includes("/api/analytics/heatmap")) {
+          return jsonResponse(200, sampleHeatmap(12));
+        }
         if (url.includes("/api/analytics/one-rm/")) {
           return jsonResponse(200, [
             {
@@ -115,6 +142,12 @@ describe("InsightsClient", () => {
 
     renderClient(<InsightsClient />);
 
+    await waitFor(() => {
+      expect(screen.getByTestId("streak-current")).toHaveTextContent("Current: 3 days");
+    });
+    expect(screen.getByTestId("streak-longest")).toHaveTextContent("Longest: 7 days");
+    expect(screen.getByTestId("heatmap-grid")).toBeInTheDocument();
+
     const containers = await waitFor(() => {
       const found = screen.queryAllByTestId("recharts-container");
       expect(found.length).toBeGreaterThanOrEqual(2);
@@ -132,6 +165,14 @@ describe("InsightsClient", () => {
         const url = typeof input === "string" ? input : input.toString();
         if (url.includes("/api/analytics/volume")) return jsonResponse(200, []);
         if (url.endsWith("/api/analytics/prs")) return jsonResponse(200, []);
+        if (url.endsWith("/api/analytics/streak")) {
+          return jsonResponse(200, {
+            currentStreakDays: 0,
+            longestStreakDays: 0,
+            lastSessionDate: null,
+          });
+        }
+        if (url.includes("/api/analytics/heatmap")) return jsonResponse(200, []);
         throw new Error("unexpected fetch: " + url);
       })
     );

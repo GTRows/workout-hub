@@ -93,6 +93,9 @@
   "insights": {
     "title": "Analiz",
     "loading": "Yukleniyor...",
+    "streakTitle": "Seri",
+    "streakCurrent": "Guncel seri: {days} gun",
+    "streakLongest": "En uzun seri: {days} gun",
     "volumeTitle": "Haftalik volume",
     "volumeDescription": "Son 12 haftanin toplam agirlik x tekrar degeri.",
     "oneRmTitle": "Tahmini 1RM",

@@ -139,34 +139,9 @@ public class AnalyticsService {
                 .sorted()
                 .toList();
 
-        int longest = 1;
-        int run = 1;
-        for (int i = 1; i < dates.size(); i++) {
-            if (dates.get(i).minusDays(1).equals(dates.get(i - 1))) {
-                run++;
-                longest = Math.max(longest, run);
-            } else {
-                run = 1;
-            }
-        }
-
-        LocalDate last = dates.get(dates.size() - 1);
         LocalDate today = LocalDate.now(clock);
-        int current;
-        if (last.equals(today) || last.equals(today.minusDays(1))) {
-            current = 1;
-            for (int i = dates.size() - 2; i >= 0; i--) {
-                if (dates.get(i + 1).minusDays(1).equals(dates.get(i))) {
-                    current++;
-                } else {
-                    break;
-                }
-            }
-        } else {
-            current = 0;
-        }
-
-        return new StreakDto(current, longest, last);
+        StreakCalculator.Result r = StreakCalculator.compute(dates, today);
+        return new StreakDto(r.current(), r.longest(), dates.get(dates.size() - 1));
     }
 
     public List<PrDto> personalRecords(UUID userId) {
