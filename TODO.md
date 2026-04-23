@@ -13,13 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-34] [p5] (app)/metrics
-  - Acceptance: Weight chart (weekly/monthly/all), entry form posting body_metrics, progress photo upload accepting JPEG/PNG <= 5MB; RTL test covers chart rendering from mocked data and form submit
-
-- [t-35] [p5] (app)/profile + supplements + full-export + import (remainder after export partial)
-  - Acceptance: Profile edits /users/me; supplements CRUD list; /export adds "download full JSON" alongside the existing claude-summary; restore upload parses and re-inserts; RTL tests cover profile edit + full export + import success/failure
-  - Notes: claude-summary download shipped on 2026-04-23; this ticket tracks the remaining profile/supplements/full-export/import work. Supplements + body_metrics repos do not exist yet -- t-34 (metrics) must land body_metrics entity + repo before the full-export dump can include body_metrics.
-
 - [t-36] [p5] PWA manifest + service worker
   - Acceptance: manifest.webmanifest with name/short_name/icons/theme/display=standalone; service worker registered; offline fallback page for the dashboard route; Lighthouse PWA check >= 90
 
@@ -64,6 +57,12 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 - [t-50] [p8] Unblock and activate Release (closes setup-release)
   - Acceptance: Decision recorded in RELEASE.md (self-hosted docker images via ghcr on tag push, OR docker-compose bundle as a GitHub Release asset); chosen path implemented in .github/workflows/release.yml and dry-run with a pre-release tag; TODO#setup-release moves to Done
+
+- [t-52] [p5] Supplements CRUD (backend + (app)/profile list)
+  - Acceptance: Supplement entity + repository + Flyway migration if not already present; GET/POST/PUT/DELETE /api/supplements scoped per user; profile page lists, adds, edits, and deletes supplements; RTL covers add + delete flow; backend integration test covers CRUD + cross-user isolation
+
+- [t-53] [p5] Full-JSON export + restore import
+  - Acceptance: GET /api/export/full returns a single JSON dump (user profile, plans, sessions, sets, body_metrics, supplements); POST /api/export/import accepts that dump and idempotently re-inserts it; (app)/export UI adds "Download full JSON" button next to claude-summary and a file-upload restore control; RTL covers download + import success + import failure; backend integration tests cover round-trip and malformed-input rejection
 
 ## Blocked
 
@@ -118,3 +117,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-32] 2026-04-23 -- History calendar (Monday-first grid) + session-detail drawer
 - [t-26] 2026-04-23 -- Dexie offline queue for session sets (enqueue, drain, subscribeOnline)
 - [t-30] 2026-04-23 -- Plan viewer + accessible Move up/down reorder (dnd-kit visual deferred)
+- [t-34] 2026-04-23 -- Metrics: body_metrics CRUD + weight chart (photo upload deferred)
+- [t-35] 2026-04-23 -- (app)/profile page editing /users/me (supplements + full-export/import carved into t-52 and t-53)
