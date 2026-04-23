@@ -1,13 +1,11 @@
 package com.workouthub;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import com.workouthub.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-class WorkoutHubApplicationTests {
+class WorkoutHubApplicationTests extends AbstractIntegrationTest {
 
     @Test
-    void mainClassIsPresent() {
-        assertNotNull(WorkoutHubApplication.class);
+    void contextLoads() {
     }
 }
