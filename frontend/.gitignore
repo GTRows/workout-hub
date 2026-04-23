@@ -4,6 +4,8 @@ out/
 build/
 dist/
 coverage/
+playwright-report/
+test-results/
 
 # Environment overrides
 .env
