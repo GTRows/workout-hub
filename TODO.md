@@ -13,21 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-16] [p3] WorkoutPlan / WorkoutDay / WorkoutDayExercise entities + repositories
-  - Acceptance: Entities with cascade=ALL, orphanRemoval=true on aggregates; unit tests on repository round-trip
-
-- [t-17] [p3] Plan CRUD endpoints
-  - Acceptance: GET /api/workout-plans, POST, GET :id (with nested days+exercises), PUT :id, DELETE :id; users only see their own plans; integration tests cover isolation and not-found
-
-- [t-18] [p3] Plan activation semantics
-  - Acceptance: POST /api/workout-plans/:id/activate sets is_active=true on this plan and false on all other plans for the user; atomic in one transaction; integration test asserts exactly one active plan
-
-- [t-19] [p3] Day + exercise nested CRUD with reorder
-  - Acceptance: POST /api/workout-plans/:id/days, PUT/DELETE .../exercises/:exId, and reorder endpoint update order_index atomically with no gaps; integration tests cover reorder and cascade
-
-- [t-20] [p3] Default "Baslangic Plani" seeded on registration
-  - Acceptance: A new user registered via /auth/register has exactly one active plan matching the template defined in a seed file; integration test asserts the plan shape
-
 - [t-21] [p4] WorkoutSession + SessionSet entities + repositories
   - Acceptance: Entities mirror V5 schema; repositories with findActiveByUser, findBySessionAndExercise; unit tests pass
 
@@ -151,3 +136,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-13] 2026-04-23 -- Public exercise endpoints
 - [t-14] 2026-04-23 -- Admin exercise CRUD
 - [t-15] 2026-04-23 -- Bilingual schema (V8) + 50-exercise seed (V9) with at-home coverage
+- [t-16] 2026-04-23 -- WorkoutPlan / Day / DayExercise entities + repository
+- [t-17] 2026-04-23 -- Plan CRUD endpoints with ownership guard
+- [t-18] 2026-04-23 -- Plan activation semantics

@@ -9,6 +9,7 @@ import com.workouthub.users.domain.User;
 import com.workouthub.users.domain.UserProfile;
 import com.workouthub.users.domain.UserProfileRepository;
 import com.workouthub.users.domain.UserRepository;
+import com.workouthub.workouts.DefaultPlanSeeder;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;
@@ -23,14 +24,17 @@ public class AdminUsersService {
     private final UserRepository users;
     private final UserProfileRepository profiles;
     private final PasswordEncoder passwordEncoder;
+    private final DefaultPlanSeeder defaultPlanSeeder;
 
     public AdminUsersService(
             UserRepository users,
             UserProfileRepository profiles,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            DefaultPlanSeeder defaultPlanSeeder) {
         this.users = users;
         this.profiles = profiles;
         this.passwordEncoder = passwordEncoder;
+        this.defaultPlanSeeder = defaultPlanSeeder;
     }
 
     public AdminUserResponse create(CreateUserRequest req) {
@@ -47,6 +51,8 @@ public class AdminUsersService {
         UserProfile profile = new UserProfile();
         profile.setUser(user);
         profiles.save(profile);
+
+        defaultPlanSeeder.seedFor(user.getId());
 
         return toResponse(user);
     }
