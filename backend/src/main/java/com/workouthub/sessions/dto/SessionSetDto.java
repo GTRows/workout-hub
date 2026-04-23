@@ -13,4 +13,5 @@ public record SessionSetDto(
         BigDecimal weightKg,
         Short rpe,
         boolean completed,
-        String notes) {}
+        String notes,
+        Boolean newPr) {}

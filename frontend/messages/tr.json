@@ -5,6 +5,7 @@
     "history": "Gecmis",
     "exercises": "Hareketler",
     "insights": "Analiz",
+    "prs": "Rekorlar",
     "metrics": "Metrikler",
     "profile": "Profil",
     "export": "Disa Aktar",
@@ -98,6 +99,12 @@
     "oneRmDescription": "Epley formulu ile hesaplanir.",
     "oneRmEmpty": "Yeterli veri yok.",
     "exerciseLabel": "Hareket"
+  },
+  "prs": {
+    "title": "Rekorlar",
+    "loading": "Yukleniyor...",
+    "empty": "Henuz kayit yok.",
+    "oneRm": "1RM {value} kg"
   },
   "plan": {
     "title": "Haftalik plan",

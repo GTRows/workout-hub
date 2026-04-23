@@ -77,6 +77,7 @@ export const sessionSetSchema = z.object({
   rpe: z.number().int().nullable().optional(),
   completed: z.boolean(),
   notes: z.string().nullable().optional(),
+  newPr: z.boolean().nullable().optional(),
 });
 
 export const sessionDetailSchema = z.object({

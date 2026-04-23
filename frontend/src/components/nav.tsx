@@ -5,12 +5,13 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const LINKS: Array<{ href: string; labelKey: "dashboard" | "plan" | "history" | "exercises" | "insights" | "metrics" | "profile" | "export" }> = [
+const LINKS: Array<{ href: string; labelKey: "dashboard" | "plan" | "history" | "exercises" | "insights" | "prs" | "metrics" | "profile" | "export" }> = [
   { href: "/dashboard", labelKey: "dashboard" },
   { href: "/plan", labelKey: "plan" },
   { href: "/history", labelKey: "history" },
   { href: "/exercises", labelKey: "exercises" },
   { href: "/insights", labelKey: "insights" },
+  { href: "/prs", labelKey: "prs" },
   { href: "/metrics", labelKey: "metrics" },
   { href: "/profile", labelKey: "profile" },
   { href: "/export", labelKey: "export" },

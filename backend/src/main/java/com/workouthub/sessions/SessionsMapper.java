@@ -43,6 +43,10 @@ public final class SessionsMapper {
     }
 
     public static SessionSetDto toSetDto(SessionSet set) {
+        return toSetDto(set, null);
+    }
+
+    public static SessionSetDto toSetDto(SessionSet set, Boolean newPr) {
         var exercise = set.getExercise();
         return new SessionSetDto(
                 set.getId(),
@@ -54,6 +58,7 @@ public final class SessionsMapper {
                 set.getWeightKg(),
                 set.getRpe(),
                 set.isCompleted(),
-                set.getNotes());
+                set.getNotes(),
+                newPr);
     }
 }

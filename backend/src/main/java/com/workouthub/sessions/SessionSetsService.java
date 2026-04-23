@@ -10,6 +10,8 @@ import com.workouthub.sessions.domain.WorkoutSession;
 import com.workouthub.sessions.dto.AddSetRequest;
 import com.workouthub.sessions.dto.SessionSetDto;
 import com.workouthub.sessions.dto.UpdateSetRequest;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,10 @@ public class SessionSetsService {
                 ? req.setNumber()
                 : (short) (sets.countBySessionIdAndExerciseId(sessionId, exercise.getId()) + 1);
 
+        BigDecimal priorBest = bestPriorOneRm(userId, exercise.getId());
+        boolean isPr = req.completed() != Boolean.FALSE
+                && PrDetector.beatsPriorBest(priorBest, req.weightKg(), req.repsDone());
+
         SessionSet set = new SessionSet();
         set.setExercise(exercise);
         set.setSetNumber(setNumber);
@@ -51,11 +57,24 @@ public class SessionSetsService {
         set.setNotes(req.notes());
         session.addSet(set);
         try {
-            return SessionsMapper.toSetDto(sets.saveAndFlush(set));
+            SessionSet saved = sets.saveAndFlush(set);
+            return SessionsMapper.toSetDto(saved, isPr ? Boolean.TRUE : null);
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new ConflictException(
                     "Set number " + setNumber + " already recorded for this exercise");
         }
+    }
+
+    private BigDecimal bestPriorOneRm(UUID userId, UUID exerciseId) {
+        List<SessionSet> history = sets.findHistoricalByUserAndExercise(userId, exerciseId);
+        BigDecimal best = null;
+        for (SessionSet s : history) {
+            if (!s.isCompleted()) continue;
+            BigDecimal oneRm = PrDetector.epleyOneRm(s.getWeightKg(), s.getRepsDone());
+            if (oneRm == null) continue;
+            if (best == null || oneRm.compareTo(best) > 0) best = oneRm;
+        }
+        return best;
     }
 
     public SessionSetDto update(UUID userId, UUID sessionId, UUID setId, UpdateSetRequest req) {

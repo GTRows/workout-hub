@@ -5,6 +5,7 @@
     "history": "History",
     "exercises": "Exercises",
     "insights": "Insights",
+    "prs": "PRs",
     "metrics": "Metrics",
     "profile": "Profile",
     "export": "Export",
@@ -98,6 +99,12 @@
     "oneRmDescription": "Calculated with the Epley formula.",
     "oneRmEmpty": "Not enough data yet.",
     "exerciseLabel": "Exercise"
+  },
+  "prs": {
+    "title": "Personal records",
+    "loading": "Loading...",
+    "empty": "No records yet.",
+    "oneRm": "1RM {value} kg"
   },
   "plan": {
     "title": "Weekly plan",
