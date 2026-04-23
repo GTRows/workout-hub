@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-36] [p5] PWA manifest + service worker
-  - Acceptance: manifest.webmanifest with name/short_name/icons/theme/display=standalone; service worker registered; offline fallback page for the dashboard route; Lighthouse PWA check >= 90
-
 - [t-37] [p6] Backend analytics endpoints
   - Acceptance: /api/analytics/volume (weekly totals), /analytics/one-rm/:exerciseId (Epley), /analytics/streak, /analytics/prs, /analytics/heatmap return Zod-validated payloads; integration tests cover empty-data and populated cases
 
@@ -119,3 +116,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-30] 2026-04-23 -- Plan viewer + accessible Move up/down reorder (dnd-kit visual deferred)
 - [t-34] 2026-04-23 -- Metrics: body_metrics CRUD + weight chart (photo upload deferred)
 - [t-35] 2026-04-23 -- (app)/profile page editing /users/me (supplements + full-export/import carved into t-52 and t-53)
+- [t-36] 2026-04-23 -- PWA manifest + service worker + offline fallback (placeholder icons pending setup-icon)
