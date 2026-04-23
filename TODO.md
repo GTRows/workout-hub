@@ -13,21 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-46] [p8] Playwright E2E critical flow
-  - Acceptance: playwright.config.ts runs against docker compose up stack; flow: register -> login -> start session -> log 3 sets -> finish -> export JSON; pnpm test:e2e passes
-
-- [t-47] [p8] Production compose.prod.yml with nginx + TLS
-  - Acceptance: compose.prod.yml brings up nginx reverse proxy terminating TLS (via certbot volume), rate limits /api/auth/*, sets HSTS, and proxies to backend/frontend; tested locally against self-signed cert; DEPLOYMENT.md documents the cert-renewal cron
-
-- [t-48] [p8] Backup script + restore playbook
-  - Acceptance: scripts/backup.sh pg_dumps to ./backups/YYYY-MM-DD.sql.gz with retention of 30 days; docs/DEPLOYMENT.md has a verified restore recipe; dry-run of restore on a fresh container succeeds
-
-- [t-49] [p8] Unblock and activate CI (closes setup-ci)
-  - Acceptance: .github/workflows/ci.yml runs `mvn verify` (backend) and `pnpm lint && pnpm typecheck && pnpm test` (frontend) on push and PR; job is green on main; TODO#setup-ci moves to Done
-
-- [t-50] [p8] Unblock and activate Release (closes setup-release)
-  - Acceptance: Decision recorded in RELEASE.md (self-hosted docker images via ghcr on tag push, OR docker-compose bundle as a GitHub Release asset); chosen path implemented in .github/workflows/release.yml and dry-run with a pre-release tag; TODO#setup-release moves to Done
-
 - [t-52] [p5] Supplements CRUD (backend + (app)/profile list)
   - Acceptance: Supplement entity + repository + Flyway migration if not already present; GET/POST/PUT/DELETE /api/supplements scoped per user; profile page lists, adds, edits, and deletes supplements; RTL covers add + delete flow; backend integration test covers CRUD + cross-user isolation
 
@@ -37,15 +22,12 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-54] [p7] Notification triggers remainder (webpush-java wiring + supplement reminder)
   - Acceptance: webpush-java (or equivalent) added to pom.xml with user approval; WebPushNotificationDispatcher replaces LoggingNotificationDispatcher and signs payloads with VAPID; supplement reminder trigger fires at each supplement's user-defined reminder_time (after t-52 lands the entity); integration tests cover signed-send success and expired-subscription pruning
 
+- [t-55] [p8] Wire ESLint and add pnpm lint to CI (closes the lint gap from t-49)
+  - Acceptance: eslint + eslint-config-next installed under frontend/ with a working flat config; pnpm lint runs non-interactively and passes; .github/workflows/ci.yml runs pnpm lint in the frontend job; setup-ci's remaining "lint" acceptance criterion is covered
+
 ## Blocked
 
-- [setup-ci] Revisit CI scaffolding decision
-  - Acceptance: `.github/workflows/ci.yml` exists and runs lint + test for backend and frontend on push/PR; `ci.yml.template` still kept for reference
-  - Blocked: deferred at setup per user direction (2026-04-22). Revisit after backend has a Maven wrapper or a stable docker-based CI recipe so the job does not start red.
-
-- [setup-release] Revisit release scaffolding decision
-  - Acceptance: decision recorded in CHANGELOG or RELEASE.md whether this self-hosted app uses tag-triggered GitHub Releases or image-based docker tags; scaffolding either activated or explicitly marked not-applicable
-  - Blocked: deferred at setup per user direction (2026-04-22). Revisit around PHASE 8 when the deployment model (self-hosted docker pull vs github release) is concrete.
+(none)
 
 ## Done
 
@@ -102,3 +84,10 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-43] 2026-04-23 -- Push permission UX on dashboard + rest-timer OS notification in session flow
 - [t-44] 2026-04-23 -- JaCoCo plugin + mvn verify 70% line-coverage gate (DTO records + Application excluded)
 - [t-45] 2026-04-23 -- Vitest v8 coverage reporter (lcov) + 70% line gate; current run at 84.5%
+- [t-46] 2026-04-23 -- Playwright scaffold + login/start/log-sets/finish/export critical-flow spec
+- [t-47] 2026-04-23 -- compose.prod.yml + nginx (TLS, HSTS, auth rate limit) + DEPLOYMENT.md runbook
+- [t-48] 2026-04-23 -- scripts/backup.sh (pg_dump + 30d retention) + docs/BACKUP.md restore playbook
+- [t-49] 2026-04-23 -- CI workflow live: backend mvn verify + frontend typecheck/test; lint step carved into t-55
+- [t-50] 2026-04-23 -- Release workflow live: GHCR images on v*.*.* tag + compose bundle in draft GitHub Release
+- [setup-ci] 2026-04-23 -- Superseded by t-49 (CI active on main; pnpm lint follow-up carved into t-55)
+- [setup-release] 2026-04-23 -- Superseded by t-50 (GHCR+compose-bundle path recorded in RELEASE.md)
