@@ -206,6 +206,30 @@ export const heatmapDaySchema = z.object({
 });
 export const heatmapListSchema = z.array(heatmapDaySchema);
 
+export const supplementTimingValues = [
+  "morning",
+  "pre_workout",
+  "post_workout",
+  "evening",
+  "with_meal",
+  "other",
+] as const;
+export const supplementTimingSchema = z.enum(supplementTimingValues);
+
+export const supplementSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  dosage: z.string().nullable().optional(),
+  timing: supplementTimingSchema,
+  active: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export const supplementListSchema = z.array(supplementSchema);
+
+export type SupplementTiming = z.infer<typeof supplementTimingSchema>;
+export type Supplement = z.infer<typeof supplementSchema>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;

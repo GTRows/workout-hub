@@ -115,6 +115,26 @@
     "enable": "Izin ver",
     "pending": "Bekleniyor..."
   },
+  "supplements": {
+    "title": "Takviyeler",
+    "description": "Kullandigin takviyeleri listele ve zamanlamasini ayarla.",
+    "empty": "Henuz takviye eklenmedi.",
+    "name": "Ad",
+    "dosage": "Doz",
+    "add": "Ekle",
+    "saving": "Kaydediliyor...",
+    "delete": "Sil",
+    "deleteConfirm": "Bu takviyeyi sil?",
+    "timing": {
+      "label": "Zaman",
+      "morning": "Sabah",
+      "pre_workout": "Antrenman oncesi",
+      "post_workout": "Antrenman sonrasi",
+      "evening": "Aksam",
+      "with_meal": "Yemekle",
+      "other": "Diger"
+    }
+  },
   "plan": {
     "title": "Haftalik plan",
     "loading": "Yukleniyor...",

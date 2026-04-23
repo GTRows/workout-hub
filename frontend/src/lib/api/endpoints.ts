@@ -13,6 +13,8 @@ import {
   sessionSetSchema,
   sessionSummaryPageSchema,
   streakSchema,
+  supplementListSchema,
+  supplementSchema,
   userMeSchema,
   weeklyVolumeListSchema,
   workoutDaySchema,
@@ -29,6 +31,8 @@ import {
   type SessionSet,
   type SessionSummaryPage,
   type Streak,
+  type Supplement,
+  type SupplementTiming,
   type UserMe,
   type WeeklyVolume,
   type WorkoutDay,
@@ -288,6 +292,53 @@ export async function fetchHeatmap(weeks = 12): Promise<HeatmapDay[]> {
     path: "/api/analytics/heatmap",
     query: { weeks },
     schema: heatmapListSchema,
+  });
+}
+
+export type CreateSupplementPayload = {
+  name: string;
+  dosage?: string;
+  timing: SupplementTiming;
+};
+
+export type UpdateSupplementPayload = Partial<CreateSupplementPayload> & {
+  active?: boolean;
+};
+
+export async function fetchSupplements(): Promise<Supplement[]> {
+  return api.request({
+    path: "/api/supplements",
+    schema: supplementListSchema,
+  });
+}
+
+export async function createSupplement(
+  payload: CreateSupplementPayload
+): Promise<Supplement> {
+  return api.request({
+    method: "POST",
+    path: "/api/supplements",
+    body: payload,
+    schema: supplementSchema,
+  });
+}
+
+export async function updateSupplement(
+  id: string,
+  payload: UpdateSupplementPayload
+): Promise<Supplement> {
+  return api.request({
+    method: "PUT",
+    path: `/api/supplements/${id}`,
+    body: payload,
+    schema: supplementSchema,
+  });
+}
+
+export async function deleteSupplement(id: string): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/supplements/${id}`,
   });
 }
 

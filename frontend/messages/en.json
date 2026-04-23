@@ -115,6 +115,26 @@
     "enable": "Allow",
     "pending": "Requesting..."
   },
+  "supplements": {
+    "title": "Supplements",
+    "description": "Track what you are taking and when.",
+    "empty": "No supplements yet.",
+    "name": "Name",
+    "dosage": "Dosage",
+    "add": "Add",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this supplement?",
+    "timing": {
+      "label": "Timing",
+      "morning": "Morning",
+      "pre_workout": "Pre-workout",
+      "post_workout": "Post-workout",
+      "evening": "Evening",
+      "with_meal": "With meal",
+      "other": "Other"
+    }
+  },
   "plan": {
     "title": "Weekly plan",
     "loading": "Loading...",
