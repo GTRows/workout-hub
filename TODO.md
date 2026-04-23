@@ -13,12 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-12] [p2] Exercise JPA entity, repository, DTO, mapper
-  - Acceptance: Entity matches V3 schema; repository has findByCategory/findByEquipment/searchByName; unit tests pass
-
-- [t-13] [p2] Public exercise endpoints
-  - Acceptance: GET /api/exercises (filter: category, equipment, difficulty, pagination), GET /api/exercises/:id, GET /api/exercises/search?q= all work anonymously; integration tests cover filters, 404, and search
-
 - [t-14] [p2] Admin exercise CRUD
   - Acceptance: POST/PUT /api/admin/exercises require ADMIN role; validation rejects missing Turkish or English name; 403 for USER role; integration tests cover role gate and validation
 
@@ -159,3 +153,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-10] 2026-04-23 -- auth module: /api/auth/register, /login, /refresh
 - [t-11] 2026-04-23 -- users module: GET/PUT /api/users/me
 - [t-51] 2026-04-23 -- Lock down auth: env-seeded admin + admin user management (no public register)
+- [t-12] 2026-04-23 -- Exercise JPA entity, repository, DTO, mapper
+- [t-13] 2026-04-23 -- Public exercise endpoints
