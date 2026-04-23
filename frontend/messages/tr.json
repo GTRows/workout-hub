@@ -48,6 +48,16 @@
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
     "finished": "Tamamlandi"
   },
+  "export": {
+    "title": "Disa Aktar",
+    "claudeTitle": "Claude icin ozet JSON",
+    "claudeDescription": "Son {days} gunun antrenmanlarini ve toplam volume bilgilerini tek bir JSON dosyasi olarak indir. Bu dosyayi Claude sohbetine yapistirip geribildirim alabilirsin.",
+    "daysLabel": "Gun araligi",
+    "downloadButton": "Ozeti indir",
+    "downloading": "Hazirlaniyor...",
+    "error": "Indirme basarisiz. Tekrar dene.",
+    "lastDownloadedAt": "Son indirme: {time}"
+  },
   "history": {
     "title": "Gecmis",
     "loading": "Yukleniyor...",

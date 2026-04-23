@@ -176,3 +176,12 @@ export async function fetchSessionHistory(
     schema: sessionSummaryPageSchema,
   });
 }
+
+export async function fetchClaudeSummary(days = 30): Promise<unknown> {
+  // Schema intentionally omitted: the summary is pass-through to Claude,
+  // so we only need to surface whatever shape the backend produces.
+  return api.request({
+    path: "/api/export/claude-summary",
+    query: { days },
+  });
+}

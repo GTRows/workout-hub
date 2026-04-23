@@ -48,6 +48,16 @@
     "finishConfirm": "Finish this workout?",
     "finished": "Finished"
   },
+  "export": {
+    "title": "Export",
+    "claudeTitle": "Claude summary JSON",
+    "claudeDescription": "Download the last {days} days of workouts plus totals as one JSON file. Paste it into a Claude chat to get feedback on your progress.",
+    "daysLabel": "Day range",
+    "downloadButton": "Download summary",
+    "downloading": "Preparing...",
+    "error": "Download failed. Try again.",
+    "lastDownloadedAt": "Last downloaded: {time}"
+  },
   "history": {
     "title": "History",
     "loading": "Loading...",
