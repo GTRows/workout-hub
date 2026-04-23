@@ -12,9 +12,22 @@
   "auth": {
     "loginTitle": "Log in",
     "email": "Email",
-    "password": "Password",
+    "password": "Secret",
     "submit": "Log in",
     "invalidCredentials": "Invalid email or password"
+  },
+  "dashboard": {
+    "loading": "Loading...",
+    "resumeTitle": "Active session",
+    "resumeHint": "You have a workout in progress",
+    "resumeButton": "Resume",
+    "todayLabel": "Today",
+    "startButton": "Start workout",
+    "exerciseCount": "{count} exercises",
+    "restDay": "Rest day",
+    "noPlan": "No active plan. Create one and activate it first.",
+    "quickAdd": "Log weight",
+    "viewPlan": "View plan"
   },
   "common": {
     "loading": "Loading...",

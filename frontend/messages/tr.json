@@ -16,6 +16,19 @@
     "submit": "Giris",
     "invalidCredentials": "E-posta veya sifre hatali"
   },
+  "dashboard": {
+    "loading": "Yukleniyor...",
+    "resumeTitle": "Devam eden antrenman",
+    "resumeHint": "Aktif bir antrenmanin var",
+    "resumeButton": "Devam et",
+    "todayLabel": "Bugun",
+    "startButton": "Antrenmani baslat",
+    "exerciseCount": "{count} hareket",
+    "restDay": "Bugun dinlenme gunu",
+    "noPlan": "Aktif plan yok. Once bir plan olusturup aktiflestir.",
+    "quickAdd": "Kilo ekle",
+    "viewPlan": "Plani gor"
+  },
   "common": {
     "loading": "Yukleniyor...",
     "save": "Kaydet",

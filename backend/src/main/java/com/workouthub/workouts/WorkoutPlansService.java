@@ -8,6 +8,7 @@ import com.workouthub.workouts.dto.UpdateWorkoutPlanRequest;
 import com.workouthub.workouts.dto.WorkoutPlanDto;
 import com.workouthub.workouts.dto.WorkoutPlanSummaryDto;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,11 @@ public class WorkoutPlansService {
     @Transactional(readOnly = true)
     public WorkoutPlanDto get(UUID userId, UUID planId) {
         return WorkoutPlanMapper.toDto(findOwnedOrThrow(userId, planId));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<WorkoutPlanDto> getActive(UUID userId) {
+        return plans.findByUserIdAndActiveTrue(userId).map(WorkoutPlanMapper::toDto);
     }
 
     public WorkoutPlanDto create(UUID userId, CreateWorkoutPlanRequest req) {

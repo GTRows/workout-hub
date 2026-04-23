@@ -35,6 +35,14 @@ public class WorkoutPlansController {
         return service.list(principal.userId());
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<WorkoutPlanDto> getActive(
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        return service.getActive(principal.userId())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
     @PostMapping
     public ResponseEntity<WorkoutPlanDto> create(
             @AuthenticationPrincipal AppUserPrincipal principal,
