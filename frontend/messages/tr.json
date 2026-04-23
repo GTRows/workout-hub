@@ -109,6 +109,12 @@
     "empty": "Henuz kayit yok.",
     "oneRm": "1RM {value} kg"
   },
+  "push": {
+    "title": "Bildirim izni",
+    "description": "Antrenman hatirlaticilari ve dinlenme zamanlayicisi icin izin ver.",
+    "enable": "Izin ver",
+    "pending": "Bekleniyor..."
+  },
   "plan": {
     "title": "Haftalik plan",
     "loading": "Yukleniyor...",

@@ -109,6 +109,12 @@
     "empty": "No records yet.",
     "oneRm": "1RM {value} kg"
   },
+  "push": {
+    "title": "Notification permission",
+    "description": "Allow workout reminders and the rest timer to notify you.",
+    "enable": "Allow",
+    "pending": "Requesting..."
+  },
   "plan": {
     "title": "Weekly plan",
     "loading": "Loading...",

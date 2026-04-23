@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { notifyRestElapsed, useRestTimer } from "@/lib/push/rest-timer";
 
 export function SessionClient({ sessionId }: { sessionId: string }) {
   const t = useTranslations("session");
@@ -136,6 +137,7 @@ function ExerciseBlock({
   const qc = useQueryClient();
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
+  const restTimer = useRestTimer(notifyRestElapsed);
 
   const lastPerfQuery = useQuery({
     queryKey: ["last-performance", planItem.exerciseId],
@@ -153,6 +155,9 @@ function ExerciseBlock({
       );
       setReps("");
       setWeight("");
+      if (planItem.restSeconds && planItem.restSeconds > 0) {
+        restTimer.start(planItem.restSeconds);
+      }
     },
   });
 
@@ -199,6 +204,12 @@ function ExerciseBlock({
             <li key={s.id}>{formatSetLine(s)}</li>
           ))}
         </ul>
+      )}
+
+      {restTimer.secondsRemaining !== null && (
+        <p className="text-sm font-medium text-primary" data-testid="rest-timer">
+          {t("restTimer", { seconds: restTimer.secondsRemaining })}
+        </p>
       )}
 
       {!locked && (

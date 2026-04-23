@@ -13,6 +13,7 @@ import type { SessionDetail, WorkoutDay } from "@/lib/api/schemas";
 import { getTodayIsoDayOfWeek } from "@/lib/time/today";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { PushPermissionCard } from "@/components/push-permission-card";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
@@ -57,6 +58,7 @@ export default function DashboardPage() {
             {t("resumeButton")}
           </Button>
         </Card>
+        <PushPermissionCard />
         <QuickActions />
       </div>
     );
@@ -88,6 +90,7 @@ export default function DashboardPage() {
             {t("startButton")}
           </Button>
         </Card>
+        <PushPermissionCard />
         <QuickActions />
       </div>
     );
@@ -99,6 +102,7 @@ export default function DashboardPage() {
         <Card>
           <CardTitle>{t("restDay")}</CardTitle>
         </Card>
+        <PushPermissionCard />
         <QuickActions />
       </div>
     );
