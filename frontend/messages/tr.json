@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "plan": "Plan",
+    "history": "Gecmis",
+    "exercises": "Hareketler",
+    "metrics": "Metrikler",
+    "profile": "Profil",
+    "export": "Disa Aktar",
+    "logout": "Cikis"
+  },
+  "auth": {
+    "loginTitle": "Giris yap",
+    "email": "E-posta",
+    "password": "Sifre",
+    "submit": "Giris",
+    "invalidCredentials": "E-posta veya sifre hatali"
+  },
+  "common": {
+    "loading": "Yukleniyor...",
+    "save": "Kaydet",
+    "cancel": "Iptal",
+    "delete": "Sil",
+    "edit": "Duzenle"
+  }
+}
