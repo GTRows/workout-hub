@@ -162,7 +162,19 @@
     "downloadButton": "Download summary",
     "downloading": "Preparing...",
     "error": "Download failed. Try again.",
-    "lastDownloadedAt": "Last downloaded: {time}"
+    "lastDownloadedAt": "Last downloaded: {time}",
+    "fullTitle": "Download full JSON",
+    "fullDescription": "Download a complete JSON dump of your profile, metrics, and supplements. Plans and sessions are included in the file; re-importing those slices is not supported yet.",
+    "fullButton": "Download full JSON",
+    "fullDownloading": "Preparing...",
+    "fullError": "Full export failed.",
+    "importTitle": "Restore from file",
+    "importDescription": "Upload a previously downloaded full-JSON dump. Profile, metrics, and supplements replace the current data.",
+    "importFileLabel": "Pick JSON file",
+    "importUploading": "Uploading...",
+    "importError": "Restore failed.",
+    "importParseError": "Invalid JSON file.",
+    "importSuccess": "Success: wrote {metrics} metrics, {supplements} supplements."
   },
   "history": {
     "title": "History",

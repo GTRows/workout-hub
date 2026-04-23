@@ -222,6 +222,27 @@ export async function fetchClaudeSummary(days = 30): Promise<unknown> {
   });
 }
 
+export async function fetchFullExport(): Promise<unknown> {
+  return api.request({
+    path: "/api/export/full",
+  });
+}
+
+export type ImportResult = {
+  profileUpdated: number;
+  metricsInserted: number;
+  supplementsInserted: number;
+  userEmail: string;
+};
+
+export async function importFullDump(body: unknown): Promise<ImportResult> {
+  return api.request<ImportResult>({
+    method: "POST",
+    path: "/api/export/import",
+    body,
+  });
+}
+
 export type UpsertBodyMetricPayload = {
   recordedDate: string;
   weightKg?: number;

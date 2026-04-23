@@ -24,6 +24,18 @@ const messages = {
     downloading: "Preparing...",
     error: "Download failed",
     lastDownloadedAt: "Last downloaded: {time}",
+    fullTitle: "Download full JSON",
+    fullDescription: "Full dump",
+    fullButton: "Download full JSON",
+    fullDownloading: "Preparing...",
+    fullError: "Full export failed",
+    importTitle: "Restore from file",
+    importDescription: "Upload previous dump",
+    importFileLabel: "Pick JSON file",
+    importUploading: "Uploading...",
+    importError: "Restore failed",
+    importParseError: "Invalid JSON file",
+    importSuccess: "Success: wrote {metrics} metrics, {supplements} supplements.",
   },
 };
 
@@ -119,6 +131,122 @@ describe("ExportClient", () => {
     await user.click(screen.getByRole("button", { name: /download summary/i }));
 
     expect(await screen.findByText(/download failed/i)).toBeInTheDocument();
+  });
+
+  it("downloads the full JSON dump when the full button is clicked", async () => {
+    const fullBody = {
+      schemaVersion: 1,
+      exportedAt: "2026-04-23T00:00:00Z",
+      user: null,
+      plans: [],
+      sessions: [],
+      bodyMetrics: [],
+      supplements: [],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/export/full")) return jsonResponse(200, fullBody);
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    const clickSpy = vi.fn();
+    const origCreateElement = document.createElement.bind(document);
+    let capturedAnchor: HTMLAnchorElement | null = null;
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+      const el = origCreateElement(tag);
+      if (tag === "a") {
+        capturedAnchor = el as HTMLAnchorElement;
+        (el as HTMLAnchorElement).click = clickSpy;
+      }
+      return el;
+    });
+
+    renderClient(<ExportClient />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Download full JSON" }));
+
+    await waitFor(() => expect(clickSpy).toHaveBeenCalled());
+    expect(capturedAnchor).not.toBeNull();
+    expect(capturedAnchor!.download).toMatch(
+      /^workouthub-full-\d{4}-\d{2}-\d{2}\.json$/
+    );
+  });
+
+  it("uploads a JSON file and shows the import success message", async () => {
+    let posted: unknown = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/export/import")) {
+          posted = JSON.parse(init!.body as string);
+          return jsonResponse(200, {
+            profileUpdated: 1,
+            metricsInserted: 2,
+            supplementsInserted: 3,
+            userEmail: "x@test.local",
+          });
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<ExportClient />);
+    const dump = JSON.stringify({
+      schemaVersion: 1,
+      exportedAt: "2026-04-23T00:00:00Z",
+      user: null,
+      plans: [],
+      sessions: [],
+      bodyMetrics: [],
+      supplements: [],
+    });
+    const file = new File([dump], "dump.json", { type: "application/json" });
+    const input = screen.getByLabelText("Pick JSON file") as HTMLInputElement;
+    await userEvent.upload(input, file);
+
+    await waitFor(() => expect(posted).not.toBeNull());
+    expect((posted as { schemaVersion: number }).schemaVersion).toBe(1);
+    await screen.findByTestId("import-success");
+  });
+
+  it("shows an import error when the server rejects the upload", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/export/import")) {
+          return jsonResponse(422, {
+            timestamp: "2026-04-23T00:00:00Z",
+            status: 422,
+            error: "unprocessable_entity",
+            message: "Importing plans and sessions is not supported yet",
+            path: "/api/export/import",
+          });
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<ExportClient />);
+    const dump = JSON.stringify({
+      schemaVersion: 1,
+      exportedAt: "2026-04-23T00:00:00Z",
+      user: null,
+      plans: [{ id: "ffffffff-1111-1111-1111-111111111111", name: "P", active: true, days: [] }],
+      sessions: [],
+      bodyMetrics: [],
+      supplements: [],
+    });
+    const file = new File([dump], "dump.json", { type: "application/json" });
+    const input = screen.getByLabelText("Pick JSON file") as HTMLInputElement;
+    await userEvent.upload(input, file);
+
+    const alerts = await screen.findAllByRole("alert");
+    expect(alerts.length).toBeGreaterThan(0);
   });
 
   it("sends the chosen days value in the query string", async () => {

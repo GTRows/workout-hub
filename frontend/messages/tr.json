@@ -162,7 +162,19 @@
     "downloadButton": "Ozeti indir",
     "downloading": "Hazirlaniyor...",
     "error": "Indirme basarisiz. Tekrar dene.",
-    "lastDownloadedAt": "Son indirme: {time}"
+    "lastDownloadedAt": "Son indirme: {time}",
+    "fullTitle": "Tum veriyi indir (JSON)",
+    "fullDescription": "Profil, metrikler ve takviyelerin tamamini tek bir JSON dosyasi olarak indir. Plan ve antrenman kayitlari da dahildir; yeniden yukleme sirasinda plan/antrenman kismi henuz desteklenmiyor.",
+    "fullButton": "Tum veriyi indir",
+    "fullDownloading": "Indiriliyor...",
+    "fullError": "Tum veri indirme basarisiz.",
+    "importTitle": "Geri yukle",
+    "importDescription": "Onceden indirdigin tam JSON yedegini buraya yukle; profil, metrikler ve takviyeler mevcut verinin yerine gecer.",
+    "importFileLabel": "JSON dosyasi sec",
+    "importUploading": "Yukleniyor...",
+    "importError": "Geri yukleme basarisiz.",
+    "importParseError": "Gecersiz JSON dosyasi.",
+    "importSuccess": "Basarili: {metrics} metrik, {supplements} takviye yazildi."
   },
   "history": {
     "title": "Gecmis",

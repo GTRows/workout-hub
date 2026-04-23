@@ -2,11 +2,32 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { fetchClaudeSummary } from "@/lib/api/endpoints";
+import { useRef, useState } from "react";
+import {
+  fetchClaudeSummary,
+  fetchFullExport,
+  importFullDump,
+  type ImportResult,
+} from "@/lib/api/endpoints";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+
+function downloadJson(payload: unknown, filename: string) {
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  try {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
 
 export function ExportClient() {
   const t = useTranslations("export");
@@ -17,20 +38,8 @@ export function ExportClient() {
   const mutation = useMutation({
     mutationFn: () => fetchClaudeSummary(days),
     onSuccess: (body) => {
-      const json = JSON.stringify(body, null, 2);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      try {
-        const iso = new Date().toISOString().slice(0, 10);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `workouthub-claude-${iso}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } finally {
-        URL.revokeObjectURL(url);
-      }
+      const iso = new Date().toISOString().slice(0, 10);
+      downloadJson(body, `workouthub-claude-${iso}.json`);
       setLastDownloadedAt(new Date().toLocaleString());
       setError(null);
     },
@@ -38,6 +47,52 @@ export function ExportClient() {
       setError(t("error"));
     },
   });
+
+  const [fullDownloadedAt, setFullDownloadedAt] = useState<string | null>(null);
+  const [fullError, setFullError] = useState<string | null>(null);
+  const fullMutation = useMutation({
+    mutationFn: () => fetchFullExport(),
+    onSuccess: (body) => {
+      const iso = new Date().toISOString().slice(0, 10);
+      downloadJson(body, `workouthub-full-${iso}.json`);
+      setFullDownloadedAt(new Date().toLocaleString());
+      setFullError(null);
+    },
+    onError: () => setFullError(t("fullError")),
+  });
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const importMutation = useMutation({
+    mutationFn: (body: unknown) => importFullDump(body),
+    onSuccess: (r) => {
+      setImportResult(r);
+      setImportError(null);
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      setImportError(message || t("importError"));
+      setImportResult(null);
+    },
+  });
+
+  const handleImportFile = (file: File) => {
+    setImportError(null);
+    setImportResult(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = String(reader.result ?? "");
+        const parsed = JSON.parse(text);
+        importMutation.mutate(parsed);
+      } catch {
+        setImportError(t("importParseError"));
+      }
+    };
+    reader.onerror = () => setImportError(t("importParseError"));
+    reader.readAsText(file);
+  };
 
   return (
     <div className="space-y-4">
@@ -83,6 +138,67 @@ export function ExportClient() {
         {lastDownloadedAt && !error && (
           <p className="text-xs text-muted-foreground">
             {t("lastDownloadedAt", { time: lastDownloadedAt })}
+          </p>
+        )}
+      </Card>
+
+      <Card className="space-y-4" data-testid="full-export-card">
+        <div className="space-y-1">
+          <CardTitle className="text-lg">{t("fullTitle")}</CardTitle>
+          <CardDescription>{t("fullDescription")}</CardDescription>
+        </div>
+        <Button
+          onClick={() => fullMutation.mutate()}
+          disabled={fullMutation.isPending}
+        >
+          {fullMutation.isPending ? t("fullDownloading") : t("fullButton")}
+        </Button>
+        {fullError && (
+          <p role="alert" className="text-sm text-destructive">
+            {fullError}
+          </p>
+        )}
+        {fullDownloadedAt && !fullError && (
+          <p className="text-xs text-muted-foreground">
+            {t("lastDownloadedAt", { time: fullDownloadedAt })}
+          </p>
+        )}
+      </Card>
+
+      <Card className="space-y-4" data-testid="import-card">
+        <div className="space-y-1">
+          <CardTitle className="text-lg">{t("importTitle")}</CardTitle>
+          <CardDescription>{t("importDescription")}</CardDescription>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          aria-label={t("importFileLabel")}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleImportFile(file);
+            e.target.value = "";
+          }}
+          className="block text-sm"
+        />
+        {importMutation.isPending && (
+          <p className="text-xs text-muted-foreground">{t("importUploading")}</p>
+        )}
+        {importError && (
+          <p role="alert" className="text-sm text-destructive">
+            {importError}
+          </p>
+        )}
+        {importResult && !importError && (
+          <p
+            className="text-sm text-primary"
+            data-testid="import-success"
+          >
+            {t("importSuccess", {
+              metrics: importResult.metricsInserted,
+              supplements: importResult.supplementsInserted,
+            })}
           </p>
         )}
       </Card>
