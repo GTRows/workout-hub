@@ -40,6 +40,11 @@ app:
     email: ${APP_ADMIN_EMAIL:}
     password-hash: ${APP_ADMIN_PASSWORD_HASH:}
     display-name: ${APP_ADMIN_DISPLAY_NAME:Admin}
+  push:
+    vapid:
+      public-key: ${APP_PUSH_VAPID_PUBLIC_KEY:}
+      private-key: ${APP_PUSH_VAPID_PRIVATE_KEY:}
+      subject: ${APP_PUSH_VAPID_SUBJECT:mailto:admin@localhost}
 
 management:
   endpoints:
