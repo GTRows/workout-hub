@@ -27,7 +27,8 @@
     "lucide-react": "^0.469.0",
     "react-hook-form": "^7.54.0",
     "@hookform/resolvers": "^3.9.0",
-    "dexie": "^4.0.10"
+    "dexie": "^4.0.10",
+    "recharts": "^2.15.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",

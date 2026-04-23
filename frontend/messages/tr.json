@@ -48,6 +48,30 @@
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
     "finished": "Tamamlandi"
   },
+  "metrics": {
+    "title": "Vucut metrikleri",
+    "loading": "Yukleniyor...",
+    "empty": "Henuz kayit yok",
+    "recordedDate": "Tarih",
+    "weightKg": "Kilo (kg)",
+    "bodyFatPercent": "Yag orani (%)",
+    "waistCm": "Bel (cm)",
+    "chestCm": "Gogus (cm)",
+    "armCm": "Kol (cm)",
+    "thighCm": "Bacak (cm)",
+    "notes": "Not",
+    "saveButton": "Kaydet",
+    "saving": "Kaydediliyor...",
+    "chartTitle": "Kilo grafigi",
+    "range": {
+      "week": "7 gun",
+      "month": "30 gun",
+      "all": "Tumu"
+    },
+    "saveSuccess": "Kaydedildi",
+    "deleteAction": "Sil",
+    "deleteConfirm": "Bu kaydi sil?"
+  },
   "plan": {
     "title": "Haftalik plan",
     "loading": "Yukleniyor...",

@@ -1,6 +1,8 @@
 import { api } from "@/lib/api/client";
 import {
   authResponseSchema,
+  bodyMetricListSchema,
+  bodyMetricSchema,
   exercisePageSchema,
   exerciseSchema,
   lastPerformanceSchema,
@@ -11,6 +13,7 @@ import {
   workoutDaySchema,
   workoutPlanSchema,
   type AuthResponse,
+  type BodyMetric,
   type Exercise,
   type ExercisePage,
   type LastPerformance,
@@ -183,6 +186,42 @@ export async function fetchClaudeSummary(days = 30): Promise<unknown> {
   return api.request({
     path: "/api/export/claude-summary",
     query: { days },
+  });
+}
+
+export type UpsertBodyMetricPayload = {
+  recordedDate: string;
+  weightKg?: number;
+  bodyFatPercent?: number;
+  waistCm?: number;
+  chestCm?: number;
+  armCm?: number;
+  thighCm?: number;
+  notes?: string;
+};
+
+export async function fetchMetrics(): Promise<BodyMetric[]> {
+  return api.request({
+    path: "/api/metrics",
+    schema: bodyMetricListSchema,
+  });
+}
+
+export async function upsertMetric(
+  payload: UpsertBodyMetricPayload
+): Promise<BodyMetric> {
+  return api.request({
+    method: "POST",
+    path: "/api/metrics",
+    body: payload,
+    schema: bodyMetricSchema,
+  });
+}
+
+export async function deleteMetric(id: string): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/metrics/${id}`,
   });
 }
 

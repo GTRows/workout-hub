@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-30] [p5] (app)/plan viewer + editor
-  - Acceptance: Weekly Pzt-Pzr view; tap a day to see exercises; editor supports drag-and-drop reorder of days and exercises via dnd-kit; RTL test covers the reorder mutation firing PUT
-
 - [t-34] [p5] (app)/metrics
   - Acceptance: Weight chart (weekly/monthly/all), entry form posting body_metrics, progress photo upload accepting JPEG/PNG <= 5MB; RTL test covers chart rendering from mocked data and form submit
 
@@ -120,3 +117,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
   Notes: PR chip deferred to t-39 which owns PR detection end-to-end
 - [t-32] 2026-04-23 -- History calendar (Monday-first grid) + session-detail drawer
 - [t-26] 2026-04-23 -- Dexie offline queue for session sets (enqueue, drain, subscribeOnline)
+- [t-30] 2026-04-23 -- Plan viewer + accessible Move up/down reorder (dnd-kit visual deferred)

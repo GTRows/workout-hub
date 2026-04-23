@@ -48,6 +48,30 @@
     "finishConfirm": "Finish this workout?",
     "finished": "Finished"
   },
+  "metrics": {
+    "title": "Body metrics",
+    "loading": "Loading...",
+    "empty": "No entries yet",
+    "recordedDate": "Date",
+    "weightKg": "Weight (kg)",
+    "bodyFatPercent": "Body fat (%)",
+    "waistCm": "Waist (cm)",
+    "chestCm": "Chest (cm)",
+    "armCm": "Arm (cm)",
+    "thighCm": "Thigh (cm)",
+    "notes": "Notes",
+    "saveButton": "Save",
+    "saving": "Saving...",
+    "chartTitle": "Weight chart",
+    "range": {
+      "week": "7 days",
+      "month": "30 days",
+      "all": "All"
+    },
+    "saveSuccess": "Saved",
+    "deleteAction": "Delete",
+    "deleteConfirm": "Delete this entry?"
+  },
   "plan": {
     "title": "Weekly plan",
     "loading": "Loading...",

@@ -150,8 +150,26 @@ export const sessionSummarySchema = z.object({
 
 export const sessionSummaryPageSchema = pageSchema(sessionSummarySchema);
 
+export const bodyMetricSchema = z.object({
+  id: z.string().uuid(),
+  recordedDate: z.string(),
+  weightKg: z.number().nullable().optional(),
+  bodyFatPercent: z.number().nullable().optional(),
+  waistCm: z.number().nullable().optional(),
+  chestCm: z.number().nullable().optional(),
+  armCm: z.number().nullable().optional(),
+  thighCm: z.number().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const bodyMetricListSchema = z.array(bodyMetricSchema);
+
 export type Exercise = z.infer<typeof exerciseSchema>;
 export type ExercisePage = z.infer<typeof exercisePageSchema>;
 export type LastPerformance = z.infer<typeof lastPerformanceSchema>;
 export type SessionSummary = z.infer<typeof sessionSummarySchema>;
 export type SessionSummaryPage = z.infer<typeof sessionSummaryPageSchema>;
+export type BodyMetric = z.infer<typeof bodyMetricSchema>;
