@@ -14,7 +14,6 @@ jobs:
   backend:
     name: backend (mvn verify)
     runs-on: ubuntu-latest
-    services: {}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +54,10 @@ jobs:
       - name: Install deps
         working-directory: frontend
         run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        working-directory: frontend
+        run: pnpm lint
 
       - name: Typecheck
         working-directory: frontend

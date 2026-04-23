@@ -61,7 +61,6 @@ function DayCard({
   dayOfWeek: number;
 }) {
   const t = useTranslations("plan");
-  const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
 
   const dayName = t(`weekday.${dayOfWeek}` as `weekday.1`);
