@@ -13,7 +13,128 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-(none)
+- [t-58] [p9] Document full-export schema as AI-readable spec
+  - Acceptance: docs/EXPORT_FORMAT.md with per-field rules, enums, UUID semantics, minimal + full examples; ExportFormatExampleTest loads the documented example JSON and asserts it validates + imports successfully.
+
+- [t-59] [p9] Per-section export endpoints (profile, plans, sessions, metrics, supplements)
+  - Acceptance: 5 new GET /api/export/{section} endpoints; integration tests per section assert shape matches full-export slice; RTL smoke for download buttons on /export.
+
+- [t-60] [p9] Per-section import endpoints (idempotent replace per slice)
+  - Acceptance: 5 POST /api/export/import/{section}; integration tests per section cover round-trip + malformed 422.
+
+- [t-61] [p9] ImportValidator with warnings (fail-soft)
+  - Acceptance: ImportValidator returns ValidationReport(errors, warnings, suggestions); unit tests cover each case; POST import response body surfaces warnings array.
+
+- [t-62] [p9] Frontend AI-roundtrip wizard (prepare -> download -> upload -> diff preview -> commit)
+  - Acceptance: /export/ai route with section picker + inline format cheatsheet; /export/ai/apply previews diff before commit; RTL covers the 3 states.
+
+- [t-63] [p9] CSV export (Strong/Hevy-compatible) for sessions
+  - Acceptance: /api/export/csv/sessions returns CSV matching Strong's column order; unit test validates header + sample row; RTL covers download button.
+
+- [t-64] [p9] Strong/Hevy CSV import with fuzzy exercise-name matching
+  - Acceptance: /api/export/import/csv + ExerciseNameMatcher class with unit tests (exact, case-insensitive, substring, unmatched); integration test covers sample Strong CSV with one unmatched row surfaced in the response.
+
+- [t-65] [p9] .ics calendar export of active plan's weekly days
+  - Acceptance: /api/export/plan.ics returns RFC 5545 feed; unit test parses the output asserting 7 VEVENTs.
+
+- [t-66] [p10] TOTP 2FA setup + verify + login
+  - Acceptance: V12 user_totp table (secret, enabled, backup_codes_hash); /api/users/me/2fa/setup returns QR URI + secret; /api/users/me/2fa/verify confirms; login accepts TOTP code when enabled; integration tests for setup + correct + wrong + disabled-user paths.
+
+- [t-67] [p10] Active session management (list + revoke)
+  - Acceptance: /api/users/me/sessions lists refresh_tokens with UA + createdAt + lastUsed; DELETE revokes; integration test confirms revoked token returns 401.
+
+- [t-68] [p10] Admin-initiated password reset flow (no email server)
+  - Acceptance: POST /api/admin/users/{id}/reset-link returns single-use 24h token URL; /api/auth/reset-password?token=... accepts new password; integration tests for single-use + expiry + wrong-user.
+
+- [t-69] [p10] Brute-force lockout (10 failed in 15 min -> 1h lock)
+  - Acceptance: V13 login_attempts table; TestClock-driven integration tests: under-threshold, at-threshold (HTTP 423), after cooldown resumes.
+
+- [t-70] [p10] Audit log for all admin writes
+  - Acceptance: V14 audit_log table; every admin-module mutation logs actor/action/target/payload; /api/admin/audit lists; integration tests cover create/update/delete + non-admin 403.
+
+- [t-71] [p10] Force-logout on password change
+  - Acceptance: Password change revokes all refresh_tokens for that user; integration test verifies prior access + refresh tokens 401 after.
+
+- [t-72] [p11] Micrometer Prometheus endpoint + homelab scrape config snippet
+  - Acceptance: /actuator/prometheus exposes JVM + http metrics; docs/OBSERVABILITY.md documents the exact scrape job entry to append to homelab/stacks/observability/config/prometheus/prometheus.yml; integration test asserts endpoint returns metrics with required labels.
+
+- [t-73] [p11] Structured JSON logs with MDC trace IDs for Loki
+  - Acceptance: Logback JSON encoder in logback-spring.xml; every log event carries trace_id via MDC; docs/OBSERVABILITY.md documents Docker logging driver for Loki; unit test asserts MDC trace_id propagation through a mock request.
+
+- [t-74] [p11] Grafana dashboard JSON for WorkoutHub
+  - Acceptance: observability/grafana/workouthub.json with 6 panels (rps, 5xx%, p95 latency, active sessions, DB pool usage, JVM heap); docs/OBSERVABILITY.md documents provisioning path into the homelab Grafana.
+
+- [t-75] [p11] Alertmanager rules (5xx spike, pool saturation, long GC, disk pressure)
+  - Acceptance: observability/alerts/workouthub.rules.yml with 4 named rules and runbook links; docs/OBSERVABILITY.md shows the rule_files include line; rule syntax validated via promtool check rules.
+
+- [t-76] [p11] Uptime-Kuma monitor config
+  - Acceptance: /actuator/health exposed through Caddy without auth; docs/OBSERVABILITY.md documents Uptime-Kuma monitor JSON import; integration test confirms health endpoint is unauth-reachable.
+
+- [t-77] [p11] Caddy site config snippet for homelab proxy
+  - Acceptance: docs/DEPLOYMENT.md gains "Homelab proxy (Caddy)" section with a Caddyfile stanza (auto-TLS) that proxies workouthub.<domain> to backend+frontend; validated with caddy validate recipe; nginx overlay kept as alternative for non-homelab installs.
+
+- [t-78] [p11] Authentik OIDC optional SSO
+  - Acceptance: app.auth.oidc.enabled flag; /api/auth/oidc/login redirects to Authentik; code exchange maps email -> local user; integration tests cover disabled (default JWT path unaffected) and enabled paths.
+
+- [t-79] [p12] V15 food_items + nutrition_entries + 50-item Turkish food seed
+  - Acceptance: Tables + FK to users; migration test asserts seed count = 50; repo tests cover searchByName + findByUserBetween(date).
+
+- [t-80] [p12] /api/foods public search + /api/nutrition per-user CRUD
+  - Acceptance: GET /api/foods?q= paginated; POST/PUT/DELETE /api/nutrition; integration tests CRUD + cross-user isolation + search relevance.
+
+- [t-81] [p12] /nutrition page with daily totals + food autocomplete + history
+  - Acceptance: Autocomplete against /api/foods; daily kcal + macro bars vs goal; RTL covers add food + delete + day-navigation.
+
+- [t-82] [p12] V16 daily goals on user_profile (kcal + protein/carbs/fat g)
+  - Acceptance: 4 new nullable columns; PUT /api/users/me accepts them; nutrition page shows progress; integration + RTL tests.
+
+- [t-83] [p12] Water tracking (V17 water_entries + quick +250/+500 widget)
+  - Acceptance: /api/water CRUD; dashboard widget + nutrition-page card; integration + RTL tests.
+
+- [t-84] [p13] Apple Health XML export import (ZIP upload)
+  - Acceptance: /api/health/import/apple parses HKQuantityTypeIdentifierBodyMass and HKWorkout; maps to body_metrics + sessions with per-type toggles; unit tests on parser with a minimal fixture XML; integration test end-to-end.
+
+- [t-85] [p13] Google Fit Takeout JSON import
+  - Acceptance: /api/health/import/google-fit parses the Takeout bucket format; unit tests on parser; integration test with fixture.
+
+- [t-86] [p13] Garmin .fit per-workout import + V18 heart_rate_bpm column
+  - Acceptance: /api/health/import/fit accepts one file; minimal subset parser; creates WorkoutSession with heartRateAvgBpm; unit tests on parser fixture; integration test.
+
+- [t-87] [p13] Smart-scale webhook (iPhone 13 Health via third-party relay)
+  - Acceptance: V19 webhook_tokens (user_id, token, purpose); /api/webhooks/scale/{token} accepts agnostic JSON (weight + timestamp), writes body_metric; integration tests for valid-token, invalid-token 401, idempotent on same timestamp.
+
+- [t-88] [p14] V20 achievements + user_achievements + rule evaluator
+  - Acceptance: 10 seeded achievement definitions; evaluator runs on set-save and session-finish; per-achievement unit tests cover unlock conditions + idempotency (double-unlock prevented).
+
+- [t-89] [p14] /achievements page (unlocked grid + progress to next)
+  - Acceptance: /api/achievements/me lists unlocked + next-3 progress; RTL covers render with mocked payload + progress bars.
+
+- [t-90] [p14] Monthly challenge feature (admin-defined, global)
+  - Acceptance: monthly_challenges table + admin CRUD + /api/challenges/current returns live progress; integration tests cover progress math across month boundary.
+
+- [t-91] [p14] Streak freeze (1 skip/month) - extends StreakCalculator
+  - Acceptance: user_streak_state.freeze_used_in_month + enabled-by-default; StreakCalculatorTest gains 3 cases (no-freeze, freeze-used, freeze-mid-broken).
+
+- [t-92] [p15] Real app icon asset set (closes setup-icon DEFERRED)
+  - Acceptance: Designed 512/192/maskable/apple-touch PNGs committed; placeholder PNGs replaced; Lighthouse PWA >= 90; setup-icon removed from DEFERRED.md.
+
+- [t-93] [p15] Exercise-detail modal on session screen
+  - Acceptance: Click on exercise title opens modal with bilingual form tips + common mistakes + last performance; RTL covers open/close + content + keyboard escape.
+
+- [t-94] [p15] dnd-kit visual drag reorder in plan viewer
+  - Acceptance: @dnd-kit installed; mouse drag reorders; existing Move up/down buttons stay as keyboard fallback; RTL covers keyboard reorder AND @dnd-kit/test-utils drag simulation.
+
+- [t-95] [p15] Responsive audit at 360px + bottom tab-bar below sm
+  - Acceptance: BottomNav component visible under sm; top Nav switches to compact; Playwright tests take viewport screenshots at 360x800 for 5 key pages and assert no horizontal overflow.
+
+- [t-96] [p15] Dark mode toggle (persisted in localStorage + profile column)
+  - Acceptance: Tailwind class-based dark mode wired; toggle in nav; V21 user_profile.theme_preference; RTL covers toggle flipping the html class + persistence across reload.
+
+- [t-97] [p15] PR celebration on set save (when newPr=true)
+  - Acceptance: Toast + subtle scale animation on the set card; RTL covers toast appearing for newPr=true fetch response and not for regular sets.
+
+- [t-98] [p15] ExerciseMedia component (video/GIF on detail page, lazy loaded)
+  - Acceptance: Uses existing exercises.video_url; lazy-load via loading="lazy" + IntersectionObserver; RTL covers render with and without URL; a11y alt/title.
 
 ## Blocked
 
