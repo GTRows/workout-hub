@@ -45,6 +45,9 @@ app:
       public-key: ${APP_PUSH_VAPID_PUBLIC_KEY:}
       private-key: ${APP_PUSH_VAPID_PRIVATE_KEY:}
       subject: ${APP_PUSH_VAPID_SUBJECT:mailto:admin@localhost}
+  reminders:
+    workout-cron: ${APP_REMINDERS_WORKOUT_CRON:-}
+    weight-cron: ${APP_REMINDERS_WEIGHT_CRON:-}
 
 management:
   endpoints:
