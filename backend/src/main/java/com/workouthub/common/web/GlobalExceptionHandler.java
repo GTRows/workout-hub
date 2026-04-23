@@ -1,6 +1,7 @@
 package com.workouthub.common.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.List;
 import org.slf4j.Logger;
@@ -39,6 +40,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleConflict(
             ConflictException ex, HttpServletRequest req) {
         return build(HttpStatus.CONFLICT, ex.getMessage(), req, null);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleConstraintViolation(
+            ConstraintViolationException ex, HttpServletRequest req) {
+        List<ApiError.FieldError> fieldErrors = ex.getConstraintViolations().stream()
+                .map(v -> new ApiError.FieldError(
+                        v.getPropertyPath().toString(), v.getMessage()))
+                .toList();
+        return build(HttpStatus.BAD_REQUEST, "Validation failed", req, fieldErrors);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
