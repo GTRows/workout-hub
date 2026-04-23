@@ -23,8 +23,9 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-34] [p5] (app)/metrics
   - Acceptance: Weight chart (weekly/monthly/all), entry form posting body_metrics, progress photo upload accepting JPEG/PNG <= 5MB; RTL test covers chart rendering from mocked data and form submit
 
-- [t-35] [p5] (app)/profile + (app)/export
-  - Acceptance: Profile edits /users/me; supplements managed in a list; /export offers "download full JSON" and "download claude-summary JSON" via /api/export/*; restore upload parses and re-inserts; RTL tests cover export download and import success/failure
+- [t-35] [p5] (app)/profile + supplements + full-export + import (remainder after export partial)
+  - Acceptance: Profile edits /users/me; supplements CRUD list; /export adds "download full JSON" alongside the existing claude-summary; restore upload parses and re-inserts; RTL tests cover profile edit + full export + import success/failure
+  - Notes: claude-summary download shipped on 2026-04-23; this ticket tracks the remaining profile/supplements/full-export/import work. Supplements + body_metrics repos do not exist yet -- t-34 (metrics) must land body_metrics entity + repo before the full-export dump can include body_metrics.
 
 - [t-36] [p5] PWA manifest + service worker
   - Acceptance: manifest.webmanifest with name/short_name/icons/theme/display=standalone; service worker registered; offline fallback page for the dashboard route; Lighthouse PWA check >= 90
