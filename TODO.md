@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-15] [p2] Seed 30+ exercises as Flyway V7 data migration
-  - Acceptance: Turkish + English names, how-to steps, form tips, common mistakes, muscle groups, difficulty filled for every exercise listed in ProjectBrief PHASE 2; count test asserts >= 30 rows after migration
-
 - [t-16] [p3] WorkoutPlan / WorkoutDay / WorkoutDayExercise entities + repositories
   - Acceptance: Entities with cascade=ALL, orphanRemoval=true on aggregates; unit tests on repository round-trip
 
@@ -153,3 +150,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-12] 2026-04-23 -- Exercise JPA entity, repository, DTO, mapper
 - [t-13] 2026-04-23 -- Public exercise endpoints
 - [t-14] 2026-04-23 -- Admin exercise CRUD
+- [t-15] 2026-04-23 -- Bilingual schema (V8) + 50-exercise seed (V9) with at-home coverage
