@@ -1,12 +1,18 @@
 import { api } from "@/lib/api/client";
 import {
   authResponseSchema,
+  lastPerformanceSchema,
   sessionDetailSchema,
+  sessionSetSchema,
   userMeSchema,
+  workoutDaySchema,
   workoutPlanSchema,
   type AuthResponse,
+  type LastPerformance,
   type SessionDetail,
+  type SessionSet,
   type UserMe,
+  type WorkoutDay,
   type WorkoutPlan,
 } from "@/lib/api/schemas";
 
@@ -36,12 +42,26 @@ export async function fetchActiveWorkoutPlan(): Promise<WorkoutPlan | null> {
   return (res as WorkoutPlan | undefined) ?? null;
 }
 
+export async function fetchWorkoutDay(dayId: string): Promise<WorkoutDay> {
+  return api.request({
+    path: `/api/workout-days/${dayId}`,
+    schema: workoutDaySchema,
+  });
+}
+
 export async function fetchActiveSession(): Promise<SessionDetail | null> {
   const res = await api.request<SessionDetail>({
     path: "/api/sessions/active",
     schema: sessionDetailSchema,
   });
   return (res as SessionDetail | undefined) ?? null;
+}
+
+export async function fetchSession(sessionId: string): Promise<SessionDetail> {
+  return api.request({
+    path: `/api/sessions/${sessionId}`,
+    schema: sessionDetailSchema,
+  });
 }
 
 export async function startSession(workoutDayId?: string): Promise<SessionDetail> {
@@ -51,4 +71,54 @@ export async function startSession(workoutDayId?: string): Promise<SessionDetail
     body: workoutDayId ? { workoutDayId } : {},
     schema: sessionDetailSchema,
   });
+}
+
+export type AddSetPayload = {
+  exerciseId: string;
+  setNumber?: number;
+  repsDone: number;
+  weightKg?: number;
+  rpe?: number;
+  completed?: boolean;
+  notes?: string;
+};
+
+export async function addSet(
+  sessionId: string,
+  payload: AddSetPayload
+): Promise<SessionSet> {
+  return api.request({
+    method: "POST",
+    path: `/api/sessions/${sessionId}/sets`,
+    body: payload,
+    schema: sessionSetSchema,
+  });
+}
+
+export type FinishSessionPayload = {
+  notes?: string;
+  mood?: number;
+  energyLevel?: number;
+};
+
+export async function finishSession(
+  sessionId: string,
+  payload: FinishSessionPayload = {}
+): Promise<SessionDetail> {
+  return api.request({
+    method: "POST",
+    path: `/api/sessions/${sessionId}/finish`,
+    body: payload,
+    schema: sessionDetailSchema,
+  });
+}
+
+export async function fetchLastPerformance(
+  exerciseId: string
+): Promise<LastPerformance | null> {
+  const res = await api.request<LastPerformance>({
+    path: `/api/exercises/${exerciseId}/last-performance`,
+    schema: lastPerformanceSchema,
+  });
+  return (res as LastPerformance | undefined) ?? null;
 }

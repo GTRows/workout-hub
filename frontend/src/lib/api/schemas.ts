@@ -66,6 +66,19 @@ export const workoutPlanSchema = z.object({
   days: z.array(workoutDaySchema),
 });
 
+export const sessionSetSchema = z.object({
+  id: z.string().uuid(),
+  exerciseId: z.string().uuid().nullable(),
+  exerciseNameTr: z.string().nullable(),
+  exerciseNameEn: z.string().nullable(),
+  setNumber: z.number().int(),
+  repsDone: z.number().int(),
+  weightKg: z.number().nullable().optional(),
+  rpe: z.number().int().nullable().optional(),
+  completed: z.boolean(),
+  notes: z.string().nullable().optional(),
+});
+
 export const sessionDetailSchema = z.object({
   id: z.string().uuid(),
   workoutDayId: z.string().uuid().nullable(),
@@ -75,7 +88,14 @@ export const sessionDetailSchema = z.object({
   mood: z.number().int().nullable().optional(),
   energyLevel: z.number().int().nullable().optional(),
   finished: z.boolean(),
-  sets: z.array(z.unknown()),
+  sets: z.array(sessionSetSchema),
+});
+
+export const lastPerformanceSchema = z.object({
+  sessionId: z.string().uuid(),
+  startedAt: z.string(),
+  endedAt: z.string().nullable(),
+  sets: z.array(sessionSetSchema),
 });
 
 export type ApiError = z.infer<typeof apiErrorSchema>;
@@ -84,4 +104,6 @@ export type UserMe = z.infer<typeof userMeSchema>;
 export type WorkoutDayExercise = z.infer<typeof workoutDayExerciseSchema>;
 export type WorkoutDay = z.infer<typeof workoutDaySchema>;
 export type WorkoutPlan = z.infer<typeof workoutPlanSchema>;
+export type SessionSet = z.infer<typeof sessionSetSchema>;
 export type SessionDetail = z.infer<typeof sessionDetailSchema>;
+export type LastPerformance = z.infer<typeof lastPerformanceSchema>;

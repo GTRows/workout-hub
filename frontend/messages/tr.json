@@ -29,6 +29,25 @@
     "quickAdd": "Kilo ekle",
     "viewPlan": "Plani gor"
   },
+  "session": {
+    "loading": "Yukleniyor...",
+    "notFound": "Antrenman bulunamadi",
+    "adHocTitle": "Serbest antrenman",
+    "startedAt": "Baslama: {time}",
+    "target": "Hedef: {sets} set, {min}-{max} tekrar",
+    "targetSimple": "Hedef: {sets} set",
+    "lastPerformance": "Son",
+    "lastPerformanceNone": "Ilk kez",
+    "reps": "Tekrar",
+    "weightKg": "Kilo (kg)",
+    "complete": "Tamam",
+    "setLine": "{n}. {reps} x {weight}kg",
+    "setLineNoWeight": "{n}. {reps} tekrar",
+    "restTimer": "Dinlenme: {seconds}s",
+    "finishButton": "Antrenmani bitir",
+    "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
+    "finished": "Tamamlandi"
+  },
   "common": {
     "loading": "Yukleniyor...",
     "save": "Kaydet",

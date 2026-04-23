@@ -29,6 +29,25 @@
     "quickAdd": "Log weight",
     "viewPlan": "View plan"
   },
+  "session": {
+    "loading": "Loading...",
+    "notFound": "Session not found",
+    "adHocTitle": "Ad-hoc workout",
+    "startedAt": "Started: {time}",
+    "target": "Target: {sets} sets, {min}-{max} reps",
+    "targetSimple": "Target: {sets} sets",
+    "lastPerformance": "Last",
+    "lastPerformanceNone": "First time",
+    "reps": "Reps",
+    "weightKg": "Weight (kg)",
+    "complete": "Done",
+    "setLine": "{n}. {reps} x {weight}kg",
+    "setLineNoWeight": "{n}. {reps} reps",
+    "restTimer": "Rest: {seconds}s",
+    "finishButton": "Finish workout",
+    "finishConfirm": "Finish this workout?",
+    "finished": "Finished"
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
