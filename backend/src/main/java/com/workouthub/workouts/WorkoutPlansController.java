@@ -65,4 +65,11 @@ public class WorkoutPlansController {
         service.delete(principal.userId(), id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/activate")
+    public WorkoutPlanDto activate(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @PathVariable UUID id) {
+        return service.activate(principal.userId(), id);
+    }
 }

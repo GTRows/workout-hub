@@ -53,6 +53,23 @@ public class WorkoutPlansService {
         plans.delete(plan);
     }
 
+    public WorkoutPlanDto activate(UUID userId, UUID planId) {
+        WorkoutPlan target = findOwnedOrThrow(userId, planId);
+        if (target.isActive()) {
+            return WorkoutPlanMapper.toDto(target);
+        }
+        // The partial unique index on workout_plans (user_id) WHERE is_active
+        // forbids two active rows at any moment, so flush the deactivate
+        // before setting the new active plan.
+        plans.findByUserIdAndActiveTrue(userId).ifPresent(current -> {
+            current.setActive(false);
+            plans.save(current);
+        });
+        plans.flush();
+        target.setActive(true);
+        return WorkoutPlanMapper.toDto(plans.save(target));
+    }
+
     WorkoutPlan findOwnedOrThrow(UUID userId, UUID planId) {
         return plans.findByIdAndUserId(planId, userId)
                 .orElseThrow(() -> new NotFoundException("Workout plan not found: " + planId));
