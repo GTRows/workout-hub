@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-14] [p2] Admin exercise CRUD
-  - Acceptance: POST/PUT /api/admin/exercises require ADMIN role; validation rejects missing Turkish or English name; 403 for USER role; integration tests cover role gate and validation
-
 - [t-15] [p2] Seed 30+ exercises as Flyway V7 data migration
   - Acceptance: Turkish + English names, how-to steps, form tips, common mistakes, muscle groups, difficulty filled for every exercise listed in ProjectBrief PHASE 2; count test asserts >= 30 rows after migration
 
@@ -155,3 +152,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-51] 2026-04-23 -- Lock down auth: env-seeded admin + admin user management (no public register)
 - [t-12] 2026-04-23 -- Exercise JPA entity, repository, DTO, mapper
 - [t-13] 2026-04-23 -- Public exercise endpoints
+- [t-14] 2026-04-23 -- Admin exercise CRUD
