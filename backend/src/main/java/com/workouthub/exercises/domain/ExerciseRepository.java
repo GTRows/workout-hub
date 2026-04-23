@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
 
+    boolean existsByNameEnIgnoreCase(String nameEn);
+
     Page<Exercise> findByCategory(Category category, Pageable pageable);
 
     Page<Exercise> findByEquipment(Equipment equipment, Pageable pageable);
