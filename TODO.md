@@ -13,15 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-43] [p7] Frontend push UX + rest-timer OS notification
-  - Acceptance: Notification permission flow on dashboard; rest timer posts OS notification via service worker when it elapses; RTL test covers permission prompt state rendering
-
-- [t-44] [p8] Backend coverage + JaCoCo gate
-  - Acceptance: JaCoCo added to pom.xml; mvn verify enforces line coverage >= 70%; any gap below threshold is closed or explicitly waived with a documented reason
-
-- [t-45] [p8] Frontend unit test harness + coverage
-  - Acceptance: Vitest + React Testing Library configured; coverage reporter emits lcov; overall line coverage >= 70%; pnpm test runs clean
-
 - [t-46] [p8] Playwright E2E critical flow
   - Acceptance: playwright.config.ts runs against docker compose up stack; flow: register -> login -> start session -> log 3 sets -> finish -> export JSON; pnpm test:e2e passes
 
@@ -108,3 +99,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-40] 2026-04-23 -- StreakCalculator + heatmap component + streak chips
 - [t-41] 2026-04-23 -- Push subscription module (V10 migration, /api/push/subscribe, VAPID env)
 - [t-42] 2026-04-23 -- Reminder scheduler + logging dispatcher (workout + weight triggers; webpush sender + supplement trigger carved into t-54)
+- [t-43] 2026-04-23 -- Push permission UX on dashboard + rest-timer OS notification in session flow
+- [t-44] 2026-04-23 -- JaCoCo plugin + mvn verify 70% line-coverage gate (DTO records + Application excluded)
+- [t-45] 2026-04-23 -- Vitest v8 coverage reporter (lcov) + 70% line gate; current run at 84.5%
