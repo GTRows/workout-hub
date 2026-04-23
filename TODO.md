@@ -13,6 +13,9 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
+- [t-7] [p1] Testcontainers harness + replace trivial smoke test
+  - Acceptance: AbstractIntegrationTest base class with a shared PostgreSQLContainer; WorkoutHubApplicationTests now boots full Spring context against it and passes
+
 - [t-2] [p1] Flyway V2: users + user_profile tables
   - Acceptance: Migration applies cleanly from empty Postgres; Testcontainers test asserts both tables and expected columns/indexes exist
 
@@ -27,9 +30,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 - [t-6] [p1] Flyway V6: body_metrics + supplements
   - Acceptance: Migration applies; test asserts both tables; date index on body_metrics.recorded_date
-
-- [t-7] [p1] Testcontainers harness + replace trivial smoke test
-  - Acceptance: AbstractIntegrationTest base class with a shared PostgreSQLContainer; WorkoutHubApplicationTests now boots full Spring context against it and passes
 
 - [t-8] [p1] Common config: SecurityConfig, CorsConfig, JacksonConfig, GlobalExceptionHandler
   - Acceptance: Context loads; 401 on protected endpoint; CORS allows configured origin; error responses follow the documented error DTO; tests cover each
