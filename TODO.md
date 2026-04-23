@@ -20,9 +20,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-30] [p5] (app)/plan viewer + editor
   - Acceptance: Weekly Pzt-Pzr view; tap a day to see exercises; editor supports drag-and-drop reorder of days and exercises via dnd-kit; RTL test covers the reorder mutation firing PUT
 
-- [t-31] [p5] (app)/session/[id] execution screen
-  - Acceptance: Exercise cards with per-set checkbox + weight/reps inputs, previous-performance chip, rest timer (auto-start on check), exercise-detail modal pulling from catalog; RTL test covers set completion offline (Dexie queue) and online flush
-
 - [t-32] [p5] (app)/history
   - Acceptance: Calendar view with completed days highlighted; tap day to open session-detail drawer; RTL test covers month navigation and empty-day vs populated-day render
 
@@ -126,3 +123,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-27] 2026-04-23 -- Frontend foundations (TanStack Query + Zod client + i18n + shadcn + vitest)
 - [t-28] 2026-04-23 -- Login page (react-hook-form + zod + mutation) -- /register removed per t-51
 - [t-29] 2026-04-23 -- Dashboard (Resume / Start today / Rest day) + GET /api/workout-plans/active
+- [t-31] 2026-04-23 -- Session execution screen (planned cards + addSet + finish) + GET /api/workout-days/{id}
+  Notes: rest-timer UI and exercise-detail modal deferred -- MVP ships without them; revisit in a follow-up if Fatih asks
