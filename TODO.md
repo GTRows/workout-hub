@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-27] [p5] Frontend foundations
-  - Acceptance: API client (fetch wrapper + TanStack Query provider + Zod-validated response types), auth token storage with refresh interceptor, next-intl configured with tr messages + en fallback, shadcn/ui initialised, authenticated layout shell with nav and protected-route guard; vitest covers the refresh interceptor
-
 - [t-26] [p5] Frontend Dexie offline queue for session sets
   - Acceptance: src/lib/offline/ stores unposted sets keyed by session id; flush-on-online drains them to POST /api/sessions/:id/sets with idempotency key; vitest unit tests cover enqueue, flush, and retry
   - Notes: moved from p4 to p5 -- depends on frontend foundations (TanStack Query + API client) landing first in t-27
@@ -132,3 +129,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-23] 2026-04-23 -- Set capture endpoints with finished-session gate
 - [t-24] 2026-04-23 -- Session history list + detail endpoints
 - [t-25] 2026-04-23 -- Per-exercise last-performance + progress analytics
+- [t-27] 2026-04-23 -- Frontend foundations (TanStack Query + Zod client + i18n + shadcn + vitest)
