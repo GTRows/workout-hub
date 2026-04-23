@@ -3,6 +3,9 @@ spring:
     name: workouthub
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
