@@ -1,13 +1,14 @@
-package com.workouthub.exercises.domain;
+package com.workouthub.common.persistence;
 
 import jakarta.persistence.AttributeConverter;
 
 /**
- * Base converter that stores enum constants as lowercase strings. Schema
- * CHECK constraints in V3 were written in lowercase ("push", "pull", ...)
- * so enum.name().toLowerCase() is the canonical DB form.
+ * Base converter that stores enum constants as lowercase strings. Multiple
+ * domain enums (exercise Category, Equipment, Difficulty; workout Focus;
+ * ...) persist with lowercase CHECK-constrained values, so we keep the
+ * Java names in uppercase convention and convert at the JPA boundary.
  */
-abstract class LowercaseEnumConverter<E extends Enum<E>> implements AttributeConverter<E, String> {
+public abstract class LowercaseEnumConverter<E extends Enum<E>> implements AttributeConverter<E, String> {
 
     private final Class<E> type;
 
