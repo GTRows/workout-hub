@@ -80,7 +80,7 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void importRejectsPayloadsThatContainPlans() throws Exception {
+    void importRejectsPayloadsWithMultipleActivePlans() throws Exception {
         SeededUser u = helpers.seed(
                 "fe3-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
 
@@ -92,13 +92,41 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
                                   "schemaVersion": 1,
                                   "exportedAt": "2026-04-23T00:00:00Z",
                                   "user": null,
-                                  "plans": [{"id":"ffffffff-1111-1111-1111-111111111111","name":"P","active":true,"days":[]}],
+                                  "plans": [
+                                    {"id":"ffffffff-1111-1111-1111-111111111111","name":"A","active":true,"days":[]},
+                                    {"id":"ffffffff-2222-2222-2222-222222222222","name":"B","active":true,"days":[]}
+                                  ],
                                   "sessions": [],
                                   "bodyMetrics": [],
                                   "supplements": []
                                 }
                                 """))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void importRoundTripPreservesPlansFromExport() throws Exception {
+        SeededUser u = helpers.seed(
+                "rt-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + u.accessToken();
+
+        // The default plan seeder runs on user creation, so the initial
+        // export should already contain at least one plan.
+        MvcResult exp = mvc.perform(get("/api/export/full").header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andReturn();
+        String dump = exp.getResponse().getContentAsString();
+
+        mvc.perform(post("/api/export/import")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(dump))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.plansInserted").value(
+                        org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+
+        mvc.perform(get("/api/workout-plans/active").header("Authorization", auth))
+                .andExpect(status().isOk());
     }
 
     @Test

@@ -232,6 +232,8 @@ export type ImportResult = {
   profileUpdated: number;
   metricsInserted: number;
   supplementsInserted: number;
+  plansInserted: number;
+  sessionsInserted: number;
   userEmail: string;
 };
 

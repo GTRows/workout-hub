@@ -35,7 +35,7 @@ const messages = {
     importUploading: "Uploading...",
     importError: "Restore failed",
     importParseError: "Invalid JSON file",
-    importSuccess: "Success: wrote {metrics} metrics, {supplements} supplements.",
+    importSuccess: "Success: wrote {metrics} metrics, {supplements} supplements, {plans} plans, {sessions} sessions.",
   },
 };
 
@@ -187,6 +187,8 @@ describe("ExportClient", () => {
             profileUpdated: 1,
             metricsInserted: 2,
             supplementsInserted: 3,
+            plansInserted: 1,
+            sessionsInserted: 4,
             userEmail: "x@test.local",
           });
         }

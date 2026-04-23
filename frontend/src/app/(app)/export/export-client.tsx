@@ -198,6 +198,8 @@ export function ExportClient() {
             {t("importSuccess", {
               metrics: importResult.metricsInserted,
               supplements: importResult.supplementsInserted,
+              plans: importResult.plansInserted,
+              sessions: importResult.sessionsInserted,
             })}
           </p>
         )}
