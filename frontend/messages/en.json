@@ -186,7 +186,9 @@
       "sessions": "Sessions",
       "metrics": "Metrics",
       "supplements": "Supplements"
-    }
+    },
+    "importWarningsHeading": "Warnings",
+    "importSuggestionsHeading": "Suggestions"
   },
   "history": {
     "title": "History",

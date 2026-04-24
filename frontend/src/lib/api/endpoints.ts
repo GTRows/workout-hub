@@ -248,6 +248,8 @@ export type ImportResult = {
   plansInserted: number;
   sessionsInserted: number;
   userEmail: string;
+  warnings?: string[];
+  suggestions?: string[];
 };
 
 export async function importFullDump(body: unknown): Promise<ImportResult> {

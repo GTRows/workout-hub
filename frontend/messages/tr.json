@@ -186,7 +186,9 @@
       "sessions": "Antrenmanlar",
       "metrics": "Metrikler",
       "supplements": "Takviyeler"
-    }
+    },
+    "importWarningsHeading": "Uyarilar",
+    "importSuggestionsHeading": "Oneriler"
   },
   "history": {
     "title": "Gecmis",

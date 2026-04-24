@@ -47,6 +47,8 @@ const messages = {
       metrics: "Metrics",
       supplements: "Supplements",
     },
+    importWarningsHeading: "Warnings",
+    importSuggestionsHeading: "Suggestions",
   },
 };
 
@@ -264,6 +266,50 @@ describe("ExportClient", () => {
     await waitFor(() => expect(posted).not.toBeNull());
     expect((posted as { schemaVersion: number }).schemaVersion).toBe(1);
     await screen.findByTestId("import-success");
+  });
+
+  it("surfaces warnings and suggestions returned by the import endpoint", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/export/import") && init?.method === "POST") {
+          return jsonResponse(200, {
+            profileUpdated: 0,
+            metricsInserted: 0,
+            supplementsInserted: 1,
+            plansInserted: 0,
+            sessionsInserted: 0,
+            userEmail: "x@test.local",
+            warnings: ["supplement 'X' has unknown timing 'midnight_snack'"],
+            suggestions: ["payload has 1001 sessions; some LLMs will truncate."],
+          });
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<ExportClient />);
+    const dump = JSON.stringify({
+      schemaVersion: 1,
+      exportedAt: "2026-04-23T00:00:00Z",
+      user: null,
+      plans: [],
+      sessions: [],
+      bodyMetrics: [],
+      supplements: [],
+    });
+    const file = new File([dump], "dump.json", { type: "application/json" });
+    const input = screen.getByLabelText("Pick JSON file") as HTMLInputElement;
+    await userEvent.upload(input, file);
+
+    await screen.findByTestId("import-warnings");
+    expect(screen.getByTestId("import-warnings")).toHaveTextContent(
+      "midnight_snack"
+    );
+    expect(screen.getByTestId("import-suggestions")).toHaveTextContent(
+      "1001 sessions"
+    );
   });
 
   it("shows an import error when the server rejects the upload", async () => {

@@ -245,17 +245,43 @@ export function ExportClient() {
           </p>
         )}
         {importResult && !importError && (
-          <p
-            className="text-sm text-primary"
-            data-testid="import-success"
-          >
-            {t("importSuccess", {
-              metrics: importResult.metricsInserted,
-              supplements: importResult.supplementsInserted,
-              plans: importResult.plansInserted,
-              sessions: importResult.sessionsInserted,
-            })}
-          </p>
+          <div className="space-y-2">
+            <p
+              className="text-sm text-primary"
+              data-testid="import-success"
+            >
+              {t("importSuccess", {
+                metrics: importResult.metricsInserted,
+                supplements: importResult.supplementsInserted,
+                plans: importResult.plansInserted,
+                sessions: importResult.sessionsInserted,
+              })}
+            </p>
+            {importResult.warnings && importResult.warnings.length > 0 && (
+              <div data-testid="import-warnings" className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  {t("importWarningsHeading")}
+                </p>
+                <ul className="list-disc pl-5 text-xs text-muted-foreground">
+                  {importResult.warnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {importResult.suggestions && importResult.suggestions.length > 0 && (
+              <div data-testid="import-suggestions" className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  {t("importSuggestionsHeading")}
+                </p>
+                <ul className="list-disc pl-5 text-xs text-muted-foreground">
+                  {importResult.suggestions.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         )}
       </Card>
     </div>

@@ -72,11 +72,11 @@ public class FullImportService {
         if (dump == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empty import payload");
         }
-        if (dump.schemaVersion() != SUPPORTED_SCHEMA_VERSION) {
+        ImportValidator.ValidationReport report = ImportValidator.validate(dump);
+        if (report.hasErrors()) {
             throw new ResponseStatusException(
                     HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Unsupported schemaVersion " + dump.schemaVersion()
-                            + "; expected " + SUPPORTED_SCHEMA_VERSION);
+                    "Validation failed: " + String.join("; ", report.errors()));
         }
 
         User user = users.findById(userId)
@@ -103,7 +103,9 @@ public class FullImportService {
                 supplementsInserted,
                 plansInserted,
                 sessionsInserted,
-                user.getEmail());
+                user.getEmail(),
+                report.warnings(),
+                report.suggestions());
     }
 
     public int importProfile(UUID userId, FullExportDto.UserSection section) {
