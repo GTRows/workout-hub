@@ -82,6 +82,36 @@ Browsers will flag the cert as untrusted; that is expected.
 
 See [BACKUP.md](./BACKUP.md).
 
+## Homelab proxy (Caddy)
+
+If you host the app behind the homelab Caddy at
+`homelab/stacks/proxy/`, copy `deploy/caddy/Caddyfile` into the Caddy
+sites directory (or wherever the main Caddyfile imports from) and
+replace `workouthub.example.com` with the real hostname.
+
+Caddy auto-provisions a Let's Encrypt cert on first request to the
+hostname. Validate before reload:
+
+```sh
+docker compose -f homelab/stacks/proxy/docker-compose.yml \
+    exec caddy caddy validate --config /etc/caddy/Caddyfile
+```
+
+Reload:
+
+```sh
+docker compose -f homelab/stacks/proxy/docker-compose.yml \
+    exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+The Caddy config assumes the backend and frontend containers are
+reachable under the docker service names `backend:8080` and
+`frontend:3000` from the proxy network. If they live on a different
+compose project, swap those for the tailscale/LAN hostnames.
+
+For non-homelab installs the `compose.prod.yml` + nginx recipe above
+remains valid and ships its own TLS via certbot.
+
 ## Shutdown
 
 ```sh

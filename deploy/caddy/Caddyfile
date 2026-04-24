@@ -1,0 +1,52 @@
+# WorkoutHub site configuration for the homelab Caddy proxy at
+# homelab/stacks/proxy/. Include by adding the file path to the
+# main Caddyfile's global import statement, for example:
+#
+#   import /etc/caddy/sites/*.caddy
+#
+# Replace workouthub.example.com with your actual hostname.
+
+workouthub.example.com {
+    encode gzip zstd
+
+    # Rate-limit the auth surface. 10 requests per minute per IP with a
+    # 5-burst tolerance before Caddy returns HTTP 429. Requires the
+    # caddy-ratelimit module; if the homelab Caddy image does not bundle
+    # it, drop this block - the nginx overlay keeps the same contract.
+    @auth path /api/auth/*
+    rate_limit @auth {
+        zone workouthub_auth {
+            key {remote_host}
+            events 10
+            window 1m
+        }
+    }
+
+    # Public scrape / health paths passthrough - no auth headers stripped.
+    @public path /actuator/health /actuator/info /actuator/prometheus
+    handle @public {
+        reverse_proxy backend:8080
+    }
+
+    # /api/** goes to the Spring backend.
+    handle /api/* {
+        reverse_proxy backend:8080
+    }
+
+    # Everything else is the Next.js app.
+    handle {
+        reverse_proxy frontend:3000
+    }
+
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Frame-Options "DENY"
+    }
+
+    log {
+        output stderr
+        format console
+    }
+}
