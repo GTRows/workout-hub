@@ -101,4 +101,44 @@ public class ExportController {
             @AuthenticationPrincipal AppUserPrincipal principal) {
         return fullExport.buildSupplements(principal.userId());
     }
+
+    @PostMapping("/import/profile")
+    public ImportResultDto importProfileSlice(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestBody UserSection section) {
+        int updated = fullImport.importProfile(principal.userId(), section);
+        return new ImportResultDto(updated, 0, 0, 0, 0, "");
+    }
+
+    @PostMapping("/import/metrics")
+    public ImportResultDto importMetricsSlice(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestBody List<MetricRow> rows) {
+        int inserted = fullImport.replaceMetricsSection(principal.userId(), rows);
+        return new ImportResultDto(0, inserted, 0, 0, 0, "");
+    }
+
+    @PostMapping("/import/supplements")
+    public ImportResultDto importSupplementsSlice(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestBody List<SupplementRow> rows) {
+        int inserted = fullImport.replaceSupplementsSection(principal.userId(), rows);
+        return new ImportResultDto(0, 0, inserted, 0, 0, "");
+    }
+
+    @PostMapping("/import/plans")
+    public ImportResultDto importPlansSlice(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestBody List<PlanSection> rows) {
+        int inserted = fullImport.replacePlansSection(principal.userId(), rows);
+        return new ImportResultDto(0, 0, 0, inserted, 0, "");
+    }
+
+    @PostMapping("/import/sessions")
+    public ImportResultDto importSessionsSlice(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestBody List<SessionSection> rows) {
+        int inserted = fullImport.replaceSessionsSection(principal.userId(), rows);
+        return new ImportResultDto(0, 0, 0, 0, inserted, "");
+    }
 }

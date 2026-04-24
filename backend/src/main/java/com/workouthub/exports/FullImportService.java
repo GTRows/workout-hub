@@ -82,7 +82,7 @@ public class FullImportService {
         User user = users.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found: " + userId));
 
-        int profileUpdated = importProfile(userId, dump.user());
+        int profileUpdated = doImportProfile(userId, dump.user());
         int metricsInserted = replaceMetrics(userId, dump.bodyMetrics());
         int supplementsInserted = replaceSupplements(userId, dump.supplements());
 
@@ -106,7 +106,33 @@ public class FullImportService {
                 user.getEmail());
     }
 
-    private int importProfile(UUID userId, FullExportDto.UserSection section) {
+    public int importProfile(UUID userId, FullExportDto.UserSection section) {
+        return doImportProfile(userId, section);
+    }
+
+    public int replaceMetricsSection(UUID userId, List<FullExportDto.MetricRow> rows) {
+        return replaceMetrics(userId, rows);
+    }
+
+    public int replaceSupplementsSection(UUID userId, List<FullExportDto.SupplementRow> rows) {
+        return replaceSupplements(userId, rows);
+    }
+
+    public int replacePlansSection(UUID userId, List<FullExportDto.PlanSection> rows) {
+        // Plans are FK'd from workout_sessions.workout_day_id (nullable).
+        // Null out those references so cascade-drop of plans -> days cannot
+        // violate the FK, then rebuild plans. Sessions keep their history
+        // but become "ad-hoc" until the user reattaches them to a new day.
+        sessions.detachSessionsFromDays(userId);
+        return replacePlans(userId, rows);
+    }
+
+    public int replaceSessionsSection(UUID userId, List<FullExportDto.SessionSection> rows) {
+        wipeSessions(userId);
+        return insertSessions(userId, rows);
+    }
+
+    private int doImportProfile(UUID userId, FullExportDto.UserSection section) {
         if (section == null) return 0;
         UserProfile profile = profiles.findById(userId).orElseGet(() -> {
             UserProfile fresh = new UserProfile();
