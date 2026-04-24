@@ -54,10 +54,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: never
+  metrics:
+    tags:
+      application: workouthub
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 logging:
   level:
