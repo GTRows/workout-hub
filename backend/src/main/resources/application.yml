@@ -71,3 +71,9 @@ logging:
     root: INFO
     org.springframework.security: INFO
     com.workouthub: DEBUG
+  include-application-name: false
+  # Enable JSON (ECS) structured logs on the 'prod' profile only so local
+  # devs still get readable console output. The per-profile override lives
+  # in application-prod.yml.
+  pattern:
+    correlation: "[%X{trace_id:-}] "
