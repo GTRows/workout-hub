@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-59] [p9] Per-section export endpoints (profile, plans, sessions, metrics, supplements)
-  - Acceptance: 5 new GET /api/export/{section} endpoints; integration tests per section assert shape matches full-export slice; RTL smoke for download buttons on /export.
-
 - [t-60] [p9] Per-section import endpoints (idempotent replace per slice)
   - Acceptance: 5 POST /api/export/import/{section}; integration tests per section cover round-trip + malformed 422.
 
@@ -206,3 +203,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-54] 2026-04-23 -- Supplement reminder trigger + V11 reminder_time (webpush sender carved into t-57)
 - [t-57] 2026-04-23 -- Real Web Push sender via nl.martijndwars:web-push 5.1.1 (VAPID sign + 404/410 pruning; activated when private-key is set)
 - [t-58] 2026-04-24 -- docs/EXPORT_FORMAT.md + guarded example JSON round-tripped by ExportFormatExampleTest
+- [t-59] 2026-04-24 -- Per-section export endpoints + single-slice download card on /export
