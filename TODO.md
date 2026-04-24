@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-77] [p11] Caddy site config snippet for homelab proxy
-  - Acceptance: docs/DEPLOYMENT.md gains "Homelab proxy (Caddy)" section with a Caddyfile stanza (auto-TLS) that proxies workouthub.<domain> to backend+frontend; validated with caddy validate recipe; nginx overlay kept as alternative for non-homelab installs.
-
 - [t-78] [p11] Authentik OIDC optional SSO
   - Acceptance: app.auth.oidc.enabled flag; /api/auth/oidc/login redirects to Authentik; code exchange maps email -> local user; integration tests cover disabled (default JWT path unaffected) and enabled paths.
 
@@ -170,3 +167,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-74] 2026-04-24 -- Grafana dashboard JSON (6 panels) + shape-guard test
 - [t-75] 2026-04-24 -- Alertmanager rules (5xx / pool / GC / disk) + YAML-parse guard test
 - [t-76] 2026-04-24 -- Uptime-Kuma monitor JSON + health unauth-reachable guard test
+- [t-77] 2026-04-24 -- Homelab Caddy snippet + DEPLOYMENT.md runbook for workouthub.<domain>
