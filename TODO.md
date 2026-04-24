@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-63] [p9] CSV export (Strong/Hevy-compatible) for sessions
-  - Acceptance: /api/export/csv/sessions returns CSV matching Strong's column order; unit test validates header + sample row; RTL covers download button.
-
 - [t-64] [p9] Strong/Hevy CSV import with fuzzy exercise-name matching
   - Acceptance: /api/export/import/csv + ExerciseNameMatcher class with unit tests (exact, case-insensitive, substring, unmatched); integration test covers sample Strong CSV with one unmatched row surfaced in the response.
 
@@ -198,3 +195,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-60] 2026-04-24 -- Per-section import endpoints with replace semantics + detach-sessions-from-days safety query
 - [t-61] 2026-04-24 -- ImportValidator with errors/warnings/suggestions + UI renders both under the import success
 - [t-62] 2026-04-24 -- /export/ai cheatsheet + section picker + /export/ai/apply diff-preview-then-commit
+- [t-63] 2026-04-24 -- Strong/Hevy-compatible sessions.csv export endpoint + UI button
