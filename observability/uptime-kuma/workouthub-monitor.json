@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "notificationList": [],
+  "monitorList": [
+    {
+      "name": "WorkoutHub API health",
+      "description": "Spring Boot actuator health on the backend",
+      "type": "http",
+      "url": "https://workouthub.example.com/actuator/health",
+      "method": "GET",
+      "interval": 60,
+      "retryInterval": 60,
+      "resendInterval": 0,
+      "maxretries": 3,
+      "timeout": 10,
+      "accepted_statuscodes": ["200"],
+      "keyword": "\"status\":\"UP\"",
+      "headers": {},
+      "body": null,
+      "tags": [
+        { "name": "workouthub", "color": "#0ea5e9" }
+      ]
+    },
+    {
+      "name": "WorkoutHub Prometheus scrape target",
+      "description": "Checks the /actuator/prometheus endpoint stays reachable for Prometheus",
+      "type": "http",
+      "url": "https://workouthub.example.com/actuator/prometheus",
+      "method": "GET",
+      "interval": 120,
+      "retryInterval": 60,
+      "maxretries": 2,
+      "timeout": 10,
+      "accepted_statuscodes": ["200"],
+      "keyword": "application=\"workouthub\"",
+      "tags": [
+        { "name": "workouthub", "color": "#0ea5e9" }
+      ]
+    }
+  ]
+}

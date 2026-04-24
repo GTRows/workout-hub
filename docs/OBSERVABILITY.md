@@ -108,12 +108,21 @@ docker compose -f homelab/stacks/observability/docker-compose.yml \
 
 ## Uptime-Kuma
 
-Add a new monitor in the homelab Uptime-Kuma with:
+Import `observability/uptime-kuma/workouthub-monitor.json` via
+Uptime-Kuma's **Settings -> Backup -> Import**. It creates two
+monitors:
+
+1. `/actuator/health` with a `"status":"UP"` keyword check at 60s.
+2. `/actuator/prometheus` with an `application="workouthub"` keyword
+   check at 120s - confirms the Prometheus scrape path stays open.
+
+Or add manually:
 
 - **Monitor type**: HTTP(s)
 - **URL**: `https://<your-domain>/actuator/health`
 - **Heartbeat interval**: 60s
 - **Accepted status codes**: 200
+- **Keyword**: `"status":"UP"`
 
 ## End-to-end smoke
 
