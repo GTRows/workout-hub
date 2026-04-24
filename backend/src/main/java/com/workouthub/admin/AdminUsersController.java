@@ -3,6 +3,7 @@ package com.workouthub.admin;
 import com.workouthub.admin.dto.AdminUserResponse;
 import com.workouthub.admin.dto.CreateUserRequest;
 import com.workouthub.admin.dto.UpdateUserRequest;
+import com.workouthub.audit.AuditLogService;
 import com.workouthub.auth.PasswordResetService;
 import com.workouthub.common.security.AppUserPrincipal;
 import jakarta.validation.Valid;
@@ -29,12 +30,15 @@ public class AdminUsersController {
 
     private final AdminUsersService service;
     private final PasswordResetService passwordResetService;
+    private final AuditLogService auditLog;
 
     public AdminUsersController(
             AdminUsersService service,
-            PasswordResetService passwordResetService) {
+            PasswordResetService passwordResetService,
+            AuditLogService auditLog) {
         this.service = service;
         this.passwordResetService = passwordResetService;
+        this.auditLog = auditLog;
     }
 
     @PostMapping("/{id}/reset-link")
@@ -42,12 +46,18 @@ public class AdminUsersController {
             @PathVariable UUID id,
             @AuthenticationPrincipal AppUserPrincipal principal) {
         String token = passwordResetService.issueFor(id, principal.userId());
+        auditLog.record(principal.userId(), "user.reset_link", "user", id, null);
         return Map.of("token", token);
     }
 
     @PostMapping
-    public ResponseEntity<AdminUserResponse> create(@Valid @RequestBody CreateUserRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req));
+    public ResponseEntity<AdminUserResponse> create(
+            @Valid @RequestBody CreateUserRequest req,
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        AdminUserResponse body = service.create(req);
+        auditLog.record(principal.userId(), "user.create", "user", body.id(),
+                Map.of("email", body.email(), "role", body.role()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @GetMapping
@@ -63,8 +73,11 @@ public class AdminUsersController {
     @PutMapping("/{id}")
     public AdminUserResponse update(
             @PathVariable UUID id,
-            @Valid @RequestBody UpdateUserRequest req) {
-        return service.update(id, req);
+            @Valid @RequestBody UpdateUserRequest req,
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        AdminUserResponse body = service.update(id, req);
+        auditLog.record(principal.userId(), "user.update", "user", id, req);
+        return body;
     }
 
     @DeleteMapping("/{id}")
@@ -72,6 +85,7 @@ public class AdminUsersController {
             @PathVariable UUID id,
             @AuthenticationPrincipal AppUserPrincipal principal) {
         service.delete(id, principal.userId());
+        auditLog.record(principal.userId(), "user.delete", "user", id, null);
         return ResponseEntity.noContent().build();
     }
 }
