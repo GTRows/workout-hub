@@ -36,18 +36,21 @@ public class ExportController {
     private final FullImportService fullImport;
     private final CsvExportService csvExport;
     private final CsvImportService csvImport;
+    private final IcsExportService icsExport;
 
     public ExportController(
             ExportService service,
             FullExportService fullExport,
             FullImportService fullImport,
             CsvExportService csvExport,
-            CsvImportService csvImport) {
+            CsvImportService csvImport,
+            IcsExportService icsExport) {
         this.service = service;
         this.fullExport = fullExport;
         this.fullImport = fullImport;
         this.csvExport = csvExport;
         this.csvImport = csvImport;
+        this.icsExport = icsExport;
     }
 
     @GetMapping("/claude-summary")
@@ -139,6 +142,17 @@ public class ExportController {
             @RequestBody List<PlanSection> rows) {
         int inserted = fullImport.replacePlansSection(principal.userId(), rows);
         return new ImportResultDto(0, 0, 0, inserted, 0, "");
+    }
+
+    @GetMapping(value = "/plan.ics", produces = "text/calendar; charset=utf-8")
+    public ResponseEntity<String> planIcs(
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        String ics = icsExport.buildActivePlanIcs(principal.userId());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "text/calendar; charset=utf-8")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"workouthub-plan.ics\"")
+                .body(ics);
     }
 
     @PostMapping(value = "/import/csv", consumes = "text/csv")
