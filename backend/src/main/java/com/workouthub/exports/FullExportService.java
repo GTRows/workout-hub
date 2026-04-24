@@ -59,11 +59,21 @@ public class FullExportService {
     }
 
     public FullExportDto build(UUID userId) {
+        return new FullExportDto(
+                SCHEMA_VERSION,
+                Instant.now(),
+                buildUserSection(userId),
+                buildPlans(userId),
+                buildSessions(userId),
+                buildMetrics(userId),
+                buildSupplements(userId));
+    }
+
+    public UserSection buildUserSection(UUID userId) {
         User user = users.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found: " + userId));
         UserProfile profile = profiles.findById(userId).orElse(null);
-
-        UserSection us = new UserSection(
+        return new UserSection(
                 user.getId(),
                 user.getEmail(),
                 user.getDisplayName(),
@@ -73,32 +83,31 @@ public class FullExportService {
                 profile == null ? null : profile.getGender(),
                 profile == null ? null : profile.getHealthNotes(),
                 profile == null ? null : profile.getGoals());
+    }
 
-        List<PlanSection> planSections = plans.findByUserIdOrderByCreatedAtAsc(userId).stream()
+    public List<PlanSection> buildPlans(UUID userId) {
+        return plans.findByUserIdOrderByCreatedAtAsc(userId).stream()
                 .map(FullExportService::toPlanSection)
                 .toList();
+    }
 
-        List<SessionSection> sessionSections = sessions
+    public List<SessionSection> buildSessions(UUID userId) {
+        return sessions
                 .findByUserIdAndEndedAtIsNotNullOrderByStartedAtDesc(userId).stream()
                 .map(FullExportService::toSessionSection)
                 .toList();
+    }
 
-        List<MetricRow> metricRows = metrics.findByUserIdOrderByRecordedDateDesc(userId).stream()
+    public List<MetricRow> buildMetrics(UUID userId) {
+        return metrics.findByUserIdOrderByRecordedDateDesc(userId).stream()
                 .map(FullExportService::toMetricRow)
                 .toList();
+    }
 
-        List<SupplementRow> suppRows = supplements.findByUserIdOrderByCreatedAtAsc(userId).stream()
+    public List<SupplementRow> buildSupplements(UUID userId) {
+        return supplements.findByUserIdOrderByCreatedAtAsc(userId).stream()
                 .map(FullExportService::toSupplementRow)
                 .toList();
-
-        return new FullExportDto(
-                SCHEMA_VERSION,
-                Instant.now(),
-                us,
-                planSections,
-                sessionSections,
-                metricRows,
-                suppRows);
     }
 
     private static PlanSection toPlanSection(WorkoutPlan p) {

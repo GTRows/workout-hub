@@ -175,7 +175,18 @@
     "importUploading": "Yukleniyor...",
     "importError": "Geri yukleme basarisiz.",
     "importParseError": "Gecersiz JSON dosyasi.",
-    "importSuccess": "Basarili: {metrics} metrik, {supplements} takviye, {plans} plan, {sessions} antrenman yazildi."
+    "importSuccess": "Basarili: {metrics} metrik, {supplements} takviye, {plans} plan, {sessions} antrenman yazildi.",
+    "sectionTitle": "Tek bolumu indir",
+    "sectionDescription": "Yalnizca bir dilimi indir - AI'a sadece o dilimi duzenletip geri alman gerektiginde kullanisli.",
+    "sectionPending": "Hazirlaniyor...",
+    "sectionError": "{section} bolumu indirilemedi.",
+    "sectionButton": {
+      "profile": "Profil",
+      "plans": "Planlar",
+      "sessions": "Antrenmanlar",
+      "metrics": "Metrikler",
+      "supplements": "Takviyeler"
+    }
   },
   "history": {
     "title": "Gecmis",

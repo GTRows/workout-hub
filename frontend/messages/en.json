@@ -175,7 +175,18 @@
     "importUploading": "Uploading...",
     "importError": "Restore failed.",
     "importParseError": "Invalid JSON file.",
-    "importSuccess": "Success: wrote {metrics} metrics, {supplements} supplements, {plans} plans, {sessions} sessions."
+    "importSuccess": "Success: wrote {metrics} metrics, {supplements} supplements, {plans} plans, {sessions} sessions.",
+    "sectionTitle": "Download a single section",
+    "sectionDescription": "Download just one slice of your data - useful when asking an AI to edit just that slice and hand it back.",
+    "sectionPending": "Preparing...",
+    "sectionError": "Section download failed for {section}.",
+    "sectionButton": {
+      "profile": "Profile",
+      "plans": "Plans",
+      "sessions": "Sessions",
+      "metrics": "Metrics",
+      "supplements": "Supplements"
+    }
   },
   "history": {
     "title": "History",

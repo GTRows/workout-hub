@@ -228,6 +228,19 @@ export async function fetchFullExport(): Promise<unknown> {
   });
 }
 
+export type ExportSection =
+  | "profile"
+  | "plans"
+  | "sessions"
+  | "metrics"
+  | "supplements";
+
+export async function fetchSectionExport(section: ExportSection): Promise<unknown> {
+  return api.request({
+    path: `/api/export/${section}`,
+  });
+}
+
 export type ImportResult = {
   profileUpdated: number;
   metricsInserted: number;

@@ -6,9 +6,19 @@ import { useRef, useState } from "react";
 import {
   fetchClaudeSummary,
   fetchFullExport,
+  fetchSectionExport,
   importFullDump,
+  type ExportSection,
   type ImportResult,
 } from "@/lib/api/endpoints";
+
+const SECTIONS: ExportSection[] = [
+  "profile",
+  "plans",
+  "sessions",
+  "metrics",
+  "supplements",
+];
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -60,6 +70,22 @@ export function ExportClient() {
     },
     onError: () => setFullError(t("fullError")),
   });
+
+  const [sectionPending, setSectionPending] = useState<ExportSection | null>(null);
+  const [sectionError, setSectionError] = useState<string | null>(null);
+  const downloadSection = async (section: ExportSection) => {
+    setSectionPending(section);
+    setSectionError(null);
+    try {
+      const body = await fetchSectionExport(section);
+      const iso = new Date().toISOString().slice(0, 10);
+      downloadJson(body, `workouthub-${section}-${iso}.json`);
+    } catch {
+      setSectionError(t("sectionError", { section }));
+    } finally {
+      setSectionPending(null);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
@@ -161,6 +187,34 @@ export function ExportClient() {
         {fullDownloadedAt && !fullError && (
           <p className="text-xs text-muted-foreground">
             {t("lastDownloadedAt", { time: fullDownloadedAt })}
+          </p>
+        )}
+      </Card>
+
+      <Card className="space-y-3" data-testid="section-export-card">
+        <div className="space-y-1">
+          <CardTitle className="text-lg">{t("sectionTitle")}</CardTitle>
+          <CardDescription>{t("sectionDescription")}</CardDescription>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {SECTIONS.map((section) => (
+            <Button
+              key={section}
+              variant="outline"
+              size="sm"
+              onClick={() => downloadSection(section)}
+              disabled={sectionPending !== null}
+              data-testid={`section-${section}`}
+            >
+              {sectionPending === section
+                ? t("sectionPending")
+                : t(`sectionButton.${section}`)}
+            </Button>
+          ))}
+        </div>
+        {sectionError && (
+          <p role="alert" className="text-sm text-destructive">
+            {sectionError}
           </p>
         )}
       </Card>

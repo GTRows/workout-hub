@@ -36,6 +36,17 @@ const messages = {
     importError: "Restore failed",
     importParseError: "Invalid JSON file",
     importSuccess: "Success: wrote {metrics} metrics, {supplements} supplements, {plans} plans, {sessions} sessions.",
+    sectionTitle: "Download a single section",
+    sectionDescription: "Download just one slice",
+    sectionPending: "Preparing...",
+    sectionError: "Section download failed for {section}.",
+    sectionButton: {
+      profile: "Profile",
+      plans: "Plans",
+      sessions: "Sessions",
+      metrics: "Metrics",
+      supplements: "Supplements",
+    },
   },
 };
 
@@ -131,6 +142,46 @@ describe("ExportClient", () => {
     await user.click(screen.getByRole("button", { name: /download summary/i }));
 
     expect(await screen.findByText(/download failed/i)).toBeInTheDocument();
+  });
+
+  it("downloads the metrics section when its section button is clicked", async () => {
+    const sectionBody = [
+      { id: "ffffffff-1111-1111-1111-111111111111", recordedDate: "2026-04-20", weightKg: 78 },
+    ];
+    let hitUrl = "";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        hitUrl = url;
+        if (url.endsWith("/api/export/metrics"))
+          return jsonResponse(200, sectionBody);
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    const clickSpy = vi.fn();
+    const origCreateElement = document.createElement.bind(document);
+    let capturedAnchor: HTMLAnchorElement | null = null;
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+      const el = origCreateElement(tag);
+      if (tag === "a") {
+        capturedAnchor = el as HTMLAnchorElement;
+        (el as HTMLAnchorElement).click = clickSpy;
+      }
+      return el;
+    });
+
+    renderClient(<ExportClient />);
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId("section-metrics"));
+
+    await waitFor(() => expect(clickSpy).toHaveBeenCalled());
+    expect(hitUrl).toContain("/api/export/metrics");
+    expect(capturedAnchor).not.toBeNull();
+    expect(capturedAnchor!.download).toMatch(
+      /^workouthub-metrics-\d{4}-\d{2}-\d{2}\.json$/
+    );
   });
 
   it("downloads the full JSON dump when the full button is clicked", async () => {
