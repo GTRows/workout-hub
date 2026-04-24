@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-67] [p10] Active session management (list + revoke)
-  - Acceptance: /api/users/me/sessions lists refresh_tokens with UA + createdAt + lastUsed; DELETE revokes; integration test confirms revoked token returns 401.
-
 - [t-68] [p10] Admin-initiated password reset flow (no email server)
   - Acceptance: POST /api/admin/users/{id}/reset-link returns single-use 24h token URL; /api/auth/reset-password?token=... accepts new password; integration tests for single-use + expiry + wrong-user.
 
@@ -190,3 +187,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-64] 2026-04-24 -- Strong CSV import with tiered ExerciseNameMatcher + unmatched-names surfaced
 - [t-65] 2026-04-24 -- /api/export/plan.ics RFC 5545 feed (one VEVENT per plan day, BYDAY RRULEs)
 - [t-66] 2026-04-24 -- TOTP 2FA (samstevens.totp) with setup/verify/status/disable + login gate
+- [t-67] 2026-04-24 -- Active session list + revoke (V13 UA/last_used + /api/users/me/sessions)
