@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-62] [p9] Frontend AI-roundtrip wizard (prepare -> download -> upload -> diff preview -> commit)
-  - Acceptance: /export/ai route with section picker + inline format cheatsheet; /export/ai/apply previews diff before commit; RTL covers the 3 states.
-
 - [t-63] [p9] CSV export (Strong/Hevy-compatible) for sessions
   - Acceptance: /api/export/csv/sessions returns CSV matching Strong's column order; unit test validates header + sample row; RTL covers download button.
 
@@ -200,3 +197,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-59] 2026-04-24 -- Per-section export endpoints + single-slice download card on /export
 - [t-60] 2026-04-24 -- Per-section import endpoints with replace semantics + detach-sessions-from-days safety query
 - [t-61] 2026-04-24 -- ImportValidator with errors/warnings/suggestions + UI renders both under the import success
+- [t-62] 2026-04-24 -- /export/ai cheatsheet + section picker + /export/ai/apply diff-preview-then-commit
