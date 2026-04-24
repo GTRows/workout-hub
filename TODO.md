@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-61] [p9] ImportValidator with warnings (fail-soft)
-  - Acceptance: ImportValidator returns ValidationReport(errors, warnings, suggestions); unit tests cover each case; POST import response body surfaces warnings array.
-
 - [t-62] [p9] Frontend AI-roundtrip wizard (prepare -> download -> upload -> diff preview -> commit)
   - Acceptance: /export/ai route with section picker + inline format cheatsheet; /export/ai/apply previews diff before commit; RTL covers the 3 states.
 
@@ -202,3 +199,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-58] 2026-04-24 -- docs/EXPORT_FORMAT.md + guarded example JSON round-tripped by ExportFormatExampleTest
 - [t-59] 2026-04-24 -- Per-section export endpoints + single-slice download card on /export
 - [t-60] 2026-04-24 -- Per-section import endpoints with replace semantics + detach-sessions-from-days safety query
+- [t-61] 2026-04-24 -- ImportValidator with errors/warnings/suggestions + UI renders both under the import success
