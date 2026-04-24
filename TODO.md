@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-69] [p10] Brute-force lockout (10 failed in 15 min -> 1h lock)
-  - Acceptance: V13 login_attempts table; TestClock-driven integration tests: under-threshold, at-threshold (HTTP 423), after cooldown resumes.
-
 - [t-70] [p10] Audit log for all admin writes
   - Acceptance: V14 audit_log table; every admin-module mutation logs actor/action/target/payload; /api/admin/audit lists; integration tests cover create/update/delete + non-admin 403.
 
@@ -186,3 +183,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-66] 2026-04-24 -- TOTP 2FA (samstevens.totp) with setup/verify/status/disable + login gate
 - [t-67] 2026-04-24 -- Active session list + revoke (V13 UA/last_used + /api/users/me/sessions)
 - [t-68] 2026-04-24 -- Admin password reset link + /api/auth/reset-password single-use flow
+- [t-69] 2026-04-24 -- Brute-force lockout (V15 login_attempts + BruteForceGuard, HTTP 423)
