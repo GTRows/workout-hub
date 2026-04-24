@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-71] [p10] Force-logout on password change
-  - Acceptance: Password change revokes all refresh_tokens for that user; integration test verifies prior access + refresh tokens 401 after.
-
 - [t-72] [p11] Micrometer Prometheus endpoint + homelab scrape config snippet
   - Acceptance: /actuator/prometheus exposes JVM + http metrics; docs/OBSERVABILITY.md documents the exact scrape job entry to append to homelab/stacks/observability/config/prometheus/prometheus.yml; integration test asserts endpoint returns metrics with required labels.
 
@@ -182,3 +179,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-68] 2026-04-24 -- Admin password reset link + /api/auth/reset-password single-use flow
 - [t-69] 2026-04-24 -- Brute-force lockout (V15 login_attempts + BruteForceGuard, HTTP 423)
 - [t-70] 2026-04-24 -- Audit log (V16 audit_log + /api/admin/audit + create/update/delete/reset_link coverage)
+- [t-71] 2026-04-24 -- Self-serve password change + revoke-all-sessions (PUT /api/users/me/password)
