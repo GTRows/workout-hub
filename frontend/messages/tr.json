@@ -188,7 +188,11 @@
       "supplements": "Takviyeler"
     },
     "importWarningsHeading": "Uyarilar",
-    "importSuggestionsHeading": "Oneriler"
+    "importSuggestionsHeading": "Oneriler",
+    "csvButton": "sessions.csv indir (Strong)",
+    "csvPending": "Hazirlaniyor...",
+    "csvError": "CSV disa aktarma basarisiz.",
+    "csvHint": "Strong/Hevy uyumlu sutun sirasi, baska uygulamalara geri yukleme icin."
   },
   "ai": {
     "title": "AI yuvarlak-ziyareti",

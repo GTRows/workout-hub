@@ -241,6 +241,18 @@ export async function fetchSectionExport(section: ExportSection): Promise<unknow
   });
 }
 
+export async function fetchSessionsCsv(): Promise<string> {
+  const base =
+    typeof process !== "undefined"
+      ? process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
+      : "";
+  const res = await api.raw(`${base}/api/export/csv/sessions`, { method: "GET" });
+  if (!res.ok) {
+    throw new Error(`CSV export failed: ${res.status}`);
+  }
+  return res.text();
+}
+
 export type ImportResult = {
   profileUpdated: number;
   metricsInserted: number;

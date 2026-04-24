@@ -49,6 +49,10 @@ const messages = {
     },
     importWarningsHeading: "Warnings",
     importSuggestionsHeading: "Suggestions",
+    csvButton: "Download sessions.csv (Strong)",
+    csvPending: "Preparing...",
+    csvError: "CSV export failed.",
+    csvHint: "Strong-compatible.",
   },
 };
 
@@ -144,6 +148,44 @@ describe("ExportClient", () => {
     await user.click(screen.getByRole("button", { name: /download summary/i }));
 
     expect(await screen.findByText(/download failed/i)).toBeInTheDocument();
+  });
+
+  it("downloads the Strong-compatible sessions CSV when csv-sessions is clicked", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/export/csv/sessions")) {
+          return new Response(
+            "Date,Workout Name,Exercise Name,Set Order,Weight,Reps,Notes,Workout Notes\n",
+            { status: 200, headers: { "content-type": "text/csv" } }
+          );
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    const clickSpy = vi.fn();
+    const origCreate = document.createElement.bind(document);
+    let captured: HTMLAnchorElement | null = null;
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+      const el = origCreate(tag);
+      if (tag === "a") {
+        captured = el as HTMLAnchorElement;
+        (el as HTMLAnchorElement).click = clickSpy;
+      }
+      return el;
+    });
+
+    renderClient(<ExportClient />);
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId("csv-sessions"));
+
+    await waitFor(() => expect(clickSpy).toHaveBeenCalled());
+    expect(captured).not.toBeNull();
+    expect(captured!.download).toMatch(
+      /^workouthub-sessions-\d{4}-\d{2}-\d{2}\.csv$/
+    );
   });
 
   it("downloads the metrics section when its section button is clicked", async () => {

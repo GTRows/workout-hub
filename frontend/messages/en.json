@@ -188,7 +188,11 @@
       "supplements": "Supplements"
     },
     "importWarningsHeading": "Warnings",
-    "importSuggestionsHeading": "Suggestions"
+    "importSuggestionsHeading": "Suggestions",
+    "csvButton": "Download sessions.csv (Strong)",
+    "csvPending": "Preparing...",
+    "csvError": "CSV export failed.",
+    "csvHint": "Strong/Hevy-compatible column order for re-import into other apps."
   },
   "ai": {
     "title": "AI roundtrip",

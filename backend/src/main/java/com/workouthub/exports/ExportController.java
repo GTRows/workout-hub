@@ -33,14 +33,17 @@ public class ExportController {
     private final ExportService service;
     private final FullExportService fullExport;
     private final FullImportService fullImport;
+    private final CsvExportService csvExport;
 
     public ExportController(
             ExportService service,
             FullExportService fullExport,
-            FullImportService fullImport) {
+            FullImportService fullImport,
+            CsvExportService csvExport) {
         this.service = service;
         this.fullExport = fullExport;
         this.fullImport = fullImport;
+        this.csvExport = csvExport;
     }
 
     @GetMapping("/claude-summary")
@@ -132,6 +135,18 @@ public class ExportController {
             @RequestBody List<PlanSection> rows) {
         int inserted = fullImport.replacePlansSection(principal.userId(), rows);
         return new ImportResultDto(0, 0, 0, inserted, 0, "");
+    }
+
+    @GetMapping(value = "/csv/sessions", produces = "text/csv; charset=utf-8")
+    public ResponseEntity<String> sessionsCsv(
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        String csv = csvExport.buildSessionsCsv(principal.userId());
+        String filename = "workouthub-sessions-" + LocalDate.now() + ".csv";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=utf-8")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"")
+                .body(csv);
     }
 
     @PostMapping("/import/sessions")

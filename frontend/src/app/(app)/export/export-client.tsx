@@ -7,6 +7,7 @@ import {
   fetchClaudeSummary,
   fetchFullExport,
   fetchSectionExport,
+  fetchSessionsCsv,
   importFullDump,
   type ExportSection,
   type ImportResult,
@@ -73,6 +74,31 @@ export function ExportClient() {
 
   const [sectionPending, setSectionPending] = useState<ExportSection | null>(null);
   const [sectionError, setSectionError] = useState<string | null>(null);
+  const [csvPending, setCsvPending] = useState(false);
+  const downloadCsv = async () => {
+    setCsvPending(true);
+    setSectionError(null);
+    try {
+      const csv = await fetchSessionsCsv();
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      try {
+        const iso = new Date().toISOString().slice(0, 10);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `workouthub-sessions-${iso}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    } catch {
+      setSectionError(t("csvError"));
+    } finally {
+      setCsvPending(false);
+    }
+  };
   const downloadSection = async (section: ExportSection) => {
     setSectionPending(section);
     setSectionError(null);
@@ -217,6 +243,20 @@ export function ExportClient() {
             {sectionError}
           </p>
         )}
+        <div className="pt-2 border-t border-border">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={downloadCsv}
+            disabled={csvPending}
+            data-testid="csv-sessions"
+          >
+            {csvPending ? t("csvPending") : t("csvButton")}
+          </Button>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t("csvHint")}
+          </p>
+        </div>
       </Card>
 
       <Card className="space-y-4" data-testid="import-card">
