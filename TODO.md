@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-75] [p11] Alertmanager rules (5xx spike, pool saturation, long GC, disk pressure)
-  - Acceptance: observability/alerts/workouthub.rules.yml with 4 named rules and runbook links; docs/OBSERVABILITY.md shows the rule_files include line; rule syntax validated via promtool check rules.
-
 - [t-76] [p11] Uptime-Kuma monitor config
   - Acceptance: /actuator/health exposed through Caddy without auth; docs/OBSERVABILITY.md documents Uptime-Kuma monitor JSON import; integration test confirms health endpoint is unauth-reachable.
 
@@ -174,3 +171,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-72] 2026-04-24 -- Prometheus endpoint + docs/OBSERVABILITY.md scrape snippet (tag application=workouthub)
 - [t-73] 2026-04-24 -- ECS-JSON structured logs on prod profile + TraceIdFilter MDC propagation
 - [t-74] 2026-04-24 -- Grafana dashboard JSON (6 panels) + shape-guard test
+- [t-75] 2026-04-24 -- Alertmanager rules (5xx / pool / GC / disk) + YAML-parse guard test
