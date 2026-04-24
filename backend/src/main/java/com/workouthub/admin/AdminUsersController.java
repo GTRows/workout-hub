@@ -3,9 +3,11 @@ package com.workouthub.admin;
 import com.workouthub.admin.dto.AdminUserResponse;
 import com.workouthub.admin.dto.CreateUserRequest;
 import com.workouthub.admin.dto.UpdateUserRequest;
+import com.workouthub.auth.PasswordResetService;
 import com.workouthub.common.security.AppUserPrincipal;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +28,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminUsersController {
 
     private final AdminUsersService service;
+    private final PasswordResetService passwordResetService;
 
-    public AdminUsersController(AdminUsersService service) {
+    public AdminUsersController(
+            AdminUsersService service,
+            PasswordResetService passwordResetService) {
         this.service = service;
+        this.passwordResetService = passwordResetService;
+    }
+
+    @PostMapping("/{id}/reset-link")
+    public Map<String, String> resetLink(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        String token = passwordResetService.issueFor(id, principal.userId());
+        return Map.of("token", token);
     }
 
     @PostMapping
