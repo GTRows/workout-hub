@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-04-23T14:05:00Z",
+  "user": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "email": "ignored-on-import@example.com",
+    "displayName": "Example User",
+    "heightCm": 180,
+    "weightKg": 78.5,
+    "birthDate": "1990-05-01",
+    "gender": "male",
+    "healthNotes": null,
+    "goals": "Hit a 140 kg squat by autumn."
+  },
+  "plans": [],
+  "sessions": [],
+  "bodyMetrics": [
+    {
+      "id": "ffffffff-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "recordedDate": "2026-04-20",
+      "weightKg": 78.5,
+      "bodyFatPercent": 18.5,
+      "waistCm": 82.0,
+      "chestCm": null,
+      "armCm": null,
+      "thighCm": null,
+      "photoUrl": null,
+      "notes": "morning, fasted"
+    }
+  ],
+  "supplements": [
+    {
+      "id": "ffffffff-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+      "name": "Creatine",
+      "dosage": "5g",
+      "timing": "morning",
+      "active": true
+    }
+  ]
+}
