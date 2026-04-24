@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-60] [p9] Per-section import endpoints (idempotent replace per slice)
-  - Acceptance: 5 POST /api/export/import/{section}; integration tests per section cover round-trip + malformed 422.
-
 - [t-61] [p9] ImportValidator with warnings (fail-soft)
   - Acceptance: ImportValidator returns ValidationReport(errors, warnings, suggestions); unit tests cover each case; POST import response body surfaces warnings array.
 
@@ -204,3 +201,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-57] 2026-04-23 -- Real Web Push sender via nl.martijndwars:web-push 5.1.1 (VAPID sign + 404/410 pruning; activated when private-key is set)
 - [t-58] 2026-04-24 -- docs/EXPORT_FORMAT.md + guarded example JSON round-tripped by ExportFormatExampleTest
 - [t-59] 2026-04-24 -- Per-section export endpoints + single-slice download card on /export
+- [t-60] 2026-04-24 -- Per-section import endpoints with replace semantics + detach-sessions-from-days safety query
