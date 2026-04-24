@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-72] [p11] Micrometer Prometheus endpoint + homelab scrape config snippet
-  - Acceptance: /actuator/prometheus exposes JVM + http metrics; docs/OBSERVABILITY.md documents the exact scrape job entry to append to homelab/stacks/observability/config/prometheus/prometheus.yml; integration test asserts endpoint returns metrics with required labels.
-
 - [t-73] [p11] Structured JSON logs with MDC trace IDs for Loki
   - Acceptance: Logback JSON encoder in logback-spring.xml; every log event carries trace_id via MDC; docs/OBSERVABILITY.md documents Docker logging driver for Loki; unit test asserts MDC trace_id propagation through a mock request.
 
@@ -180,3 +177,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-69] 2026-04-24 -- Brute-force lockout (V15 login_attempts + BruteForceGuard, HTTP 423)
 - [t-70] 2026-04-24 -- Audit log (V16 audit_log + /api/admin/audit + create/update/delete/reset_link coverage)
 - [t-71] 2026-04-24 -- Self-serve password change + revoke-all-sessions (PUT /api/users/me/password)
+- [t-72] 2026-04-24 -- Prometheus endpoint + docs/OBSERVABILITY.md scrape snippet (tag application=workouthub)
