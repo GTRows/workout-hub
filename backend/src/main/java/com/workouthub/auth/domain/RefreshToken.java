@@ -29,6 +29,12 @@ public class RefreshToken {
     @Column(nullable = false)
     private boolean revoked;
 
+    @Column(name = "user_agent", length = 500)
+    private String userAgent;
+
+    @Column(name = "last_used_at")
+    private Instant lastUsedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -50,6 +56,12 @@ public class RefreshToken {
 
     public boolean isRevoked() { return revoked; }
     public void setRevoked(boolean revoked) { this.revoked = revoked; }
+
+    public String getUserAgent() { return userAgent; }
+    public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
+
+    public Instant getLastUsedAt() { return lastUsedAt; }
+    public void setLastUsedAt(Instant lastUsedAt) { this.lastUsedAt = lastUsedAt; }
 
     public Instant getCreatedAt() { return createdAt; }
 }

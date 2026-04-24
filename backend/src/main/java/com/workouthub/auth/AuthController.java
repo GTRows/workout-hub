@@ -3,6 +3,7 @@ package com.workouthub.auth;
 import com.workouthub.auth.dto.AuthResponse;
 import com.workouthub.auth.dto.LoginRequest;
 import com.workouthub.auth.dto.RefreshRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,12 +21,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest req) {
-        return authService.login(req);
+    public AuthResponse login(
+            @Valid @RequestBody LoginRequest req,
+            HttpServletRequest httpReq) {
+        return authService.login(req, httpReq.getHeader("User-Agent"));
     }
 
     @PostMapping("/refresh")
-    public AuthResponse refresh(@Valid @RequestBody RefreshRequest req) {
-        return authService.refresh(req);
+    public AuthResponse refresh(
+            @Valid @RequestBody RefreshRequest req,
+            HttpServletRequest httpReq) {
+        return authService.refresh(req, httpReq.getHeader("User-Agent"));
     }
 }

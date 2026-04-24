@@ -45,7 +45,7 @@ public class AuthService {
         this.twoFactor = twoFactor;
     }
 
-    public AuthResponse login(LoginRequest req) {
+    public AuthResponse login(LoginRequest req, String userAgent) {
         User user = users.findByEmailIgnoreCase(req.email())
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
         if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
@@ -58,10 +58,10 @@ public class AuthService {
                 throw new BadCredentialsException("TOTP code required or invalid");
             }
         }
-        return issueTokens(user);
+        return issueTokens(user, userAgent);
     }
 
-    public AuthResponse refresh(RefreshRequest req) {
+    public AuthResponse refresh(RefreshRequest req, String userAgent) {
         Claims claims;
         try {
             claims = jwtService.parse(req.refreshToken());
@@ -79,15 +79,16 @@ public class AuthService {
             throw new BadCredentialsException("Refresh token expired or revoked");
         }
         stored.setRevoked(true);
+        stored.setLastUsedAt(Instant.now());
         refreshTokens.save(stored);
 
         UUID userId = UUID.fromString(claims.getSubject());
         User user = users.findById(userId)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
-        return issueTokens(user);
+        return issueTokens(user, userAgent);
     }
 
-    private AuthResponse issueTokens(User user) {
+    private AuthResponse issueTokens(User user, String userAgent) {
         String access = jwtService.generateAccessToken(user.getId(), user.getRole().name());
         String refresh = jwtService.generateRefreshToken(user.getId(), user.getRole().name());
         Instant refreshExp = jwtService.parse(refresh).getExpiration().toInstant();
@@ -97,6 +98,9 @@ public class AuthService {
         rt.setTokenHash(sha256Hex(refresh));
         rt.setExpiresAt(refreshExp);
         rt.setRevoked(false);
+        rt.setUserAgent(userAgent == null ? null
+                : userAgent.substring(0, Math.min(userAgent.length(), 500)));
+        rt.setLastUsedAt(Instant.now());
         refreshTokens.save(rt);
 
         return new AuthResponse(access, refresh, user.getId(), user.getRole().name());
