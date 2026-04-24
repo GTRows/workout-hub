@@ -1,0 +1,69 @@
+groups:
+  - name: workouthub.rules
+    rules:
+      - alert: WorkoutHubHigh5xxRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{application="workouthub",status=~"5.."}[5m]))
+            /
+          sum(rate(http_server_requests_seconds_count{application="workouthub"}[5m]))
+            > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          app: workouthub
+        annotations:
+          summary: "WorkoutHub 5xx rate > 5% for 5 minutes"
+          description: >-
+            More than 5% of HTTP responses in the last 5m have been 5xx.
+            Check the Grafana request-rate panel and recent deploys.
+          runbook: "docs/OBSERVABILITY.md#troubleshooting-5xx-spikes"
+
+      - alert: WorkoutHubDbPoolSaturation
+        expr: |
+          hikaricp_connections_active{application="workouthub"}
+            /
+          hikaricp_connections_max{application="workouthub"}
+            > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          app: workouthub
+        annotations:
+          summary: "HikariCP connection pool > 90% utilized for 10 minutes"
+          description: >-
+            Active connections are > 90% of the configured max. Expect
+            request timeouts. Verify slow queries and @Transactional
+            boundaries.
+          runbook: "docs/OBSERVABILITY.md#db-pool-saturation"
+
+      - alert: WorkoutHubLongGC
+        expr: |
+          rate(jvm_gc_pause_seconds_sum{application="workouthub"}[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          app: workouthub
+        annotations:
+          summary: "JVM GC pause budget > 500 ms/s for 5 minutes"
+          description: >-
+            GC is eating half of every wall-clock second. Almost always
+            a memory leak, a suddenly-hot cache, or heap too small.
+          runbook: "docs/OBSERVABILITY.md#long-gc-pauses"
+
+      - alert: WorkoutHubDiskPressure
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}
+            /
+          node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"})
+            < 0.1
+        for: 15m
+        labels:
+          severity: critical
+          app: workouthub
+        annotations:
+          summary: "Host root filesystem < 10% free for 15 minutes"
+          description: >-
+            The workouthub host is running out of disk. Flyway + Postgres
+            will start failing writes. Check backups/, container logs,
+            and the postgres data volume.
+          runbook: "docs/OBSERVABILITY.md#disk-pressure"
