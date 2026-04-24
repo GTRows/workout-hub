@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-66] [p10] TOTP 2FA setup + verify + login
-  - Acceptance: V12 user_totp table (secret, enabled, backup_codes_hash); /api/users/me/2fa/setup returns QR URI + secret; /api/users/me/2fa/verify confirms; login accepts TOTP code when enabled; integration tests for setup + correct + wrong + disabled-user paths.
-
 - [t-67] [p10] Active session management (list + revoke)
   - Acceptance: /api/users/me/sessions lists refresh_tokens with UA + createdAt + lastUsed; DELETE revokes; integration test confirms revoked token returns 401.
 
@@ -192,3 +189,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-63] 2026-04-24 -- Strong/Hevy-compatible sessions.csv export endpoint + UI button
 - [t-64] 2026-04-24 -- Strong CSV import with tiered ExerciseNameMatcher + unmatched-names surfaced
 - [t-65] 2026-04-24 -- /api/export/plan.ics RFC 5545 feed (one VEVENT per plan day, BYDAY RRULEs)
+- [t-66] 2026-04-24 -- TOTP 2FA (samstevens.totp) with setup/verify/status/disable + login gate
