@@ -2,6 +2,7 @@ package com.workouthub.exports;
 
 import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.exports.dto.ClaudeSummaryDto;
+import com.workouthub.exports.dto.CsvImportResultDto;
 import com.workouthub.exports.dto.FullExportDto;
 import com.workouthub.exports.dto.FullExportDto.MetricRow;
 import com.workouthub.exports.dto.FullExportDto.PlanSection;
@@ -34,16 +35,19 @@ public class ExportController {
     private final FullExportService fullExport;
     private final FullImportService fullImport;
     private final CsvExportService csvExport;
+    private final CsvImportService csvImport;
 
     public ExportController(
             ExportService service,
             FullExportService fullExport,
             FullImportService fullImport,
-            CsvExportService csvExport) {
+            CsvExportService csvExport,
+            CsvImportService csvImport) {
         this.service = service;
         this.fullExport = fullExport;
         this.fullImport = fullImport;
         this.csvExport = csvExport;
+        this.csvImport = csvImport;
     }
 
     @GetMapping("/claude-summary")
@@ -135,6 +139,13 @@ public class ExportController {
             @RequestBody List<PlanSection> rows) {
         int inserted = fullImport.replacePlansSection(principal.userId(), rows);
         return new ImportResultDto(0, 0, 0, inserted, 0, "");
+    }
+
+    @PostMapping(value = "/import/csv", consumes = "text/csv")
+    public CsvImportResultDto importSessionsCsv(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestBody String csv) {
+        return csvImport.importSessionsCsv(principal.userId(), csv);
     }
 
     @GetMapping(value = "/csv/sessions", produces = "text/csv; charset=utf-8")
