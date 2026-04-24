@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-78] [p11] Authentik OIDC optional SSO
-  - Acceptance: app.auth.oidc.enabled flag; /api/auth/oidc/login redirects to Authentik; code exchange maps email -> local user; integration tests cover disabled (default JWT path unaffected) and enabled paths.
-
 - [t-79] [p12] V15 food_items + nutrition_entries + 50-item Turkish food seed
   - Acceptance: Tables + FK to users; migration test asserts seed count = 50; repo tests cover searchByName + findByUserBetween(date).
 
@@ -168,3 +165,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-75] 2026-04-24 -- Alertmanager rules (5xx / pool / GC / disk) + YAML-parse guard test
 - [t-76] 2026-04-24 -- Uptime-Kuma monitor JSON + health unauth-reachable guard test
 - [t-77] 2026-04-24 -- Homelab Caddy snippet + DEPLOYMENT.md runbook for workouthub.<domain>
+- [t-78] 2026-04-24 -- Optional Authentik OIDC login (hand-rolled, flag-gated, auto-provision) - Phase 11 complete
