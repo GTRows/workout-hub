@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-65] [p9] .ics calendar export of active plan's weekly days
-  - Acceptance: /api/export/plan.ics returns RFC 5545 feed; unit test parses the output asserting 7 VEVENTs.
-
 - [t-66] [p10] TOTP 2FA setup + verify + login
   - Acceptance: V12 user_totp table (secret, enabled, backup_codes_hash); /api/users/me/2fa/setup returns QR URI + secret; /api/users/me/2fa/verify confirms; login accepts TOTP code when enabled; integration tests for setup + correct + wrong + disabled-user paths.
 
@@ -194,3 +191,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-62] 2026-04-24 -- /export/ai cheatsheet + section picker + /export/ai/apply diff-preview-then-commit
 - [t-63] 2026-04-24 -- Strong/Hevy-compatible sessions.csv export endpoint + UI button
 - [t-64] 2026-04-24 -- Strong CSV import with tiered ExerciseNameMatcher + unmatched-names surfaced
+- [t-65] 2026-04-24 -- /api/export/plan.ics RFC 5545 feed (one VEVENT per plan day, BYDAY RRULEs)
