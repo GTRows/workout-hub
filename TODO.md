@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-76] [p11] Uptime-Kuma monitor config
-  - Acceptance: /actuator/health exposed through Caddy without auth; docs/OBSERVABILITY.md documents Uptime-Kuma monitor JSON import; integration test confirms health endpoint is unauth-reachable.
-
 - [t-77] [p11] Caddy site config snippet for homelab proxy
   - Acceptance: docs/DEPLOYMENT.md gains "Homelab proxy (Caddy)" section with a Caddyfile stanza (auto-TLS) that proxies workouthub.<domain> to backend+frontend; validated with caddy validate recipe; nginx overlay kept as alternative for non-homelab installs.
 
@@ -172,3 +169,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-73] 2026-04-24 -- ECS-JSON structured logs on prod profile + TraceIdFilter MDC propagation
 - [t-74] 2026-04-24 -- Grafana dashboard JSON (6 panels) + shape-guard test
 - [t-75] 2026-04-24 -- Alertmanager rules (5xx / pool / GC / disk) + YAML-parse guard test
+- [t-76] 2026-04-24 -- Uptime-Kuma monitor JSON + health unauth-reachable guard test
