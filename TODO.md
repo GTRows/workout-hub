@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-74] [p11] Grafana dashboard JSON for WorkoutHub
-  - Acceptance: observability/grafana/workouthub.json with 6 panels (rps, 5xx%, p95 latency, active sessions, DB pool usage, JVM heap); docs/OBSERVABILITY.md documents provisioning path into the homelab Grafana.
-
 - [t-75] [p11] Alertmanager rules (5xx spike, pool saturation, long GC, disk pressure)
   - Acceptance: observability/alerts/workouthub.rules.yml with 4 named rules and runbook links; docs/OBSERVABILITY.md shows the rule_files include line; rule syntax validated via promtool check rules.
 
@@ -176,3 +173,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-71] 2026-04-24 -- Self-serve password change + revoke-all-sessions (PUT /api/users/me/password)
 - [t-72] 2026-04-24 -- Prometheus endpoint + docs/OBSERVABILITY.md scrape snippet (tag application=workouthub)
 - [t-73] 2026-04-24 -- ECS-JSON structured logs on prod profile + TraceIdFilter MDC propagation
+- [t-74] 2026-04-24 -- Grafana dashboard JSON (6 panels) + shape-guard test
