@@ -6,6 +6,7 @@ import com.workouthub.auth.dto.AuthResponse;
 import com.workouthub.auth.dto.LoginRequest;
 import com.workouthub.auth.dto.RefreshRequest;
 import com.workouthub.common.security.JwtService;
+import com.workouthub.twofa.TwoFactorService;
 import com.workouthub.users.domain.User;
 import com.workouthub.users.domain.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -29,16 +30,19 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokens;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TwoFactorService twoFactor;
 
     public AuthService(
             UserRepository users,
             RefreshTokenRepository refreshTokens,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+            JwtService jwtService,
+            TwoFactorService twoFactor) {
         this.users = users;
         this.refreshTokens = refreshTokens;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.twoFactor = twoFactor;
     }
 
     public AuthResponse login(LoginRequest req) {
@@ -46,6 +50,13 @@ public class AuthService {
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
         if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid credentials");
+        }
+        if (twoFactor.isEnabled(user.getId())) {
+            String code = req.totpCode();
+            if (code == null || code.isBlank()
+                    || !twoFactor.verifyCode(user.getId(), code)) {
+                throw new BadCredentialsException("TOTP code required or invalid");
+            }
         }
         return issueTokens(user);
     }
