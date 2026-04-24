@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-70] [p10] Audit log for all admin writes
-  - Acceptance: V14 audit_log table; every admin-module mutation logs actor/action/target/payload; /api/admin/audit lists; integration tests cover create/update/delete + non-admin 403.
-
 - [t-71] [p10] Force-logout on password change
   - Acceptance: Password change revokes all refresh_tokens for that user; integration test verifies prior access + refresh tokens 401 after.
 
@@ -184,3 +181,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-67] 2026-04-24 -- Active session list + revoke (V13 UA/last_used + /api/users/me/sessions)
 - [t-68] 2026-04-24 -- Admin password reset link + /api/auth/reset-password single-use flow
 - [t-69] 2026-04-24 -- Brute-force lockout (V15 login_attempts + BruteForceGuard, HTTP 423)
+- [t-70] 2026-04-24 -- Audit log (V16 audit_log + /api/admin/audit + create/update/delete/reset_link coverage)
