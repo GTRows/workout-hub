@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-73] [p11] Structured JSON logs with MDC trace IDs for Loki
-  - Acceptance: Logback JSON encoder in logback-spring.xml; every log event carries trace_id via MDC; docs/OBSERVABILITY.md documents Docker logging driver for Loki; unit test asserts MDC trace_id propagation through a mock request.
-
 - [t-74] [p11] Grafana dashboard JSON for WorkoutHub
   - Acceptance: observability/grafana/workouthub.json with 6 panels (rps, 5xx%, p95 latency, active sessions, DB pool usage, JVM heap); docs/OBSERVABILITY.md documents provisioning path into the homelab Grafana.
 
@@ -178,3 +175,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-70] 2026-04-24 -- Audit log (V16 audit_log + /api/admin/audit + create/update/delete/reset_link coverage)
 - [t-71] 2026-04-24 -- Self-serve password change + revoke-all-sessions (PUT /api/users/me/password)
 - [t-72] 2026-04-24 -- Prometheus endpoint + docs/OBSERVABILITY.md scrape snippet (tag application=workouthub)
+- [t-73] 2026-04-24 -- ECS-JSON structured logs on prod profile + TraceIdFilter MDC propagation
