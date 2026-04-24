@@ -31,33 +31,40 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final TwoFactorService twoFactor;
+    private final BruteForceGuard bruteForceGuard;
 
     public AuthService(
             UserRepository users,
             RefreshTokenRepository refreshTokens,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            TwoFactorService twoFactor) {
+            TwoFactorService twoFactor,
+            BruteForceGuard bruteForceGuard) {
         this.users = users;
         this.refreshTokens = refreshTokens;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.twoFactor = twoFactor;
+        this.bruteForceGuard = bruteForceGuard;
     }
 
     public AuthResponse login(LoginRequest req, String userAgent) {
-        User user = users.findByEmailIgnoreCase(req.email())
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
-        if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
+        bruteForceGuard.assertNotLocked(req.email());
+        User user = users.findByEmailIgnoreCase(req.email()).orElse(null);
+        if (user == null
+                || !passwordEncoder.matches(req.password(), user.getPasswordHash())) {
+            bruteForceGuard.recordFailure(req.email());
             throw new BadCredentialsException("Invalid credentials");
         }
         if (twoFactor.isEnabled(user.getId())) {
             String code = req.totpCode();
             if (code == null || code.isBlank()
                     || !twoFactor.verifyCode(user.getId(), code)) {
+                bruteForceGuard.recordFailure(req.email());
                 throw new BadCredentialsException("TOTP code required or invalid");
             }
         }
+        bruteForceGuard.recordSuccess(req.email());
         return issueTokens(user, userAgent);
     }
 
