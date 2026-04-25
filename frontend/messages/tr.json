@@ -331,5 +331,16 @@
     "cancel": "Iptal",
     "delete": "Sil",
     "edit": "Duzenle"
+  },
+  "health": {
+    "appleTitle": "Apple Health iceri aktar",
+    "appleDescription": "iPhone Health uygulamasinin export.zip dosyasini veya cikarilmis export.xml'i sec. Body Mass olcumleri /metrics'e, HKWorkout kayitlari bitmis sessiona donusur.",
+    "toggleBodyMass": "Vucut agirligi",
+    "toggleWorkouts": "Antrenmanlar",
+    "filePickerLabel": "Apple Health dosyasini sec",
+    "uploading": "Yukleniyor...",
+    "imported": "Eklenen: {bm} tarti, {wo} antrenman.",
+    "skipped": "Atlanan (zaten var): {bm} tarti, {wo} antrenman.",
+    "error": "Iceri aktarma basarisiz."
   }
 }

@@ -1,11 +1,13 @@
-import { api } from "@/lib/api/client";
+import { ApiError, api } from "@/lib/api/client";
 import {
+  apiErrorSchema,
   authResponseSchema,
   bodyMetricListSchema,
   bodyMetricSchema,
   exercisePageSchema,
   exerciseSchema,
   foodItemListSchema,
+  healthImportResultSchema,
   heatmapListSchema,
   lastPerformanceSchema,
   nutritionEntryListSchema,
@@ -29,6 +31,7 @@ import {
   type Exercise,
   type ExercisePage,
   type FoodItem,
+  type HealthImportResult,
   type WaterDay,
   type WaterEntry,
   type HeatmapDay,
@@ -482,4 +485,33 @@ export async function reorderDayExercises(
     body: { itemIdsInOrder },
     schema: workoutDaySchema,
   });
+}
+
+export async function importAppleHealth(
+  file: File,
+  options: { bodyMass?: boolean; workouts?: boolean } = {}
+): Promise<HealthImportResult> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+  const form = new FormData();
+  form.append("file", file);
+  const params = new URLSearchParams();
+  if (options.bodyMass !== undefined)
+    params.set("bodyMass", String(options.bodyMass));
+  if (options.workouts !== undefined)
+    params.set("workouts", String(options.workouts));
+  const qs = params.toString() ? `?${params.toString()}` : "";
+
+  const res = await api.raw(
+    `${baseUrl}/api/health/import/apple${qs}`,
+    { method: "POST", body: form }
+  );
+  const text = await res.text();
+  const json = text ? JSON.parse(text) : undefined;
+  if (!res.ok) {
+    const parsed = apiErrorSchema.safeParse(json);
+    const message = parsed.success ? parsed.data.message : res.statusText;
+    throw new ApiError(res.status, json, message);
+  }
+  return healthImportResultSchema.parse(json);
 }

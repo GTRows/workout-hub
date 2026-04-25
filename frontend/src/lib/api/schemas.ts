@@ -280,6 +280,17 @@ export const waterDaySchema = z.object({
 export type WaterEntry = z.infer<typeof waterEntrySchema>;
 export type WaterDay = z.infer<typeof waterDaySchema>;
 
+export const healthImportResultSchema = z.object({
+  bodyMassParsed: z.number().int(),
+  bodyMassImported: z.number().int(),
+  bodyMassSkipped: z.number().int(),
+  workoutsParsed: z.number().int(),
+  workoutsImported: z.number().int(),
+  workoutsSkipped: z.number().int(),
+});
+
+export type HealthImportResult = z.infer<typeof healthImportResultSchema>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;
