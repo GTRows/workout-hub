@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-89] [p14] /achievements page (unlocked grid + progress to next)
-  - Acceptance: /api/achievements/me lists unlocked + next-3 progress; RTL covers render with mocked payload + progress bars.
-
 - [t-90] [p14] Monthly challenge feature (admin-defined, global)
   - Acceptance: monthly_challenges table + admin CRUD + /api/challenges/current returns live progress; integration tests cover progress math across month boundary.
 
@@ -146,3 +143,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-86] 2026-04-25 -- Hand-rolled Garmin .fit parser + V20 heart_rate_avg_bpm + /api/health/import/fit
 - [t-87] 2026-04-25 -- V21 webhook_tokens + /api/webhooks/scale/{token} + profile token UI; Phase 13 complete
 - [t-88] 2026-04-25 -- V22 achievements + 10 seed defs + AchievementEvaluator hooks (session/set) + /api/achievements/me
+- [t-89] 2026-04-25 -- /achievements grid (unlocked + next-up locked) + nav link + RTL coverage
