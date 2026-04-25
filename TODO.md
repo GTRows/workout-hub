@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-90] [p14] Monthly challenge feature (admin-defined, global)
-  - Acceptance: monthly_challenges table + admin CRUD + /api/challenges/current returns live progress; integration tests cover progress math across month boundary.
-
 - [t-91] [p14] Streak freeze (1 skip/month) - extends StreakCalculator
   - Acceptance: user_streak_state.freeze_used_in_month + enabled-by-default; StreakCalculatorTest gains 3 cases (no-freeze, freeze-used, freeze-mid-broken).
 
@@ -144,3 +141,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-87] 2026-04-25 -- V21 webhook_tokens + /api/webhooks/scale/{token} + profile token UI; Phase 13 complete
 - [t-88] 2026-04-25 -- V22 achievements + 10 seed defs + AchievementEvaluator hooks (session/set) + /api/achievements/me
 - [t-89] 2026-04-25 -- /achievements grid (unlocked + next-up locked) + nav link + RTL coverage
+- [t-90] 2026-04-25 -- V23 monthly_challenges + admin CRUD + /api/challenges/current with month-bounded progress
