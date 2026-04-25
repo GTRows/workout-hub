@@ -15,11 +15,16 @@ import { clearTokens } from "@/lib/auth/token-store";
 
 const messages = {
   health: {
-    appleTitle: "Apple Health import",
-    appleDescription: "desc",
+    title: "Health imports",
+    description: "desc",
+    appleTitle: "Apple Health",
+    appleDescription: "desc apple",
+    googleTitle: "Google Fit",
+    googleDescription: "desc google",
     toggleBodyMass: "Body Mass",
     toggleWorkouts: "Workouts",
     filePickerLabel: "Pick file",
+    googleFilePickerLabel: "Pick google file",
     uploading: "Uploading...",
     imported: "Imported: {bm} weight, {wo} workouts.",
     skipped: "Skipped: {bm} weight, {wo} workouts.",
@@ -91,6 +96,37 @@ describe("HealthImportClient", () => {
     expect(screen.getByText(/Imported: 2 weight, 1 workouts/)).toBeInTheDocument();
     expect(postedUrl).toContain("bodyMass=true");
     expect(postedUrl).toContain("workouts=true");
+  });
+
+  it("uploads to the google-fit endpoint when the google picker is used", async () => {
+    let postedUrl: string | null = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.includes("/api/health/import/google-fit") && method === "POST") {
+          postedUrl = url;
+          return jsonResponse(200, {
+            bodyMassParsed: 1,
+            bodyMassImported: 1,
+            bodyMassSkipped: 0,
+            workoutsParsed: 0,
+            workoutsImported: 0,
+            workoutsSkipped: 0,
+          });
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<HealthImportClient />);
+    const file = new File(["{}"], "fitness.json", { type: "application/json" });
+    fireEvent.change(screen.getByTestId("google-file-input"), {
+      target: { files: [file] },
+    });
+    await waitFor(() => expect(postedUrl).not.toBeNull());
+    expect(postedUrl).toContain("/api/health/import/google-fit");
   });
 
   it("respects the body-mass toggle in the upload querystring", async () => {

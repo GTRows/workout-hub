@@ -31,16 +31,34 @@ public class HealthImportService {
             boolean importBodyMass,
             boolean importWorkouts) throws Exception {
 
-        AppleHealthParser.ParsedHealth parsed;
+        ParsedHealth parsed;
         try {
             parsed = new AppleHealthParser().parse(stream);
         } catch (XMLStreamException e) {
             throw new IllegalArgumentException("Invalid Apple Health XML: " + e.getMessage(), e);
         }
 
+        return apply(userId, parsed, importBodyMass, importWorkouts);
+    }
+
+    @Transactional
+    public HealthImportResultDto importGoogleFit(
+            UUID userId,
+            InputStream stream,
+            boolean importBodyMass,
+            boolean importWorkouts) throws Exception {
+        ParsedHealth parsed = new GoogleFitParser().parse(stream);
+        return apply(userId, parsed, importBodyMass, importWorkouts);
+    }
+
+    private HealthImportResultDto apply(
+            UUID userId,
+            ParsedHealth parsed,
+            boolean importBodyMass,
+            boolean importWorkouts) {
         int bmImported = 0, bmSkipped = 0;
         if (importBodyMass) {
-            for (AppleHealthParser.BodyMassRecord rec : parsed.bodyMass()) {
+            for (ParsedHealth.BodyMassRecord rec : parsed.bodyMass()) {
                 if (bodyMetricRepo.findByUserIdAndRecordedDate(userId, rec.date()).isPresent()) {
                     bmSkipped++;
                     continue;
@@ -56,7 +74,7 @@ public class HealthImportService {
 
         int wImported = 0, wSkipped = 0;
         if (importWorkouts) {
-            for (AppleHealthParser.WorkoutRecord rec : parsed.workouts()) {
+            for (ParsedHealth.WorkoutRecord rec : parsed.workouts()) {
                 boolean dup = sessionRepo.findFinishedSince(userId, rec.startedAt()).stream()
                         .anyMatch(s -> s.getStartedAt().equals(rec.startedAt()));
                 if (dup) {

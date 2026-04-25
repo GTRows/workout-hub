@@ -2,7 +2,7 @@ package com.workouthub.health;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.workouthub.health.AppleHealthParser.ParsedHealth;
+import com.workouthub.health.ParsedHealth;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -49,7 +49,7 @@ class AppleHealthParserTest {
                 .parse(new ByteArrayInputStream(FIXTURE.getBytes(StandardCharsets.UTF_8)));
 
         assertThat(parsed.workouts()).hasSize(1);
-        AppleHealthParser.WorkoutRecord w = parsed.workouts().get(0);
+        ParsedHealth.WorkoutRecord w = parsed.workouts().get(0);
         assertThat(w.activityType()).contains("TraditionalStrengthTraining");
         assertThat(w.startedAt().toString()).isEqualTo("2026-01-15T17:00:00Z");
         assertThat(w.endedAt().toString()).isEqualTo("2026-01-15T18:00:00Z");

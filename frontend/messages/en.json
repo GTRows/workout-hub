@@ -333,11 +333,16 @@
     "edit": "Edit"
   },
   "health": {
-    "appleTitle": "Apple Health import",
-    "appleDescription": "Drop the export.zip from the iPhone Health app or the raw export.xml. Body Mass becomes /metrics rows; HKWorkout becomes finished sessions.",
+    "title": "Health imports",
+    "description": "Bring weight and workouts in from Apple Health or Google Fit. Toggles below apply to both pickers.",
+    "appleTitle": "Apple Health (export.xml or export.zip)",
+    "appleDescription": "Drop the file iPhone Health writes when you tap Export Health Data. Body Mass becomes /metrics rows; HKWorkout becomes finished sessions.",
+    "googleTitle": "Google Fit (Takeout JSON)",
+    "googleDescription": "One JSON file from Google Takeout: weight data points and the sessions list.",
     "toggleBodyMass": "Body Mass",
     "toggleWorkouts": "Workouts",
     "filePickerLabel": "Pick Apple Health export",
+    "googleFilePickerLabel": "Pick Google Fit JSON",
     "uploading": "Uploading...",
     "imported": "Imported: {bm} weight, {wo} workouts.",
     "skipped": "Skipped (already present): {bm} weight, {wo} workouts.",

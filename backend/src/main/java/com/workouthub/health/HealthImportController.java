@@ -38,4 +38,22 @@ public class HealthImportController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/google-fit")
+    public ResponseEntity<HealthImportResultDto> importGoogleFit(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "bodyMass", defaultValue = "true") boolean bodyMass,
+            @RequestParam(value = "workouts", defaultValue = "true") boolean workouts) throws Exception {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try (var stream = file.getInputStream()) {
+            HealthImportResultDto result = service.importGoogleFit(
+                    principal.userId(), stream, bodyMass, workouts);
+            return ResponseEntity.ok(result);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

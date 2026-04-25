@@ -487,9 +487,10 @@ export async function reorderDayExercises(
   });
 }
 
-export async function importAppleHealth(
+async function uploadHealthFile(
+  source: "apple" | "google-fit",
   file: File,
-  options: { bodyMass?: boolean; workouts?: boolean } = {}
+  options: { bodyMass?: boolean; workouts?: boolean }
 ): Promise<HealthImportResult> {
   const baseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
@@ -503,7 +504,7 @@ export async function importAppleHealth(
   const qs = params.toString() ? `?${params.toString()}` : "";
 
   const res = await api.raw(
-    `${baseUrl}/api/health/import/apple${qs}`,
+    `${baseUrl}/api/health/import/${source}${qs}`,
     { method: "POST", body: form }
   );
   const text = await res.text();
@@ -514,4 +515,18 @@ export async function importAppleHealth(
     throw new ApiError(res.status, json, message);
   }
   return healthImportResultSchema.parse(json);
+}
+
+export async function importAppleHealth(
+  file: File,
+  options: { bodyMass?: boolean; workouts?: boolean } = {}
+): Promise<HealthImportResult> {
+  return uploadHealthFile("apple", file, options);
+}
+
+export async function importGoogleFit(
+  file: File,
+  options: { bodyMass?: boolean; workouts?: boolean } = {}
+): Promise<HealthImportResult> {
+  return uploadHealthFile("google-fit", file, options);
 }

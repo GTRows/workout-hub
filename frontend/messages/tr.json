@@ -333,11 +333,16 @@
     "edit": "Duzenle"
   },
   "health": {
-    "appleTitle": "Apple Health iceri aktar",
-    "appleDescription": "iPhone Health uygulamasinin export.zip dosyasini veya cikarilmis export.xml'i sec. Body Mass olcumleri /metrics'e, HKWorkout kayitlari bitmis sessiona donusur.",
+    "title": "Saglik iceri aktarma",
+    "description": "Apple Health veya Google Fit'ten tarti ve antrenman cek. Asagidaki anahtarlar her iki secici icin gecerlidir.",
+    "appleTitle": "Apple Health (export.xml veya export.zip)",
+    "appleDescription": "iPhone Health uygulamasi 'Sagligi Disa Aktar' dedigin zaman uretiyor. Body Mass /metrics'e, HKWorkout bitmis sessiona donusur.",
+    "googleTitle": "Google Fit (Takeout JSON)",
+    "googleDescription": "Google Takeout'tan inen tek bir JSON dosyasi: tarti veri noktalari ve sessions listesi.",
     "toggleBodyMass": "Vucut agirligi",
     "toggleWorkouts": "Antrenmanlar",
     "filePickerLabel": "Apple Health dosyasini sec",
+    "googleFilePickerLabel": "Google Fit JSON sec",
     "uploading": "Yukleniyor...",
     "imported": "Eklenen: {bm} tarti, {wo} antrenman.",
     "skipped": "Atlanan (zaten var): {bm} tarti, {wo} antrenman.",

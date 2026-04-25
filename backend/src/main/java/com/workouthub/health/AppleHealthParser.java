@@ -25,18 +25,6 @@ public class AppleHealthParser {
     private static final DateTimeFormatter APPLE_DATE =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
 
-    public record BodyMassRecord(LocalDate date, BigDecimal kg) {}
-
-    public record WorkoutRecord(
-            String activityType,
-            Instant startedAt,
-            Instant endedAt,
-            String notes) {}
-
-    public record ParsedHealth(
-            List<BodyMassRecord> bodyMass,
-            List<WorkoutRecord> workouts) {}
-
     public ParsedHealth parse(InputStream raw) throws IOException, XMLStreamException {
         InputStream stream = unwrapZipIfNeeded(raw);
         XMLInputFactory factory = XMLInputFactory.newFactory();
@@ -44,8 +32,8 @@ public class AppleHealthParser {
         factory.setProperty("javax.xml.stream.isSupportingExternalEntities", Boolean.FALSE);
         XMLStreamReader reader = factory.createXMLStreamReader(stream);
 
-        List<BodyMassRecord> bodyMass = new ArrayList<>();
-        List<WorkoutRecord> workouts = new ArrayList<>();
+        List<ParsedHealth.BodyMassRecord> bodyMass = new ArrayList<>();
+        List<ParsedHealth.WorkoutRecord> workouts = new ArrayList<>();
 
         while (reader.hasNext()) {
             int event = reader.next();
@@ -54,11 +42,11 @@ public class AppleHealthParser {
             if ("Record".equals(name)) {
                 String type = reader.getAttributeValue(null, "type");
                 if (TYPE_BODY_MASS.equals(type)) {
-                    BodyMassRecord rec = parseBodyMass(reader);
+                    ParsedHealth.BodyMassRecord rec = parseBodyMass(reader);
                     if (rec != null) bodyMass.add(rec);
                 }
             } else if ("Workout".equals(name)) {
-                WorkoutRecord w = parseWorkout(reader);
+                ParsedHealth.WorkoutRecord w = parseWorkout(reader);
                 if (w != null) workouts.add(w);
             }
         }
@@ -84,7 +72,7 @@ public class AppleHealthParser {
         return raw;
     }
 
-    private BodyMassRecord parseBodyMass(XMLStreamReader r) {
+    private ParsedHealth.BodyMassRecord parseBodyMass(XMLStreamReader r) {
         String unit = r.getAttributeValue(null, "unit");
         String value = r.getAttributeValue(null, "value");
         String startDate = r.getAttributeValue(null, "startDate");
@@ -96,10 +84,10 @@ public class AppleHealthParser {
         Instant when = parseAppleInstant(startDate);
         if (when == null) return null;
         LocalDate date = when.atZone(ZoneOffset.UTC).toLocalDate();
-        return new BodyMassRecord(date, kg);
+        return new ParsedHealth.BodyMassRecord(date, kg);
     }
 
-    private WorkoutRecord parseWorkout(XMLStreamReader r) {
+    private ParsedHealth.WorkoutRecord parseWorkout(XMLStreamReader r) {
         String activityType = r.getAttributeValue(null, "workoutActivityType");
         String startDate = r.getAttributeValue(null, "startDate");
         String endDate = r.getAttributeValue(null, "endDate");
@@ -110,7 +98,8 @@ public class AppleHealthParser {
         String label = activityType.startsWith(WORKOUT_PREFIX)
                 ? activityType.substring(WORKOUT_PREFIX.length())
                 : activityType;
-        return new WorkoutRecord(activityType, start, end, "Imported from Apple Health: " + label);
+        return new ParsedHealth.WorkoutRecord(
+                activityType, start, end, "Imported from Apple Health: " + label);
     }
 
     private Instant parseAppleInstant(String s) {

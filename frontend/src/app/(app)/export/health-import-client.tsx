@@ -5,19 +5,28 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { importAppleHealth } from "@/lib/api/endpoints";
+import { importAppleHealth, importGoogleFit } from "@/lib/api/endpoints";
 import type { HealthImportResult } from "@/lib/api/schemas";
+
+type Source = "apple" | "google";
 
 export function HealthImportClient() {
   const t = useTranslations("health");
   const [bodyMass, setBodyMass] = useState(true);
   const [workouts, setWorkouts] = useState(true);
-  const [result, setResult] = useState<HealthImportResult | null>(null);
+  const [result, setResult] = useState<{ source: Source; data: HealthImportResult } | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useMutation({
-    mutationFn: (file: File) =>
-      importAppleHealth(file, { bodyMass, workouts }),
+    mutationFn: async ({ source, file }: { source: Source; file: File }) => {
+      const data =
+        source === "apple"
+          ? await importAppleHealth(file, { bodyMass, workouts })
+          : await importGoogleFit(file, { bodyMass, workouts });
+      return { source, data } as { source: Source; data: HealthImportResult };
+    },
     onSuccess: (r) => {
       setResult(r);
       setError(null);
@@ -32,8 +41,8 @@ export function HealthImportClient() {
   return (
     <Card className="space-y-4" data-testid="health-import-card">
       <div className="space-y-1">
-        <CardTitle className="text-lg">{t("appleTitle")}</CardTitle>
-        <CardDescription>{t("appleDescription")}</CardDescription>
+        <CardTitle className="text-lg">{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </div>
       <div className="flex flex-wrap gap-4 text-sm">
         <label className="flex items-center gap-2">
@@ -55,18 +64,41 @@ export function HealthImportClient() {
           {t("toggleWorkouts")}
         </label>
       </div>
-      <input
-        type="file"
-        accept=".xml,.zip,application/xml,application/zip"
-        aria-label={t("filePickerLabel")}
-        data-testid="apple-file-input"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) mutation.mutate(file);
-          e.target.value = "";
-        }}
-        className="block text-sm"
-      />
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium">{t("appleTitle")}</p>
+        <p className="text-xs text-muted-foreground">{t("appleDescription")}</p>
+        <input
+          type="file"
+          accept=".xml,.zip,application/xml,application/zip"
+          aria-label={t("filePickerLabel")}
+          data-testid="apple-file-input"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) mutation.mutate({ source: "apple", file });
+            e.target.value = "";
+          }}
+          className="block text-sm"
+        />
+      </div>
+
+      <div className="space-y-2 pt-2 border-t border-border">
+        <p className="text-sm font-medium">{t("googleTitle")}</p>
+        <p className="text-xs text-muted-foreground">{t("googleDescription")}</p>
+        <input
+          type="file"
+          accept=".json,application/json"
+          aria-label={t("googleFilePickerLabel")}
+          data-testid="google-file-input"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) mutation.mutate({ source: "google", file });
+            e.target.value = "";
+          }}
+          className="block text-sm"
+        />
+      </div>
+
       {mutation.isPending && (
         <p className="text-xs text-muted-foreground">{t("uploading")}</p>
       )}
@@ -80,15 +112,15 @@ export function HealthImportClient() {
           <Button asChild variant="outline" size="sm" disabled>
             <span>
               {t("imported", {
-                bm: result.bodyMassImported,
-                wo: result.workoutsImported,
+                bm: result.data.bodyMassImported,
+                wo: result.data.workoutsImported,
               })}
             </span>
           </Button>
           <p className="text-xs text-muted-foreground">
             {t("skipped", {
-              bm: result.bodyMassSkipped,
-              wo: result.workoutsSkipped,
+              bm: result.data.bodyMassSkipped,
+              wo: result.data.workoutsSkipped,
             })}
           </p>
         </div>
