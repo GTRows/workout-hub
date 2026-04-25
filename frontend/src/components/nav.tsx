@@ -24,7 +24,7 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-border bg-background/80 backdrop-blur">
+    <nav className="hidden border-b border-border bg-background/80 backdrop-blur sm:block">
       <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-2">
         {LINKS.map(({ href, labelKey }) => {
           const active = pathname.startsWith(href);
