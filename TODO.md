@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-82] [p12] V16 daily goals on user_profile (kcal + protein/carbs/fat g)
-  - Acceptance: 4 new nullable columns; PUT /api/users/me accepts them; nutrition page shows progress; integration + RTL tests.
-
 - [t-83] [p12] Water tracking (V17 water_entries + quick +250/+500 widget)
   - Acceptance: /api/water CRUD; dashboard widget + nutrition-page card; integration + RTL tests.
 
@@ -160,3 +157,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-79] 2026-04-24 -- V17 nutrition schema + 50-item TR food seed + repository tests
 - [t-80] 2026-04-24 -- /api/foods search + /api/nutrition per-user CRUD with macro scaling
 - [t-81] 2026-04-24 -- /nutrition page (autocomplete + day nav + per-row macro display)
+- [t-82] 2026-04-24 -- V18 nutrition goals on user_profile + profile form fields + goals line on /nutrition
