@@ -169,4 +169,30 @@ describe("PlanClient", () => {
     await waitFor(() => expect(reorderBody).not.toBeNull());
     expect(reorderBody).toEqual({ itemIdsInOrder: [item2.id, item1.id] });
   });
+
+  it("renders accessible drag handles next to each exercise row", async () => {
+    const plan = planWithOneDay();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/workout-plans/active")) {
+          return jsonResponse(200, plan);
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+    renderClient(<PlanClient />);
+    const user = userEvent.setup();
+    await user.click(await screen.findByText("Monday Push"));
+
+    const day = plan.days[0];
+    const a = day.exercises[0].id;
+    const b = day.exercises[1].id;
+    expect(await screen.findByTestId(`drag-handle-${a}`)).toHaveAttribute(
+      "aria-label",
+      "Drag to reorder"
+    );
+    expect(screen.getByTestId(`drag-handle-${b}`)).toBeInTheDocument();
+  });
 });

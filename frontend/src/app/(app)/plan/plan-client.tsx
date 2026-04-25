@@ -1,5 +1,22 @@
 "use client";
 
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
@@ -119,6 +136,11 @@ function DayExercises({ plan, day }: { plan: WorkoutPlan; day: WorkoutDay }) {
     },
   });
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
   if (orderedItems.length === 0) {
     return <p className="text-sm text-muted-foreground">{t("emptyDay")}</p>;
   }
@@ -126,60 +148,130 @@ function DayExercises({ plan, day }: { plan: WorkoutPlan; day: WorkoutDay }) {
   const move = (index: number, delta: -1 | 1) => {
     const target = index + delta;
     if (target < 0 || target >= orderedItems.length) return;
-    const next = [...orderedItems];
-    const [moved] = next.splice(index, 1);
-    next.splice(target, 0, moved);
-    const ids = next.map((e) => e.id);
+    commitOrder(arrayMove(orderedItems, index, target).map((e) => e.id));
+  };
+
+  const commitOrder = (ids: string[]) => {
     setLocalOrder(ids);
     mutation.mutate(ids);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = orderedItems.findIndex((e) => e.id === active.id);
+    const newIndex = orderedItems.findIndex((e) => e.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    commitOrder(arrayMove(orderedItems, oldIndex, newIndex).map((e) => e.id));
+  };
+
   return (
-    <ul className="space-y-2">
-      {orderedItems.map((item, index) => (
-        <li
-          key={item.id}
-          className="flex items-center gap-2 rounded-md border border-border px-3 py-2"
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={orderedItems.map((e) => e.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <ul className="space-y-2">
+          {orderedItems.map((item, index) => (
+            <SortableRow
+              key={item.id}
+              item={item}
+              index={index}
+              total={orderedItems.length}
+              locale={locale}
+              t={t}
+              mutationPending={mutation.isPending}
+              onMove={move}
+            />
+          ))}
+        </ul>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function SortableRow({
+  item,
+  index,
+  total,
+  locale,
+  t,
+  mutationPending,
+  onMove,
+}: {
+  item: WorkoutDayExercise;
+  index: number;
+  total: number;
+  locale: string;
+  t: ReturnType<typeof useTranslations<"plan">>;
+  mutationPending: boolean;
+  onMove: (index: number, delta: -1 | 1) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2"
+      data-testid={`row-${item.id}`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="cursor-grab text-muted-foreground hover:text-foreground"
+        aria-label="Drag to reorder"
+        data-testid={`drag-handle-${item.id}`}
+      >
+        ::
+      </button>
+      <div className="flex-1">
+        <Link
+          href={`/exercises/${item.exerciseId}`}
+          className="text-sm font-medium hover:underline"
         >
-          <div className="flex-1">
-            <Link
-              href={`/exercises/${item.exerciseId}`}
-              className="text-sm font-medium hover:underline"
-            >
-              {pickLocaleField(locale, item.exerciseNameTr, item.exerciseNameEn)}
-            </Link>
-            <p className="text-xs text-muted-foreground">
-              {item.targetRepsMin && item.targetRepsMax
-                ? t("setsReps", {
-                    sets: item.targetSets,
-                    min: item.targetRepsMin,
-                    max: item.targetRepsMax,
-                  })
-                : t("setsOnly", { sets: item.targetSets })}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            aria-label={t("moveUp")}
-            onClick={() => move(index, -1)}
-            disabled={index === 0 || mutation.isPending}
-          >
-            {t("moveUp")}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            aria-label={t("moveDown")}
-            onClick={() => move(index, 1)}
-            disabled={
-              index === orderedItems.length - 1 || mutation.isPending
-            }
-          >
-            {t("moveDown")}
-          </Button>
-        </li>
-      ))}
-    </ul>
+          {pickLocaleField(locale, item.exerciseNameTr, item.exerciseNameEn)}
+        </Link>
+        <p className="text-xs text-muted-foreground">
+          {item.targetRepsMin && item.targetRepsMax
+            ? t("setsReps", {
+                sets: item.targetSets,
+                min: item.targetRepsMin,
+                max: item.targetRepsMax,
+              })
+            : t("setsOnly", { sets: item.targetSets })}
+        </p>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        aria-label={t("moveUp")}
+        onClick={() => onMove(index, -1)}
+        disabled={index === 0 || mutationPending}
+      >
+        {t("moveUp")}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        aria-label={t("moveDown")}
+        onClick={() => onMove(index, 1)}
+        disabled={index === total - 1 || mutationPending}
+      >
+        {t("moveDown")}
+      </Button>
+    </li>
   );
 }
