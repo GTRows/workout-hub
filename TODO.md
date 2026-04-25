@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-94] [p15] dnd-kit visual drag reorder in plan viewer
-  - Acceptance: @dnd-kit installed; mouse drag reorders; existing Move up/down buttons stay as keyboard fallback; RTL covers keyboard reorder AND @dnd-kit/test-utils drag simulation.
-
 - [t-95] [p15] Responsive audit at 360px + bottom tab-bar below sm
   - Acceptance: BottomNav component visible under sm; top Nav switches to compact; Playwright tests take viewport screenshots at 360x800 for 5 key pages and assert no horizontal overflow.
 
@@ -137,3 +134,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-90] 2026-04-25 -- V23 monthly_challenges + admin CRUD + /api/challenges/current with month-bounded progress
 - [t-91] 2026-04-25 -- V24 streak_freeze_used_month + computeWithFreeze + 4 new StreakCalculator tests; Phase 14 done
 - [t-93] 2026-04-25 -- Exercise-detail modal on session screen (tips/mistakes/last-perf, click+escape)
+- [t-94] 2026-04-25 -- @dnd-kit installed + sortable rows in plan viewer + drag handle accessibility test
