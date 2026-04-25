@@ -6,6 +6,7 @@ import Link from "next/link";
 import { fetchExerciseDetail } from "@/lib/api/endpoints";
 import { pickLocaleArray, pickLocaleField } from "@/lib/locale";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { ExerciseMedia } from "@/components/exercise-media";
 
 export function ExerciseDetailClient({ id }: { id: string }) {
   const t = useTranslations("exercises");
@@ -54,6 +55,12 @@ export function ExerciseDetailClient({ id }: { id: string }) {
           ) : null}
         </CardDescription>
       </Card>
+
+      <ExerciseMedia
+        videoUrl={ex.videoUrl}
+        imageUrl={ex.imageUrl}
+        alt={name}
+      />
 
       <Card>
         <p className="whitespace-pre-line text-sm">
