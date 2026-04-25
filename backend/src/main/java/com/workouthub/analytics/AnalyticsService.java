@@ -12,12 +12,15 @@ import com.workouthub.sessions.domain.SessionSet;
 import com.workouthub.sessions.domain.SessionSetRepository;
 import com.workouthub.sessions.domain.WorkoutSession;
 import com.workouthub.sessions.domain.WorkoutSessionRepository;
+import com.workouthub.users.domain.UserProfile;
+import com.workouthub.users.domain.UserProfileRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -41,16 +44,19 @@ public class AnalyticsService {
     private final WorkoutSessionRepository sessions;
     private final SessionSetRepository sets;
     private final ExerciseRepository exercises;
+    private final UserProfileRepository profiles;
     private final Clock clock;
 
     public AnalyticsService(
             WorkoutSessionRepository sessions,
             SessionSetRepository sets,
             ExerciseRepository exercises,
+            UserProfileRepository profiles,
             Clock clock) {
         this.sessions = sessions;
         this.sets = sets;
         this.exercises = exercises;
+        this.profiles = profiles;
         this.clock = clock;
     }
 
@@ -127,6 +133,7 @@ public class AnalyticsService {
         return out;
     }
 
+    @Transactional
     public StreakDto streak(UUID userId) {
         List<WorkoutSession> finished = sessions.findFinishedSince(userId, Instant.EPOCH);
         if (finished.isEmpty()) {
@@ -140,7 +147,18 @@ public class AnalyticsService {
                 .toList();
 
         LocalDate today = LocalDate.now(clock);
-        StreakCalculator.Result r = StreakCalculator.compute(dates, today);
+        UserProfile profile = profiles.findById(userId).orElse(null);
+        String currentMonth = YearMonth.from(today).toString();
+        boolean freezeAvailable = profile == null
+                || profile.getStreakFreezeUsedMonth() == null
+                || !profile.getStreakFreezeUsedMonth().equals(currentMonth);
+
+        StreakCalculator.FreezeAwareResult r =
+                StreakCalculator.computeWithFreeze(dates, today, freezeAvailable);
+
+        if (freezeAvailable && r.freezeUsedInRun() && profile != null) {
+            profile.setStreakFreezeUsedMonth(currentMonth);
+        }
         return new StreakDto(r.current(), r.longest(), dates.get(dates.size() - 1));
     }
 

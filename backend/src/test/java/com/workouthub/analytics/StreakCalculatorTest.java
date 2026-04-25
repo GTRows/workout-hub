@@ -77,4 +77,64 @@ class StreakCalculatorTest {
         assertThat(r.current()).isZero();
         assertThat(r.longest()).isEqualTo(3);
     }
+
+    @Test
+    void freezeKeepsStreakWhenSingleMidGapIsAllowed() {
+        // ...3 ago, 2 ago skipped, 1 ago, today. Without freeze: would break
+        // at the 2-day gap. With freeze: continues and consumes the freeze.
+        var r = StreakCalculator.computeWithFreeze(
+                List.of(TODAY.minusDays(3), TODAY.minusDays(1), TODAY),
+                TODAY,
+                true);
+        assertThat(r.current()).isEqualTo(3);
+        assertThat(r.freezeUsedInRun()).isTrue();
+    }
+
+    @Test
+    void streakBreaksAtSecondGapEvenWhenFreezeIsAvailable() {
+        // Walk-back from today: consecutive through -1 -> -2, freeze covers
+        // the -2 -> -4 jump (2-day gap), continues -4 -> -5 (consecutive),
+        // then stops at -5 -> -7 (a 2-day gap with no freeze left).
+        var r = StreakCalculator.computeWithFreeze(
+                List.of(
+                        TODAY.minusDays(7),
+                        TODAY.minusDays(5),
+                        TODAY.minusDays(4),
+                        TODAY.minusDays(2),
+                        TODAY.minusDays(1),
+                        TODAY),
+                TODAY,
+                true);
+        assertThat(r.current()).isEqualTo(5);
+        assertThat(r.freezeUsedInRun()).isTrue();
+    }
+
+    @Test
+    void streakDoesNotSurviveSecondGapWhenSeparated() {
+        // Two distinct 2-day gaps: -3 -> -1 needs the freeze and -8 -> -6
+        // would too. After spending the freeze on the recent hop, the walk
+        // stops at the older gap -- so the run does NOT include -8.
+        var r = StreakCalculator.computeWithFreeze(
+                List.of(
+                        TODAY.minusDays(8),
+                        TODAY.minusDays(6),
+                        TODAY.minusDays(5),
+                        TODAY.minusDays(3),
+                        TODAY.minusDays(1),
+                        TODAY),
+                TODAY,
+                true);
+        assertThat(r.current()).isEqualTo(5);
+        assertThat(r.freezeUsedInRun()).isTrue();
+    }
+
+    @Test
+    void freezeNotUsedWhenStreakIsAlreadyConsecutive() {
+        var r = StreakCalculator.computeWithFreeze(
+                List.of(TODAY.minusDays(2), TODAY.minusDays(1), TODAY),
+                TODAY,
+                true);
+        assertThat(r.current()).isEqualTo(3);
+        assertThat(r.freezeUsedInRun()).isFalse();
+    }
 }

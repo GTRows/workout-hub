@@ -58,6 +58,9 @@ public class UserProfile {
     @Column(name = "daily_fat_g_goal")
     private Integer dailyFatGGoal;
 
+    @Column(name = "streak_freeze_used_month", length = 7)
+    private String streakFreezeUsedMonth;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -111,6 +114,9 @@ public class UserProfile {
 
     public Integer getDailyFatGGoal() { return dailyFatGGoal; }
     public void setDailyFatGGoal(Integer v) { this.dailyFatGGoal = v; }
+
+    public String getStreakFreezeUsedMonth() { return streakFreezeUsedMonth; }
+    public void setStreakFreezeUsedMonth(String v) { this.streakFreezeUsedMonth = v; }
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

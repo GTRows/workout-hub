@@ -9,11 +9,21 @@ public final class StreakCalculator {
 
     public record Result(int current, int longest) {}
 
+    public record FreezeAwareResult(int current, int longest, boolean freezeUsedInRun) {}
+
     private StreakCalculator() {}
 
     public static Result compute(Collection<LocalDate> rawSessionDates, LocalDate today) {
+        FreezeAwareResult r = computeWithFreeze(rawSessionDates, today, false);
+        return new Result(r.current(), r.longest());
+    }
+
+    public static FreezeAwareResult computeWithFreeze(
+            Collection<LocalDate> rawSessionDates,
+            LocalDate today,
+            boolean freezeAvailable) {
         if (rawSessionDates == null || rawSessionDates.isEmpty()) {
-            return new Result(0, 0);
+            return new FreezeAwareResult(0, 0, false);
         }
 
         List<LocalDate> dates = new TreeSet<>(rawSessionDates).stream().toList();
@@ -31,19 +41,37 @@ public final class StreakCalculator {
 
         LocalDate last = dates.get(dates.size() - 1);
         int current;
-        if (last.equals(today) || last.equals(today.minusDays(1))) {
+        boolean freezeUsed = false;
+        boolean freezeRemaining = freezeAvailable;
+        boolean lastDateMatchesToday =
+                last.equals(today) || last.equals(today.minusDays(1));
+        boolean lastDateOneFreezeAway =
+                freezeRemaining && last.equals(today.minusDays(2));
+
+        if (lastDateMatchesToday) {
             current = 1;
-            for (int i = dates.size() - 2; i >= 0; i--) {
-                if (dates.get(i + 1).minusDays(1).equals(dates.get(i))) {
-                    current++;
-                } else {
-                    break;
-                }
-            }
+        } else if (lastDateOneFreezeAway) {
+            current = 1;
+            freezeUsed = true;
+            freezeRemaining = false;
         } else {
-            current = 0;
+            return new FreezeAwareResult(0, longest, false);
         }
 
-        return new Result(current, longest);
+        for (int i = dates.size() - 2; i >= 0; i--) {
+            LocalDate next = dates.get(i + 1);
+            LocalDate cur = dates.get(i);
+            if (next.minusDays(1).equals(cur)) {
+                current++;
+            } else if (freezeRemaining && next.minusDays(2).equals(cur)) {
+                current++;
+                freezeUsed = true;
+                freezeRemaining = false;
+            } else {
+                break;
+            }
+        }
+
+        return new FreezeAwareResult(current, longest, freezeUsed);
     }
 }
