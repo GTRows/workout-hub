@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-92] [p15] Real app icon asset set (closes setup-icon DEFERRED)
-  - Acceptance: Designed 512/192/maskable/apple-touch PNGs committed; placeholder PNGs replaced; Lighthouse PWA >= 90; setup-icon removed from DEFERRED.md.
-
 - [t-93] [p15] Exercise-detail modal on session screen
   - Acceptance: Click on exercise title opens modal with bilingual form tips + common mistakes + last performance; RTL covers open/close + content + keyboard escape.
 
@@ -36,7 +33,9 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Blocked
 
-(none)
+- [t-92] [p15] Real app icon asset set (closes setup-icon DEFERRED)
+  - Acceptance: Designed 512/192/maskable/apple-touch PNGs committed; placeholder PNGs replaced; Lighthouse PWA >= 90; setup-icon removed from DEFERRED.md.
+  - Blocked: needs designed PNGs from the user (2026-04-25); not autonomously generatable.
 
 ## Done
 
