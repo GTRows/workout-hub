@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-86] [p13] Garmin .fit per-workout import + V18 heart_rate_bpm column
-  - Acceptance: /api/health/import/fit accepts one file; minimal subset parser; creates WorkoutSession with heartRateAvgBpm; unit tests on parser fixture; integration test.
-
 - [t-87] [p13] Smart-scale webhook (iPhone 13 Health via third-party relay)
   - Acceptance: V19 webhook_tokens (user_id, token, purpose); /api/webhooks/scale/{token} accepts agnostic JSON (weight + timestamp), writes body_metric; integration tests for valid-token, invalid-token 401, idempotent on same timestamp.
 
@@ -152,3 +149,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-83] 2026-04-25 -- V19 water_entries + /api/water + /nutrition water card; Phase 12 complete
 - [t-84] 2026-04-25 -- Apple Health parser (StAX, ZIP unwrap) + /api/health/import/apple + /export card
 - [t-85] 2026-04-25 -- Google Fit parser (Jackson, dataPoint+session shapes) + /api/health/import/google-fit
+- [t-86] 2026-04-25 -- Hand-rolled Garmin .fit parser + V20 heart_rate_avg_bpm + /api/health/import/fit
