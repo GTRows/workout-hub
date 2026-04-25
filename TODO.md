@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-98] [p15] ExerciseMedia component (video/GIF on detail page, lazy loaded)
-  - Acceptance: Uses existing exercises.video_url; lazy-load via loading="lazy" + IntersectionObserver; RTL covers render with and without URL; a11y alt/title.
-
 ## Blocked
 
 - [t-92] [p15] Real app icon asset set (closes setup-icon DEFERRED)
@@ -129,3 +126,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-95] 2026-04-25 -- BottomNav <sm + top Nav hidden <sm + 360x800 Playwright responsive spec
 - [t-96] 2026-04-25 -- Class-based dark mode + auto/dark/light cycle toggle + V25 theme_preference column
 - [t-97] 2026-04-25 -- PrToast component + session-client integration (newPr=true gates the toast)
+- [t-98] 2026-04-25 -- ExerciseMedia component (IntersectionObserver gate, video > image fallback) on /exercises/[id]; v0.2 roadmap done except t-92 icon
