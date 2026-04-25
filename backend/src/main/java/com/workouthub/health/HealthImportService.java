@@ -51,6 +51,25 @@ public class HealthImportService {
         return apply(userId, parsed, importBodyMass, importWorkouts);
     }
 
+    @Transactional
+    public HealthImportResultDto importGarminFit(UUID userId, InputStream stream) throws Exception {
+        GarminFitParser.Session s = new GarminFitParser().parse(stream);
+
+        boolean dup = sessionRepo.findFinishedSince(userId, s.startedAt()).stream()
+                .anyMatch(existing -> existing.getStartedAt().equals(s.startedAt()));
+        if (dup) {
+            return new HealthImportResultDto(0, 0, 0, 1, 0, 1);
+        }
+        WorkoutSession session = new WorkoutSession();
+        session.setUserId(userId);
+        session.setStartedAt(s.startedAt());
+        session.setEndedAt(s.endedAt());
+        session.setNotes("Imported from Garmin .fit");
+        session.setHeartRateAvgBpm(s.avgHeartRateBpm());
+        sessionRepo.save(session);
+        return new HealthImportResultDto(0, 0, 0, 1, 1, 0);
+    }
+
     private HealthImportResultDto apply(
             UUID userId,
             ParsedHealth parsed,

@@ -5,10 +5,14 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { importAppleHealth, importGoogleFit } from "@/lib/api/endpoints";
+import {
+  importAppleHealth,
+  importGarminFit,
+  importGoogleFit,
+} from "@/lib/api/endpoints";
 import type { HealthImportResult } from "@/lib/api/schemas";
 
-type Source = "apple" | "google";
+type Source = "apple" | "google" | "garmin";
 
 export function HealthImportClient() {
   const t = useTranslations("health");
@@ -21,10 +25,14 @@ export function HealthImportClient() {
 
   const mutation = useMutation({
     mutationFn: async ({ source, file }: { source: Source; file: File }) => {
-      const data =
-        source === "apple"
-          ? await importAppleHealth(file, { bodyMass, workouts })
-          : await importGoogleFit(file, { bodyMass, workouts });
+      let data: HealthImportResult;
+      if (source === "apple") {
+        data = await importAppleHealth(file, { bodyMass, workouts });
+      } else if (source === "google") {
+        data = await importGoogleFit(file, { bodyMass, workouts });
+      } else {
+        data = await importGarminFit(file);
+      }
       return { source, data } as { source: Source; data: HealthImportResult };
     },
     onSuccess: (r) => {
@@ -93,6 +101,23 @@ export function HealthImportClient() {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) mutation.mutate({ source: "google", file });
+            e.target.value = "";
+          }}
+          className="block text-sm"
+        />
+      </div>
+
+      <div className="space-y-2 pt-2 border-t border-border">
+        <p className="text-sm font-medium">{t("garminTitle")}</p>
+        <p className="text-xs text-muted-foreground">{t("garminDescription")}</p>
+        <input
+          type="file"
+          accept=".fit,application/octet-stream"
+          aria-label={t("garminFilePickerLabel")}
+          data-testid="garmin-file-input"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) mutation.mutate({ source: "garmin", file });
             e.target.value = "";
           }}
           className="block text-sm"

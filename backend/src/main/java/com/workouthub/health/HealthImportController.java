@@ -56,4 +56,19 @@ public class HealthImportController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/fit")
+    public ResponseEntity<HealthImportResultDto> importFit(
+            @AuthenticationPrincipal AppUserPrincipal principal,
+            @RequestParam("file") MultipartFile file) throws Exception {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try (var stream = file.getInputStream()) {
+            HealthImportResultDto result = service.importGarminFit(principal.userId(), stream);
+            return ResponseEntity.ok(result);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

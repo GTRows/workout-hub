@@ -530,3 +530,22 @@ export async function importGoogleFit(
 ): Promise<HealthImportResult> {
   return uploadHealthFile("google-fit", file, options);
 }
+
+export async function importGarminFit(file: File): Promise<HealthImportResult> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+  const form = new FormData();
+  form.append("file", file);
+  const res = await api.raw(`${baseUrl}/api/health/import/fit`, {
+    method: "POST",
+    body: form,
+  });
+  const text = await res.text();
+  const json = text ? JSON.parse(text) : undefined;
+  if (!res.ok) {
+    const parsed = apiErrorSchema.safeParse(json);
+    const message = parsed.success ? parsed.data.message : res.statusText;
+    throw new ApiError(res.status, json, message);
+  }
+  return healthImportResultSchema.parse(json);
+}

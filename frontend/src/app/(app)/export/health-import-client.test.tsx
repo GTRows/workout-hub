@@ -21,6 +21,9 @@ const messages = {
     appleDescription: "desc apple",
     googleTitle: "Google Fit",
     googleDescription: "desc google",
+    garminTitle: "Garmin",
+    garminDescription: "desc garmin",
+    garminFilePickerLabel: "Pick fit",
     toggleBodyMass: "Body Mass",
     toggleWorkouts: "Workouts",
     filePickerLabel: "Pick file",
@@ -127,6 +130,40 @@ describe("HealthImportClient", () => {
     });
     await waitFor(() => expect(postedUrl).not.toBeNull());
     expect(postedUrl).toContain("/api/health/import/google-fit");
+  });
+
+  it("uploads the fit file to the garmin endpoint", async () => {
+    let postedUrl: string | null = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.includes("/api/health/import/fit") && method === "POST") {
+          postedUrl = url;
+          return jsonResponse(200, {
+            bodyMassParsed: 0,
+            bodyMassImported: 0,
+            bodyMassSkipped: 0,
+            workoutsParsed: 1,
+            workoutsImported: 1,
+            workoutsSkipped: 0,
+          });
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<HealthImportClient />);
+    const file = new File([new ArrayBuffer(8)], "ride.fit", {
+      type: "application/octet-stream",
+    });
+    fireEvent.change(screen.getByTestId("garmin-file-input"), {
+      target: { files: [file] },
+    });
+    await waitFor(() => expect(postedUrl).not.toBeNull());
+    expect(postedUrl).toContain("/api/health/import/fit");
+    expect(postedUrl).not.toContain("/api/health/import/google-fit");
   });
 
   it("respects the body-mass toggle in the upload querystring", async () => {

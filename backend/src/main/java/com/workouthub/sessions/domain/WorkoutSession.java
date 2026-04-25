@@ -44,6 +44,9 @@ public class WorkoutSession {
     @Column(name = "energy_level")
     private Short energyLevel;
 
+    @Column(name = "heart_rate_avg_bpm")
+    private Short heartRateAvgBpm;
+
     @OneToMany(
             mappedBy = "session",
             cascade = CascadeType.ALL,
@@ -107,6 +110,9 @@ public class WorkoutSession {
 
     public Short getEnergyLevel() { return energyLevel; }
     public void setEnergyLevel(Short energyLevel) { this.energyLevel = energyLevel; }
+
+    public Short getHeartRateAvgBpm() { return heartRateAvgBpm; }
+    public void setHeartRateAvgBpm(Short heartRateAvgBpm) { this.heartRateAvgBpm = heartRateAvgBpm; }
 
     public List<SessionSet> getSets() { return sets; }
 
