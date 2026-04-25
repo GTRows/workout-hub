@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-97] [p15] PR celebration on set save (when newPr=true)
-  - Acceptance: Toast + subtle scale animation on the set card; RTL covers toast appearing for newPr=true fetch response and not for regular sets.
-
 - [t-98] [p15] ExerciseMedia component (video/GIF on detail page, lazy loaded)
   - Acceptance: Uses existing exercises.video_url; lazy-load via loading="lazy" + IntersectionObserver; RTL covers render with and without URL; a11y alt/title.
 
@@ -131,3 +128,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-94] 2026-04-25 -- @dnd-kit installed + sortable rows in plan viewer + drag handle accessibility test
 - [t-95] 2026-04-25 -- BottomNav <sm + top Nav hidden <sm + 360x800 Playwright responsive spec
 - [t-96] 2026-04-25 -- Class-based dark mode + auto/dark/light cycle toggle + V25 theme_preference column
+- [t-97] 2026-04-25 -- PrToast component + session-client integration (newPr=true gates the toast)
