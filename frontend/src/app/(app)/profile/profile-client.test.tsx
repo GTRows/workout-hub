@@ -30,6 +30,10 @@ const messages = {
     saving: "Saving...",
     saved: "Saved",
     error: "Save failed",
+    dailyKcalGoal: "kcal/day",
+    dailyProteinGGoal: "Protein (g/day)",
+    dailyCarbsGGoal: "Carbs (g/day)",
+    dailyFatGGoal: "Fat (g/day)",
   },
 };
 
@@ -66,6 +70,10 @@ function userMe(overrides: Record<string, unknown> = {}) {
       gender: "male",
       healthNotes: null,
       goals: null,
+      dailyKcalGoal: null,
+      dailyProteinGGoal: null,
+      dailyCarbsGGoal: null,
+      dailyFatGGoal: null,
     },
     ...overrides,
   };

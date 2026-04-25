@@ -15,4 +15,8 @@ public record UpdateProfileRequest(
         LocalDate birthDate,
         @Size(max = 20) String gender,
         @Size(max = 10000) String healthNotes,
-        @Size(max = 10000) String goals) {}
+        @Size(max = 10000) String goals,
+        @Min(0) @Max(20000) Integer dailyKcalGoal,
+        @Min(0) @Max(1000) Integer dailyProteinGGoal,
+        @Min(0) @Max(2000) Integer dailyCarbsGGoal,
+        @Min(0) @Max(1000) Integer dailyFatGGoal) {}

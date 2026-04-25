@@ -20,6 +20,7 @@ const messages = {
     prevDay: "Prev",
     nextDay: "Next",
     dayTotals: "Today: {kcal} kcal - {protein}g protein, {carbs}g carbs, {fat}g fat",
+    goalsLine: "Goal: {kcal} kcal ({kcalLeft} left) - {protein}p / {carbs}c / {fat}f",
     addTitle: "Log a food",
     searchLabel: "Food",
     searchPlaceholder: "Search foods...",
@@ -51,6 +52,25 @@ function jsonResponse(status: number, body: unknown): Response {
     headers: { "content-type": "application/json" },
   });
 }
+
+const ME = {
+  id: "ffffffff-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  email: "u@test.local",
+  displayName: "U",
+  role: "USER",
+  profile: {
+    heightCm: null,
+    weightKg: null,
+    birthDate: null,
+    gender: null,
+    healthNotes: null,
+    goals: null,
+    dailyKcalGoal: 2200,
+    dailyProteinGGoal: 160,
+    dailyCarbsGGoal: 220,
+    dailyFatGGoal: 70,
+  },
+};
 
 const FOOD = {
   id: "ffffffff-1111-1111-1111-111111111111",
@@ -110,6 +130,7 @@ describe("NutritionClient", () => {
           posted = JSON.parse(init!.body as string);
           return jsonResponse(201, entry("ffffffff-2222-2222-2222-222222222222"));
         }
+        if (url.endsWith("/api/users/me")) return jsonResponse(200, ME);
         throw new Error("unexpected fetch: " + url + " " + method);
       })
     );
@@ -159,6 +180,7 @@ describe("NutritionClient", () => {
           deletedId = url.split("/api/nutrition/")[1] ?? null;
           return new Response(null, { status: 204 });
         }
+        if (url.endsWith("/api/users/me")) return jsonResponse(200, ME);
         throw new Error("unexpected fetch: " + url + " " + method);
       })
     );
@@ -183,6 +205,7 @@ describe("NutritionClient", () => {
       "fetch",
       vi.fn(async (input: string | URL | Request) => {
         const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/users/me")) return jsonResponse(200, ME);
         const m = url.match(/date=([^&]+)/);
         if (m) seenDates.push(decodeURIComponent(m[1]));
         return jsonResponse(200, []);

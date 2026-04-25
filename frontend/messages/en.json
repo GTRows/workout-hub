@@ -65,13 +65,18 @@
     "save": "Save",
     "saving": "Saving...",
     "saved": "Saved",
-    "error": "Save failed"
+    "error": "Save failed",
+    "dailyKcalGoal": "kcal/day",
+    "dailyProteinGGoal": "Protein (g/day)",
+    "dailyCarbsGGoal": "Carbs (g/day)",
+    "dailyFatGGoal": "Fat (g/day)"
   },
   "nutrition": {
     "title": "Nutrition",
     "prevDay": "Prev",
     "nextDay": "Next",
     "dayTotals": "Today: {kcal} kcal - {protein}g protein, {carbs}g carbs, {fat}g fat",
+    "goalsLine": "Goal: {kcal} kcal ({kcalLeft} left) - {protein}p / {carbs}c / {fat}f",
     "addTitle": "Log a food",
     "searchLabel": "Food",
     "searchPlaceholder": "Search foods...",

@@ -9,4 +9,8 @@ public record UserProfileDto(
         LocalDate birthDate,
         String gender,
         String healthNotes,
-        String goals) {}
+        String goals,
+        Integer dailyKcalGoal,
+        Integer dailyProteinGGoal,
+        Integer dailyCarbsGGoal,
+        Integer dailyFatGGoal) {}

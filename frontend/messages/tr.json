@@ -65,13 +65,18 @@
     "save": "Kaydet",
     "saving": "Kaydediliyor...",
     "saved": "Kaydedildi",
-    "error": "Kaydetme basarisiz"
+    "error": "Kaydetme basarisiz",
+    "dailyKcalGoal": "kcal/gun",
+    "dailyProteinGGoal": "Protein (g/gun)",
+    "dailyCarbsGGoal": "Karbonhidrat (g/gun)",
+    "dailyFatGGoal": "Yag (g/gun)"
   },
   "nutrition": {
     "title": "Beslenme",
     "prevDay": "Onceki",
     "nextDay": "Sonraki",
     "dayTotals": "Bugun: {kcal} kcal - {protein}g protein, {carbs}g karbonhidrat, {fat}g yag",
+    "goalsLine": "Hedef: {kcal} kcal ({kcalLeft} kaldi) - {protein}p / {carbs}k / {fat}y",
     "addTitle": "Yiyecek ekle",
     "searchLabel": "Yiyecek",
     "searchPlaceholder": "Yiyecek ara...",

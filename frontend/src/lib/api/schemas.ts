@@ -31,6 +31,10 @@ export const userMeSchema = z.object({
     gender: z.string().nullable().optional(),
     healthNotes: z.string().nullable().optional(),
     goals: z.string().nullable().optional(),
+    dailyKcalGoal: z.number().int().nullable().optional(),
+    dailyProteinGGoal: z.number().int().nullable().optional(),
+    dailyCarbsGGoal: z.number().int().nullable().optional(),
+    dailyFatGGoal: z.number().int().nullable().optional(),
   }),
 });
 

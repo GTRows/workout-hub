@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import {
   createNutritionEntry,
   deleteNutritionEntry,
+  fetchMe,
   fetchNutritionForDate,
   searchFoods,
   type CreateNutritionEntryPayload,
@@ -40,6 +41,17 @@ export function NutritionClient() {
     queryKey: ["nutrition", date],
     queryFn: () => fetchNutritionForDate(date),
   });
+
+  const meQuery = useQuery({
+    queryKey: ["users", "me"],
+    queryFn: fetchMe,
+  });
+  const goals = {
+    kcal: meQuery.data?.profile.dailyKcalGoal ?? null,
+    protein: meQuery.data?.profile.dailyProteinGGoal ?? null,
+    carbs: meQuery.data?.profile.dailyCarbsGGoal ?? null,
+    fat: meQuery.data?.profile.dailyFatGGoal ?? null,
+  };
 
   const searchQuery = useQuery({
     queryKey: ["foods", query],
@@ -126,6 +138,17 @@ export function NutritionClient() {
             fat: totals.fat.toFixed(0),
           })}
         </CardDescription>
+        {(goals.kcal || goals.protein || goals.carbs || goals.fat) && (
+          <p className="text-xs text-muted-foreground" data-testid="nutrition-goals">
+            {t("goalsLine", {
+              kcal: goals.kcal ?? 0,
+              kcalLeft: Math.max(0, (goals.kcal ?? 0) - totals.kcal).toFixed(0),
+              protein: goals.protein ?? 0,
+              carbs: goals.carbs ?? 0,
+              fat: goals.fat ?? 0,
+            })}
+          </p>
+        )}
       </Card>
 
       <Card className="space-y-3" data-testid="nutrition-add-form">

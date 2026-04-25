@@ -19,6 +19,10 @@ type FormState = {
   gender: string;
   healthNotes: string;
   goals: string;
+  dailyKcalGoal: string;
+  dailyProteinGGoal: string;
+  dailyCarbsGGoal: string;
+  dailyFatGGoal: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -29,6 +33,10 @@ const EMPTY_FORM: FormState = {
   gender: "",
   healthNotes: "",
   goals: "",
+  dailyKcalGoal: "",
+  dailyProteinGGoal: "",
+  dailyCarbsGGoal: "",
+  dailyFatGGoal: "",
 };
 
 export function ProfileClient() {
@@ -67,6 +75,10 @@ export function ProfileClient() {
     if (form.gender) payload.gender = form.gender;
     if (form.healthNotes) payload.healthNotes = form.healthNotes;
     if (form.goals) payload.goals = form.goals;
+    if (form.dailyKcalGoal) payload.dailyKcalGoal = Number(form.dailyKcalGoal);
+    if (form.dailyProteinGGoal) payload.dailyProteinGGoal = Number(form.dailyProteinGGoal);
+    if (form.dailyCarbsGGoal) payload.dailyCarbsGGoal = Number(form.dailyCarbsGGoal);
+    if (form.dailyFatGGoal) payload.dailyFatGGoal = Number(form.dailyFatGGoal);
     mutation.mutate(payload);
   };
 
@@ -152,6 +164,45 @@ export function ProfileClient() {
           />
         </Field>
 
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Field id="dailyKcalGoal" label={t("dailyKcalGoal")}>
+            <Input
+              id="dailyKcalGoal"
+              type="number"
+              inputMode="numeric"
+              value={form.dailyKcalGoal}
+              onChange={(e) => setForm((p) => ({ ...p, dailyKcalGoal: e.target.value }))}
+            />
+          </Field>
+          <Field id="dailyProteinGGoal" label={t("dailyProteinGGoal")}>
+            <Input
+              id="dailyProteinGGoal"
+              type="number"
+              inputMode="numeric"
+              value={form.dailyProteinGGoal}
+              onChange={(e) => setForm((p) => ({ ...p, dailyProteinGGoal: e.target.value }))}
+            />
+          </Field>
+          <Field id="dailyCarbsGGoal" label={t("dailyCarbsGGoal")}>
+            <Input
+              id="dailyCarbsGGoal"
+              type="number"
+              inputMode="numeric"
+              value={form.dailyCarbsGGoal}
+              onChange={(e) => setForm((p) => ({ ...p, dailyCarbsGGoal: e.target.value }))}
+            />
+          </Field>
+          <Field id="dailyFatGGoal" label={t("dailyFatGGoal")}>
+            <Input
+              id="dailyFatGGoal"
+              type="number"
+              inputMode="numeric"
+              value={form.dailyFatGGoal}
+              onChange={(e) => setForm((p) => ({ ...p, dailyFatGGoal: e.target.value }))}
+            />
+          </Field>
+        </div>
+
         <div className="flex items-center gap-3">
           <Button onClick={submit} disabled={mutation.isPending}>
             {mutation.isPending ? t("saving") : t("save")}
@@ -198,5 +249,13 @@ function toForm(me: UserMe): FormState {
     gender: me.profile.gender ?? "",
     healthNotes: me.profile.healthNotes ?? "",
     goals: me.profile.goals ?? "",
+    dailyKcalGoal:
+      me.profile.dailyKcalGoal != null ? String(me.profile.dailyKcalGoal) : "",
+    dailyProteinGGoal:
+      me.profile.dailyProteinGGoal != null ? String(me.profile.dailyProteinGGoal) : "",
+    dailyCarbsGGoal:
+      me.profile.dailyCarbsGGoal != null ? String(me.profile.dailyCarbsGGoal) : "",
+    dailyFatGGoal:
+      me.profile.dailyFatGGoal != null ? String(me.profile.dailyFatGGoal) : "",
   };
 }

@@ -70,6 +70,10 @@ export type UpdateProfilePayload = {
   gender?: string;
   healthNotes?: string;
   goals?: string;
+  dailyKcalGoal?: number;
+  dailyProteinGGoal?: number;
+  dailyCarbsGGoal?: number;
+  dailyFatGGoal?: number;
 };
 
 export async function updateMe(payload: UpdateProfilePayload): Promise<UserMe> {

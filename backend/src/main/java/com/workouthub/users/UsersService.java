@@ -49,6 +49,10 @@ public class UsersService {
         if (req.gender() != null) profile.setGender(req.gender());
         if (req.healthNotes() != null) profile.setHealthNotes(req.healthNotes());
         if (req.goals() != null) profile.setGoals(req.goals());
+        if (req.dailyKcalGoal() != null) profile.setDailyKcalGoal(req.dailyKcalGoal());
+        if (req.dailyProteinGGoal() != null) profile.setDailyProteinGGoal(req.dailyProteinGGoal());
+        if (req.dailyCarbsGGoal() != null) profile.setDailyCarbsGGoal(req.dailyCarbsGGoal());
+        if (req.dailyFatGGoal() != null) profile.setDailyFatGGoal(req.dailyFatGGoal());
 
         profiles.save(profile);
         return toResponse(user, profile);
@@ -72,6 +76,10 @@ public class UsersService {
                         profile.getBirthDate(),
                         profile.getGender(),
                         profile.getHealthNotes(),
-                        profile.getGoals()));
+                        profile.getGoals(),
+                        profile.getDailyKcalGoal(),
+                        profile.getDailyProteinGGoal(),
+                        profile.getDailyCarbsGGoal(),
+                        profile.getDailyFatGGoal()));
     }
 }

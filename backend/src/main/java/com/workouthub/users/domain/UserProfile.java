@@ -46,6 +46,18 @@ public class UserProfile {
     @Column(columnDefinition = "TEXT")
     private String goals;
 
+    @Column(name = "daily_kcal_goal")
+    private Integer dailyKcalGoal;
+
+    @Column(name = "daily_protein_g_goal")
+    private Integer dailyProteinGGoal;
+
+    @Column(name = "daily_carbs_g_goal")
+    private Integer dailyCarbsGGoal;
+
+    @Column(name = "daily_fat_g_goal")
+    private Integer dailyFatGGoal;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -87,6 +99,18 @@ public class UserProfile {
 
     public String getGoals() { return goals; }
     public void setGoals(String goals) { this.goals = goals; }
+
+    public Integer getDailyKcalGoal() { return dailyKcalGoal; }
+    public void setDailyKcalGoal(Integer v) { this.dailyKcalGoal = v; }
+
+    public Integer getDailyProteinGGoal() { return dailyProteinGGoal; }
+    public void setDailyProteinGGoal(Integer v) { this.dailyProteinGGoal = v; }
+
+    public Integer getDailyCarbsGGoal() { return dailyCarbsGGoal; }
+    public void setDailyCarbsGGoal(Integer v) { this.dailyCarbsGGoal = v; }
+
+    public Integer getDailyFatGGoal() { return dailyFatGGoal; }
+    public void setDailyFatGGoal(Integer v) { this.dailyFatGGoal = v; }
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
