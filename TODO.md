@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-84] [p13] Apple Health XML export import (ZIP upload)
-  - Acceptance: /api/health/import/apple parses HKQuantityTypeIdentifierBodyMass and HKWorkout; maps to body_metrics + sessions with per-type toggles; unit tests on parser with a minimal fixture XML; integration test end-to-end.
-
 - [t-85] [p13] Google Fit Takeout JSON import
   - Acceptance: /api/health/import/google-fit parses the Takeout bucket format; unit tests on parser; integration test with fixture.
 
@@ -156,3 +153,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-81] 2026-04-24 -- /nutrition page (autocomplete + day nav + per-row macro display)
 - [t-82] 2026-04-24 -- V18 nutrition goals on user_profile + profile form fields + goals line on /nutrition
 - [t-83] 2026-04-25 -- V19 water_entries + /api/water + /nutrition water card; Phase 12 complete
+- [t-84] 2026-04-25 -- Apple Health parser (StAX, ZIP unwrap) + /api/health/import/apple + /export card
