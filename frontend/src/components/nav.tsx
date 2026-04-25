@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const LINKS: Array<{ href: string; labelKey: "dashboard" | "plan" | "history" | "exercises" | "insights" | "prs" | "achievements" | "nutrition" | "metrics" | "profile" | "export" }> = [
   { href: "/dashboard", labelKey: "dashboard" },
@@ -26,6 +27,9 @@ export function Nav() {
   return (
     <nav className="hidden border-b border-border bg-background/80 backdrop-blur sm:block">
       <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-2">
+        <div className="ml-auto order-last">
+          <ThemeToggle />
+        </div>
         {LINKS.map(({ href, labelKey }) => {
           const active = pathname.startsWith(href);
           return (

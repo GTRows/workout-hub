@@ -16,8 +16,18 @@
   --radius-lg: 0.75rem;
 }
 
+:root.dark {
+  --color-background: oklch(0.15 0 0);
+  --color-foreground: oklch(0.97 0 0);
+  --color-muted: oklch(0.22 0 0);
+  --color-muted-foreground: oklch(0.72 0 0);
+  --color-border: oklch(0.27 0 0);
+  --color-primary: oklch(0.67 0.16 260);
+  --color-primary-foreground: oklch(0.15 0 0);
+}
+
 @media (prefers-color-scheme: dark) {
-  @theme {
+  :root:not(.light) {
     --color-background: oklch(0.15 0 0);
     --color-foreground: oklch(0.97 0 0);
     --color-muted: oklch(0.22 0 0);

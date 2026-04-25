@@ -61,6 +61,9 @@ public class UserProfile {
     @Column(name = "streak_freeze_used_month", length = 7)
     private String streakFreezeUsedMonth;
 
+    @Column(name = "theme_preference", length = 8)
+    private String themePreference;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -117,6 +120,9 @@ public class UserProfile {
 
     public String getStreakFreezeUsedMonth() { return streakFreezeUsedMonth; }
     public void setStreakFreezeUsedMonth(String v) { this.streakFreezeUsedMonth = v; }
+
+    public String getThemePreference() { return themePreference; }
+    public void setThemePreference(String v) { this.themePreference = v; }
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
