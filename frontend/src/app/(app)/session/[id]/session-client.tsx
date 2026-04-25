@@ -22,6 +22,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { notifyRestElapsed, useRestTimer } from "@/lib/push/rest-timer";
+import { ExerciseDetailModal } from "./exercise-detail-modal";
 
 export function SessionClient({ sessionId }: { sessionId: string }) {
   const t = useTranslations("session");
@@ -137,6 +138,7 @@ function ExerciseBlock({
   const qc = useQueryClient();
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
+  const [detailOpen, setDetailOpen] = useState(false);
   const restTimer = useRestTimer(notifyRestElapsed);
 
   const lastPerfQuery = useQuery({
@@ -192,11 +194,28 @@ function ExerciseBlock({
     <Card className="space-y-4">
       <div className="space-y-1">
         <CardTitle>
-          {planItem.exerciseNameTr ?? planItem.exerciseNameEn ?? "?"}
+          {planItem.exerciseId ? (
+            <button
+              type="button"
+              onClick={() => setDetailOpen(true)}
+              className="text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              data-testid={`open-detail-${planItem.id}`}
+            >
+              {planItem.exerciseNameTr ?? planItem.exerciseNameEn ?? "?"}
+            </button>
+          ) : (
+            planItem.exerciseNameTr ?? planItem.exerciseNameEn ?? "?"
+          )}
         </CardTitle>
         <CardDescription>{targetText}</CardDescription>
         <LastPerformanceChip data={lastPerfQuery.data ?? null} />
       </div>
+      {detailOpen && planItem.exerciseId && (
+        <ExerciseDetailModal
+          exerciseId={planItem.exerciseId}
+          onClose={() => setDetailOpen(false)}
+        />
+      )}
 
       {existingSets.length > 0 && (
         <ul className="space-y-1 text-sm">
