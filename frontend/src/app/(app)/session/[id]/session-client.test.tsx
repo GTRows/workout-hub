@@ -185,6 +185,72 @@ describe("SessionClient", () => {
     });
   });
 
+  it("shows the PR celebration toast when the saved set comes back with newPr=true", async () => {
+    const user = userEvent.setup();
+    const newSet = {
+      id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      exerciseId,
+      exerciseNameTr: "Sinav",
+      exerciseNameEn: "Push-up",
+      setNumber: 1,
+      repsDone: 10,
+      weightKg: 50,
+      rpe: null,
+      completed: true,
+      notes: null,
+      newPr: true,
+    };
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () => jsonResponse(200, baseSession()),
+        [`/api/workout-days/${dayId}`]: () => jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets`]: () => jsonResponse(201, newSet),
+      })
+    );
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+    await user.type(screen.getByLabelText("Reps"), "10");
+    await user.type(screen.getByLabelText("Weight"), "50");
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    expect(await screen.findByTestId("pr-toast")).toBeInTheDocument();
+  });
+
+  it("does not show the PR toast for a regular non-PR set", async () => {
+    const user = userEvent.setup();
+    const newSet = {
+      id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      exerciseId,
+      exerciseNameTr: "Sinav",
+      exerciseNameEn: "Push-up",
+      setNumber: 1,
+      repsDone: 10,
+      weightKg: 20,
+      rpe: null,
+      completed: true,
+      notes: null,
+    };
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () => jsonResponse(200, baseSession()),
+        [`/api/workout-days/${dayId}`]: () => jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets`]: () => jsonResponse(201, newSet),
+      })
+    );
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+    await user.type(screen.getByLabelText("Reps"), "10");
+    await user.type(screen.getByLabelText("Weight"), "20");
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    await waitFor(() =>
+      expect(screen.getByText(/^1\. 10 x 20kg$/)).toBeInTheDocument()
+    );
+    expect(screen.queryByTestId("pr-toast")).not.toBeInTheDocument();
+  });
+
   it("finishes the workout on confirm and navigates to /dashboard", async () => {
     const user = userEvent.setup();
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);

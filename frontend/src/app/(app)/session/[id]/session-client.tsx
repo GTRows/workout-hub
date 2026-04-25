@@ -22,6 +22,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { notifyRestElapsed, useRestTimer } from "@/lib/push/rest-timer";
+import { PrToast } from "@/components/pr-toast";
 import { ExerciseDetailModal } from "./exercise-detail-modal";
 
 export function SessionClient({ sessionId }: { sessionId: string }) {
@@ -139,6 +140,7 @@ function ExerciseBlock({
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
+  const [prCelebration, setPrCelebration] = useState<string | null>(null);
   const restTimer = useRestTimer(notifyRestElapsed);
 
   const lastPerfQuery = useQuery({
@@ -157,6 +159,11 @@ function ExerciseBlock({
       );
       setReps("");
       setWeight("");
+      if (newSet.newPr) {
+        setPrCelebration(
+          planItem.exerciseNameTr ?? planItem.exerciseNameEn ?? "PR"
+        );
+      }
       if (planItem.restSeconds && planItem.restSeconds > 0) {
         restTimer.start(planItem.restSeconds);
       }
@@ -214,6 +221,12 @@ function ExerciseBlock({
         <ExerciseDetailModal
           exerciseId={planItem.exerciseId}
           onClose={() => setDetailOpen(false)}
+        />
+      )}
+      {prCelebration && (
+        <PrToast
+          message={`New PR: ${prCelebration}`}
+          onDismiss={() => setPrCelebration(null)}
         />
       )}
 
