@@ -231,6 +231,36 @@ export const supplementListSchema = z.array(supplementSchema);
 export type SupplementTiming = z.infer<typeof supplementTimingSchema>;
 export type Supplement = z.infer<typeof supplementSchema>;
 
+export const foodItemSchema = z.object({
+  id: z.string().uuid(),
+  nameTr: z.string(),
+  nameEn: z.string(),
+  kcalPer100g: z.number(),
+  proteinG: z.number(),
+  carbsG: z.number(),
+  fatG: z.number(),
+  defaultServingG: z.number(),
+});
+export const foodItemListSchema = z.array(foodItemSchema);
+
+export const nutritionEntrySchema = z.object({
+  id: z.string().uuid(),
+  foodId: z.string().uuid(),
+  foodNameTr: z.string().nullable().optional(),
+  foodNameEn: z.string().nullable().optional(),
+  servingG: z.number(),
+  kcal: z.number().nullable().optional(),
+  proteinG: z.number().nullable().optional(),
+  carbsG: z.number().nullable().optional(),
+  fatG: z.number().nullable().optional(),
+  consumedAt: z.string(),
+  notes: z.string().nullable().optional(),
+});
+export const nutritionEntryListSchema = z.array(nutritionEntrySchema);
+
+export type FoodItem = z.infer<typeof foodItemSchema>;
+export type NutritionEntry = z.infer<typeof nutritionEntrySchema>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;

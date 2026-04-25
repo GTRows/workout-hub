@@ -6,6 +6,7 @@
     "exercises": "Exercises",
     "insights": "Insights",
     "prs": "PRs",
+    "nutrition": "Nutrition",
     "metrics": "Metrics",
     "profile": "Profile",
     "export": "Export",
@@ -65,6 +66,23 @@
     "saving": "Saving...",
     "saved": "Saved",
     "error": "Save failed"
+  },
+  "nutrition": {
+    "title": "Nutrition",
+    "prevDay": "Prev",
+    "nextDay": "Next",
+    "dayTotals": "Today: {kcal} kcal - {protein}g protein, {carbs}g carbs, {fat}g fat",
+    "addTitle": "Log a food",
+    "searchLabel": "Food",
+    "searchPlaceholder": "Search foods...",
+    "selectedHint": "Selected: {name}",
+    "servingLabel": "Serving (g)",
+    "add": "Add",
+    "saving": "Saving...",
+    "dayList": "Today's foods",
+    "empty": "No entries for this day yet.",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this entry?"
   },
   "metrics": {
     "title": "Body metrics",

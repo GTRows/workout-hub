@@ -6,6 +6,7 @@
     "exercises": "Hareketler",
     "insights": "Analiz",
     "prs": "Rekorlar",
+    "nutrition": "Beslenme",
     "metrics": "Metrikler",
     "profile": "Profil",
     "export": "Disa Aktar",
@@ -65,6 +66,23 @@
     "saving": "Kaydediliyor...",
     "saved": "Kaydedildi",
     "error": "Kaydetme basarisiz"
+  },
+  "nutrition": {
+    "title": "Beslenme",
+    "prevDay": "Onceki",
+    "nextDay": "Sonraki",
+    "dayTotals": "Bugun: {kcal} kcal - {protein}g protein, {carbs}g karbonhidrat, {fat}g yag",
+    "addTitle": "Yiyecek ekle",
+    "searchLabel": "Yiyecek",
+    "searchPlaceholder": "Yiyecek ara...",
+    "selectedHint": "Secili: {name}",
+    "servingLabel": "Porsiyon (g)",
+    "add": "Ekle",
+    "saving": "Kaydediliyor...",
+    "dayList": "Bugun yenenler",
+    "empty": "Bu gun icin kayit yok.",
+    "delete": "Sil",
+    "deleteConfirm": "Bu kaydi sil?"
   },
   "metrics": {
     "title": "Vucut metrikleri",

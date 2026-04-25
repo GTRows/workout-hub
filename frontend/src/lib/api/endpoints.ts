@@ -5,8 +5,11 @@ import {
   bodyMetricSchema,
   exercisePageSchema,
   exerciseSchema,
+  foodItemListSchema,
   heatmapListSchema,
   lastPerformanceSchema,
+  nutritionEntryListSchema,
+  nutritionEntrySchema,
   oneRmPointListSchema,
   personalRecordListSchema,
   sessionDetailSchema,
@@ -23,8 +26,10 @@ import {
   type BodyMetric,
   type Exercise,
   type ExercisePage,
+  type FoodItem,
   type HeatmapDay,
   type LastPerformance,
+  type NutritionEntry,
   type OneRmPoint,
   type PersonalRecord,
   type SessionDetail,
@@ -238,6 +243,47 @@ export type ExportSection =
 export async function fetchSectionExport(section: ExportSection): Promise<unknown> {
   return api.request({
     path: `/api/export/${section}`,
+  });
+}
+
+export async function searchFoods(q: string, size = 20): Promise<FoodItem[]> {
+  return api.request({
+    path: "/api/foods",
+    query: { q, size },
+    schema: foodItemListSchema,
+  });
+}
+
+export async function fetchNutritionForDate(date: string): Promise<NutritionEntry[]> {
+  return api.request({
+    path: "/api/nutrition",
+    query: { date },
+    schema: nutritionEntryListSchema,
+  });
+}
+
+export type CreateNutritionEntryPayload = {
+  foodId: string;
+  servingG: number;
+  consumedAt: string;
+  notes?: string;
+};
+
+export async function createNutritionEntry(
+  payload: CreateNutritionEntryPayload
+): Promise<NutritionEntry> {
+  return api.request({
+    method: "POST",
+    path: "/api/nutrition",
+    body: payload,
+    schema: nutritionEntrySchema,
+  });
+}
+
+export async function deleteNutritionEntry(id: string): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/nutrition/${id}`,
   });
 }
 
