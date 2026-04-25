@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-91] [p14] Streak freeze (1 skip/month) - extends StreakCalculator
-  - Acceptance: user_streak_state.freeze_used_in_month + enabled-by-default; StreakCalculatorTest gains 3 cases (no-freeze, freeze-used, freeze-mid-broken).
-
 - [t-92] [p15] Real app icon asset set (closes setup-icon DEFERRED)
   - Acceptance: Designed 512/192/maskable/apple-touch PNGs committed; placeholder PNGs replaced; Lighthouse PWA >= 90; setup-icon removed from DEFERRED.md.
 
@@ -142,3 +139,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-88] 2026-04-25 -- V22 achievements + 10 seed defs + AchievementEvaluator hooks (session/set) + /api/achievements/me
 - [t-89] 2026-04-25 -- /achievements grid (unlocked + next-up locked) + nav link + RTL coverage
 - [t-90] 2026-04-25 -- V23 monthly_challenges + admin CRUD + /api/challenges/current with month-bounded progress
+- [t-91] 2026-04-25 -- V24 streak_freeze_used_month + computeWithFreeze + 4 new StreakCalculator tests; Phase 14 done
