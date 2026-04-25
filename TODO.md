@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-83] [p12] Water tracking (V17 water_entries + quick +250/+500 widget)
-  - Acceptance: /api/water CRUD; dashboard widget + nutrition-page card; integration + RTL tests.
-
 - [t-84] [p13] Apple Health XML export import (ZIP upload)
   - Acceptance: /api/health/import/apple parses HKQuantityTypeIdentifierBodyMass and HKWorkout; maps to body_metrics + sessions with per-type toggles; unit tests on parser with a minimal fixture XML; integration test end-to-end.
 
@@ -158,3 +155,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-80] 2026-04-24 -- /api/foods search + /api/nutrition per-user CRUD with macro scaling
 - [t-81] 2026-04-24 -- /nutrition page (autocomplete + day nav + per-row macro display)
 - [t-82] 2026-04-24 -- V18 nutrition goals on user_profile + profile form fields + goals line on /nutrition
+- [t-83] 2026-04-25 -- V19 water_entries + /api/water + /nutrition water card; Phase 12 complete
