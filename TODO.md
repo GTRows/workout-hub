@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-80] [p12] /api/foods public search + /api/nutrition per-user CRUD
-  - Acceptance: GET /api/foods?q= paginated; POST/PUT/DELETE /api/nutrition; integration tests CRUD + cross-user isolation + search relevance.
-
 - [t-81] [p12] /nutrition page with daily totals + food autocomplete + history
   - Acceptance: Autocomplete against /api/foods; daily kcal + macro bars vs goal; RTL covers add food + delete + day-navigation.
 
@@ -164,3 +161,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-77] 2026-04-24 -- Homelab Caddy snippet + DEPLOYMENT.md runbook for workouthub.<domain>
 - [t-78] 2026-04-24 -- Optional Authentik OIDC login (hand-rolled, flag-gated, auto-provision) - Phase 11 complete
 - [t-79] 2026-04-24 -- V17 nutrition schema + 50-item TR food seed + repository tests
+- [t-80] 2026-04-24 -- /api/foods search + /api/nutrition per-user CRUD with macro scaling
