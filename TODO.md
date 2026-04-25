@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-85] [p13] Google Fit Takeout JSON import
-  - Acceptance: /api/health/import/google-fit parses the Takeout bucket format; unit tests on parser; integration test with fixture.
-
 - [t-86] [p13] Garmin .fit per-workout import + V18 heart_rate_bpm column
   - Acceptance: /api/health/import/fit accepts one file; minimal subset parser; creates WorkoutSession with heartRateAvgBpm; unit tests on parser fixture; integration test.
 
@@ -154,3 +151,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-82] 2026-04-24 -- V18 nutrition goals on user_profile + profile form fields + goals line on /nutrition
 - [t-83] 2026-04-25 -- V19 water_entries + /api/water + /nutrition water card; Phase 12 complete
 - [t-84] 2026-04-25 -- Apple Health parser (StAX, ZIP unwrap) + /api/health/import/apple + /export card
+- [t-85] 2026-04-25 -- Google Fit parser (Jackson, dataPoint+session shapes) + /api/health/import/google-fit
