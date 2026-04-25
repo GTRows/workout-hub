@@ -332,6 +332,16 @@
     "delete": "Delete",
     "edit": "Edit"
   },
+  "webhookTokens": {
+    "title": "Smart-scale webhook",
+    "description": "Mint a per-user URL and paste it into your scale relay (Apple Shortcuts, Home Assistant, IFTTT). Each ping logs a body weight for that day. Same-day pings are no-ops.",
+    "mint": "Generate URL",
+    "minting": "Generating...",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke this webhook URL? Anything still using it will stop working.",
+    "lastUsed": "Last ping: {time}",
+    "never": "Never used"
+  },
   "health": {
     "title": "Health imports",
     "description": "Bring weight and workouts in from Apple Health or Google Fit. Toggles below apply to both pickers.",

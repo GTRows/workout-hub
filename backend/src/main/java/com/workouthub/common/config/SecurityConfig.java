@@ -35,6 +35,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/auth/oidc/login",
                                 "/api/auth/oidc/callback").permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/webhooks/scale/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info",
                                 "/actuator/prometheus").permitAll()
                         .requestMatchers("/error").permitAll()

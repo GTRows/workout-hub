@@ -280,6 +280,16 @@ export const waterDaySchema = z.object({
 export type WaterEntry = z.infer<typeof waterEntrySchema>;
 export type WaterDay = z.infer<typeof waterDaySchema>;
 
+export const webhookTokenSchema = z.object({
+  id: z.string().uuid(),
+  token: z.string(),
+  purpose: z.string(),
+  createdAt: z.string(),
+  lastUsedAt: z.string().nullable().optional(),
+});
+export const webhookTokenListSchema = z.array(webhookTokenSchema);
+export type WebhookToken = z.infer<typeof webhookTokenSchema>;
+
 export const healthImportResultSchema = z.object({
   bodyMassParsed: z.number().int(),
   bodyMassImported: z.number().int(),

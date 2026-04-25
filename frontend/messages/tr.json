@@ -332,6 +332,16 @@
     "delete": "Sil",
     "edit": "Duzenle"
   },
+  "webhookTokens": {
+    "title": "Akilli tarti webhook",
+    "description": "Kullaniciya ozel bir URL uret, akilli tarti aktariciya (Apple Shortcuts, Home Assistant, IFTTT) yapistir. Her atilan istek o gunun tartisini ekler; ayni gun icindeki tekrarlar yoksayilir.",
+    "mint": "URL uret",
+    "minting": "Uretiliyor...",
+    "revoke": "Iptal et",
+    "revokeConfirm": "Bu webhook URL'sini iptal et? Hala kullanan bir sey varsa calismayi durdurur.",
+    "lastUsed": "Son istek: {time}",
+    "never": "Hic kullanilmadi"
+  },
   "health": {
     "title": "Saglik iceri aktarma",
     "description": "Apple Health veya Google Fit'ten tarti ve antrenman cek. Asagidaki anahtarlar her iki secici icin gecerlidir.",

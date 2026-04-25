@@ -9,6 +9,8 @@ import {
   foodItemListSchema,
   healthImportResultSchema,
   heatmapListSchema,
+  webhookTokenListSchema,
+  webhookTokenSchema,
   lastPerformanceSchema,
   nutritionEntryListSchema,
   nutritionEntrySchema,
@@ -32,6 +34,7 @@ import {
   type ExercisePage,
   type FoodItem,
   type HealthImportResult,
+  type WebhookToken,
   type WaterDay,
   type WaterEntry,
   type HeatmapDay,
@@ -529,6 +532,34 @@ export async function importGoogleFit(
   options: { bodyMass?: boolean; workouts?: boolean } = {}
 ): Promise<HealthImportResult> {
   return uploadHealthFile("google-fit", file, options);
+}
+
+export async function fetchWebhookTokens(
+  purpose = "scale"
+): Promise<WebhookToken[]> {
+  return api.request({
+    path: "/api/users/me/webhook-tokens",
+    query: { purpose },
+    schema: webhookTokenListSchema,
+  });
+}
+
+export async function mintWebhookToken(
+  purpose = "scale"
+): Promise<WebhookToken> {
+  return api.request({
+    method: "POST",
+    path: "/api/users/me/webhook-tokens",
+    query: { purpose },
+    schema: webhookTokenSchema,
+  });
+}
+
+export async function revokeWebhookToken(id: string): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/users/me/webhook-tokens/${id}`,
+  });
 }
 
 export async function importGarminFit(file: File): Promise<HealthImportResult> {
