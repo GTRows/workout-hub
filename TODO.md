@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-96] [p15] Dark mode toggle (persisted in localStorage + profile column)
-  - Acceptance: Tailwind class-based dark mode wired; toggle in nav; V21 user_profile.theme_preference; RTL covers toggle flipping the html class + persistence across reload.
-
 - [t-97] [p15] PR celebration on set save (when newPr=true)
   - Acceptance: Toast + subtle scale animation on the set card; RTL covers toast appearing for newPr=true fetch response and not for regular sets.
 
@@ -133,3 +130,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-93] 2026-04-25 -- Exercise-detail modal on session screen (tips/mistakes/last-perf, click+escape)
 - [t-94] 2026-04-25 -- @dnd-kit installed + sortable rows in plan viewer + drag handle accessibility test
 - [t-95] 2026-04-25 -- BottomNav <sm + top Nav hidden <sm + 360x800 Playwright responsive spec
+- [t-96] 2026-04-25 -- Class-based dark mode + auto/dark/light cycle toggle + V25 theme_preference column
