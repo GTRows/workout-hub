@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-95] [p15] Responsive audit at 360px + bottom tab-bar below sm
-  - Acceptance: BottomNav component visible under sm; top Nav switches to compact; Playwright tests take viewport screenshots at 360x800 for 5 key pages and assert no horizontal overflow.
-
 - [t-96] [p15] Dark mode toggle (persisted in localStorage + profile column)
   - Acceptance: Tailwind class-based dark mode wired; toggle in nav; V21 user_profile.theme_preference; RTL covers toggle flipping the html class + persistence across reload.
 
@@ -135,3 +132,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-91] 2026-04-25 -- V24 streak_freeze_used_month + computeWithFreeze + 4 new StreakCalculator tests; Phase 14 done
 - [t-93] 2026-04-25 -- Exercise-detail modal on session screen (tips/mistakes/last-perf, click+escape)
 - [t-94] 2026-04-25 -- @dnd-kit installed + sortable rows in plan viewer + drag handle accessibility test
+- [t-95] 2026-04-25 -- BottomNav <sm + top Nav hidden <sm + 360x800 Playwright responsive spec
