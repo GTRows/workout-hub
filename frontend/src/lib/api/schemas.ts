@@ -280,6 +280,23 @@ export const waterDaySchema = z.object({
 export type WaterEntry = z.infer<typeof waterEntrySchema>;
 export type WaterDay = z.infer<typeof waterDaySchema>;
 
+export const achievementSchema = z.object({
+  id: z.string().uuid(),
+  code: z.string(),
+  nameTr: z.string(),
+  nameEn: z.string(),
+  descriptionTr: z.string().nullable().optional(),
+  descriptionEn: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  ruleType: z.string(),
+  threshold: z.number().int(),
+  unlocked: z.boolean(),
+  unlockedAt: z.string().nullable().optional(),
+  progressValue: z.number().int().nullable().optional(),
+});
+export const achievementListSchema = z.array(achievementSchema);
+export type Achievement = z.infer<typeof achievementSchema>;
+
 export const webhookTokenSchema = z.object({
   id: z.string().uuid(),
   token: z.string(),

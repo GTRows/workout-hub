@@ -1,5 +1,6 @@
 import { ApiError, api } from "@/lib/api/client";
 import {
+  achievementListSchema,
   apiErrorSchema,
   authResponseSchema,
   bodyMetricListSchema,
@@ -28,6 +29,7 @@ import {
   weeklyVolumeListSchema,
   workoutDaySchema,
   workoutPlanSchema,
+  type Achievement,
   type AuthResponse,
   type BodyMetric,
   type Exercise,
@@ -532,6 +534,13 @@ export async function importGoogleFit(
   options: { bodyMass?: boolean; workouts?: boolean } = {}
 ): Promise<HealthImportResult> {
   return uploadHealthFile("google-fit", file, options);
+}
+
+export async function fetchAchievements(): Promise<Achievement[]> {
+  return api.request({
+    path: "/api/achievements/me",
+    schema: achievementListSchema,
+  });
 }
 
 export async function fetchWebhookTokens(

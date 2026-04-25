@@ -6,6 +6,7 @@
     "exercises": "Exercises",
     "insights": "Insights",
     "prs": "PRs",
+    "achievements": "Achievements",
     "nutrition": "Nutrition",
     "metrics": "Metrics",
     "profile": "Profile",
@@ -331,6 +332,24 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "loading": "Loading...",
+    "error": "Could not load achievements.",
+    "summary": "{unlocked} of {total} unlocked",
+    "unlockedHeading": "Unlocked",
+    "unlockedEmpty": "No achievements yet. Finish a workout to unlock the first one.",
+    "nextHeading": "Next up",
+    "nextEmpty": "All unlocked. Strong work.",
+    "unlockedAt": "Unlocked: {time}",
+    "threshold": "{rule}: {value}",
+    "rule": {
+      "session_count": "Finished workouts",
+      "streak_days": "Streak days",
+      "pr_count": "Personal records",
+      "volume_kg": "Total volume (kg)"
+    }
   },
   "webhookTokens": {
     "title": "Smart-scale webhook",

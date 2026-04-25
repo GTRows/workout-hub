@@ -6,6 +6,7 @@
     "exercises": "Hareketler",
     "insights": "Analiz",
     "prs": "Rekorlar",
+    "achievements": "Basarimlar",
     "nutrition": "Beslenme",
     "metrics": "Metrikler",
     "profile": "Profil",
@@ -331,6 +332,24 @@
     "cancel": "Iptal",
     "delete": "Sil",
     "edit": "Duzenle"
+  },
+  "achievements": {
+    "title": "Basarimlar",
+    "loading": "Yukleniyor...",
+    "error": "Basarimlar yuklenemedi.",
+    "summary": "{total} basarimdan {unlocked} tanesi acildi",
+    "unlockedHeading": "Acilanlar",
+    "unlockedEmpty": "Henuz basarim yok. Bir antrenman bitir, ilki acilsin.",
+    "nextHeading": "Sirada",
+    "nextEmpty": "Hepsi acildi. Helal olsun.",
+    "unlockedAt": "Acildi: {time}",
+    "threshold": "{rule}: {value}",
+    "rule": {
+      "session_count": "Bitirilen antrenman",
+      "streak_days": "Ardisik gun",
+      "pr_count": "Kisisel rekor",
+      "volume_kg": "Toplam hacim (kg)"
+    }
   },
   "webhookTokens": {
     "title": "Akilli tarti webhook",
