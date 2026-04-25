@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-93] [p15] Exercise-detail modal on session screen
-  - Acceptance: Click on exercise title opens modal with bilingual form tips + common mistakes + last performance; RTL covers open/close + content + keyboard escape.
-
 - [t-94] [p15] dnd-kit visual drag reorder in plan viewer
   - Acceptance: @dnd-kit installed; mouse drag reorders; existing Move up/down buttons stay as keyboard fallback; RTL covers keyboard reorder AND @dnd-kit/test-utils drag simulation.
 
@@ -139,3 +136,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-89] 2026-04-25 -- /achievements grid (unlocked + next-up locked) + nav link + RTL coverage
 - [t-90] 2026-04-25 -- V23 monthly_challenges + admin CRUD + /api/challenges/current with month-bounded progress
 - [t-91] 2026-04-25 -- V24 streak_freeze_used_month + computeWithFreeze + 4 new StreakCalculator tests; Phase 14 done
+- [t-93] 2026-04-25 -- Exercise-detail modal on session screen (tips/mistakes/last-perf, click+escape)
