@@ -1,5 +1,6 @@
 package com.workouthub.sessions;
 
+import com.workouthub.achievements.AchievementEvaluator;
 import com.workouthub.common.web.ConflictException;
 import com.workouthub.common.web.NotFoundException;
 import com.workouthub.exercises.domain.Exercise;
@@ -23,14 +24,17 @@ public class SessionSetsService {
     private final SessionsService sessionsService;
     private final SessionSetRepository sets;
     private final ExerciseRepository exercises;
+    private final AchievementEvaluator achievements;
 
     public SessionSetsService(
             SessionsService sessionsService,
             SessionSetRepository sets,
-            ExerciseRepository exercises) {
+            ExerciseRepository exercises,
+            AchievementEvaluator achievements) {
         this.sessionsService = sessionsService;
         this.sets = sets;
         this.exercises = exercises;
+        this.achievements = achievements;
     }
 
     public SessionSetDto add(UUID userId, UUID sessionId, AddSetRequest req) {
@@ -58,6 +62,7 @@ public class SessionSetsService {
         session.addSet(set);
         try {
             SessionSet saved = sets.saveAndFlush(set);
+            achievements.onSetSaved(userId, isPr);
             return SessionsMapper.toSetDto(saved, isPr ? Boolean.TRUE : null);
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new ConflictException(

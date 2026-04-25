@@ -1,5 +1,6 @@
 package com.workouthub.sessions;
 
+import com.workouthub.achievements.AchievementEvaluator;
 import com.workouthub.common.web.ConflictException;
 import com.workouthub.common.web.NotFoundException;
 import com.workouthub.sessions.domain.WorkoutSession;
@@ -23,10 +24,15 @@ public class SessionsService {
 
     private final WorkoutSessionRepository sessions;
     private final WorkoutDayRepository days;
+    private final AchievementEvaluator achievements;
 
-    public SessionsService(WorkoutSessionRepository sessions, WorkoutDayRepository days) {
+    public SessionsService(
+            WorkoutSessionRepository sessions,
+            WorkoutDayRepository days,
+            AchievementEvaluator achievements) {
         this.sessions = sessions;
         this.days = days;
+        this.achievements = achievements;
     }
 
     public SessionDto start(UUID userId, StartSessionRequest req) {
@@ -75,6 +81,7 @@ public class SessionsService {
             if (req.mood() != null) session.setMood(req.mood());
             if (req.energyLevel() != null) session.setEnergyLevel(req.energyLevel());
         }
+        achievements.onSessionFinished(userId);
         return SessionsMapper.toDto(session);
     }
 
