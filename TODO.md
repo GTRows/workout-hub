@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-81] [p12] /nutrition page with daily totals + food autocomplete + history
-  - Acceptance: Autocomplete against /api/foods; daily kcal + macro bars vs goal; RTL covers add food + delete + day-navigation.
-
 - [t-82] [p12] V16 daily goals on user_profile (kcal + protein/carbs/fat g)
   - Acceptance: 4 new nullable columns; PUT /api/users/me accepts them; nutrition page shows progress; integration + RTL tests.
 
@@ -162,3 +159,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-78] 2026-04-24 -- Optional Authentik OIDC login (hand-rolled, flag-gated, auto-provision) - Phase 11 complete
 - [t-79] 2026-04-24 -- V17 nutrition schema + 50-item TR food seed + repository tests
 - [t-80] 2026-04-24 -- /api/foods search + /api/nutrition per-user CRUD with macro scaling
+- [t-81] 2026-04-24 -- /nutrition page (autocomplete + day nav + per-row macro display)
