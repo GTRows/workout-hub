@@ -4,10 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import {
+  addWater,
   createNutritionEntry,
   deleteNutritionEntry,
+  deleteWater,
   fetchMe,
   fetchNutritionForDate,
+  fetchWaterDay,
   searchFoods,
   type CreateNutritionEntryPayload,
 } from "@/lib/api/endpoints";
@@ -74,6 +77,19 @@ export function NutritionClient() {
     mutationFn: (id: string) => deleteNutritionEntry(id),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["nutrition", date] }),
+  });
+
+  const waterQuery = useQuery({
+    queryKey: ["water", date],
+    queryFn: () => fetchWaterDay(date),
+  });
+  const addWaterMutation = useMutation({
+    mutationFn: (ml: number) => addWater(ml),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["water", date] }),
+  });
+  const undoWaterMutation = useMutation({
+    mutationFn: (id: string) => deleteWater(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["water", date] }),
   });
 
   const entries = dayQuery.data ?? [];
@@ -214,6 +230,40 @@ export function NutritionClient() {
               {createMutation.isPending ? t("saving") : t("add")}
             </Button>
           </div>
+        </div>
+      </Card>
+
+      <Card className="space-y-2" data-testid="water-card">
+        <CardTitle className="text-base">{t("waterTitle")}</CardTitle>
+        <p className="text-sm" data-testid="water-total">
+          {t("waterTotal", { ml: waterQuery.data?.totalMl ?? 0 })}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {[250, 500, 750].map((ml) => (
+            <Button
+              key={ml}
+              size="sm"
+              variant="outline"
+              onClick={() => addWaterMutation.mutate(ml)}
+              disabled={addWaterMutation.isPending}
+              data-testid={`water-add-${ml}`}
+            >
+              + {ml} ml
+            </Button>
+          ))}
+          {waterQuery.data && waterQuery.data.entries.length > 0 && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() =>
+                undoWaterMutation.mutate(waterQuery.data!.entries[0].id)
+              }
+              disabled={undoWaterMutation.isPending}
+              data-testid="water-undo"
+            >
+              {t("waterUndo")}
+            </Button>
+          )}
         </div>
       </Card>
 

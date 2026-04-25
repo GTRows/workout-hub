@@ -32,6 +32,9 @@ const messages = {
     empty: "No entries for this day yet.",
     delete: "Delete",
     deleteConfirm: "Delete this entry?",
+    waterTitle: "Water",
+    waterTotal: "{ml} ml today",
+    waterUndo: "Undo last sip",
   },
 };
 
@@ -131,6 +134,8 @@ describe("NutritionClient", () => {
           return jsonResponse(201, entry("ffffffff-2222-2222-2222-222222222222"));
         }
         if (url.endsWith("/api/users/me")) return jsonResponse(200, ME);
+        if (url.includes("/api/water"))
+          return jsonResponse(200, { date: "2026-04-23", totalMl: 0, entries: [] });
         throw new Error("unexpected fetch: " + url + " " + method);
       })
     );
@@ -181,6 +186,8 @@ describe("NutritionClient", () => {
           return new Response(null, { status: 204 });
         }
         if (url.endsWith("/api/users/me")) return jsonResponse(200, ME);
+        if (url.includes("/api/water"))
+          return jsonResponse(200, { date: "2026-04-23", totalMl: 0, entries: [] });
         throw new Error("unexpected fetch: " + url + " " + method);
       })
     );
@@ -199,6 +206,63 @@ describe("NutritionClient", () => {
     );
   });
 
+  it("posts a water sip when a water-add button is clicked", async () => {
+    let posted: unknown = null;
+    let waterTotal = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.endsWith("/api/users/me")) return jsonResponse(200, ME);
+        if (url.includes("/api/water") && method === "POST") {
+          posted = JSON.parse(init!.body as string);
+          waterTotal = (posted as { ml: number }).ml;
+          return jsonResponse(201, {
+            id: "ffffffff-4444-4444-4444-444444444444",
+            ml: (posted as { ml: number }).ml,
+            consumedAt: "2026-04-23T10:00:00Z",
+          });
+        }
+        if (url.includes("/api/water")) {
+          return jsonResponse(200, {
+            date: "2026-04-23",
+            totalMl: waterTotal,
+            entries: waterTotal
+              ? [
+                  {
+                    id: "ffffffff-5555-5555-5555-555555555555",
+                    ml: waterTotal,
+                    consumedAt: "2026-04-23T10:00:00Z",
+                  },
+                ]
+              : [],
+          });
+        }
+        if (url.includes("/api/nutrition")) return jsonResponse(200, []);
+        if (url.includes("/api/foods")) return jsonResponse(200, []);
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<NutritionClient />);
+    await screen.findByTestId("water-card");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId("water-add-500"));
+
+    await waitFor(() => expect(posted).not.toBeNull());
+    expect((posted as { ml: number }).ml).toBe(500);
+    // The refetch in onSuccess returns the updated total. Just assert
+    // the eventual rendered total reflects the POST without prescribing
+    // a specific number of intermediate fetches.
+    await waitFor(
+      () =>
+        expect(screen.getByTestId("water-total")).toHaveTextContent("500 ml today"),
+      { timeout: 2000 }
+    );
+  });
+
   it("navigates to the previous day when day-prev is clicked", async () => {
     const seenDates: string[] = [];
     vi.stubGlobal(
@@ -206,6 +270,8 @@ describe("NutritionClient", () => {
       vi.fn(async (input: string | URL | Request) => {
         const url = typeof input === "string" ? input : input.toString();
         if (url.endsWith("/api/users/me")) return jsonResponse(200, ME);
+        if (url.includes("/api/water"))
+          return jsonResponse(200, { date: "2026-04-23", totalMl: 0, entries: [] });
         const m = url.match(/date=([^&]+)/);
         if (m) seenDates.push(decodeURIComponent(m[1]));
         return jsonResponse(200, []);

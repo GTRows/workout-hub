@@ -87,7 +87,10 @@
     "dayList": "Today's foods",
     "empty": "No entries for this day yet.",
     "delete": "Delete",
-    "deleteConfirm": "Delete this entry?"
+    "deleteConfirm": "Delete this entry?",
+    "waterTitle": "Water",
+    "waterTotal": "{ml} ml today",
+    "waterUndo": "Undo last sip"
   },
   "metrics": {
     "title": "Body metrics",

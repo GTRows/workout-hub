@@ -265,6 +265,21 @@ export const nutritionEntryListSchema = z.array(nutritionEntrySchema);
 export type FoodItem = z.infer<typeof foodItemSchema>;
 export type NutritionEntry = z.infer<typeof nutritionEntrySchema>;
 
+export const waterEntrySchema = z.object({
+  id: z.string().uuid(),
+  ml: z.number().int(),
+  consumedAt: z.string(),
+});
+
+export const waterDaySchema = z.object({
+  date: z.string(),
+  totalMl: z.number().int(),
+  entries: z.array(waterEntrySchema),
+});
+
+export type WaterEntry = z.infer<typeof waterEntrySchema>;
+export type WaterDay = z.infer<typeof waterDaySchema>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;

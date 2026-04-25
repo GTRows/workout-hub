@@ -10,6 +10,8 @@ import {
   lastPerformanceSchema,
   nutritionEntryListSchema,
   nutritionEntrySchema,
+  waterDaySchema,
+  waterEntrySchema,
   oneRmPointListSchema,
   personalRecordListSchema,
   sessionDetailSchema,
@@ -27,6 +29,8 @@ import {
   type Exercise,
   type ExercisePage,
   type FoodItem,
+  type WaterDay,
+  type WaterEntry,
   type HeatmapDay,
   type LastPerformance,
   type NutritionEntry,
@@ -288,6 +292,30 @@ export async function deleteNutritionEntry(id: string): Promise<void> {
   await api.request({
     method: "DELETE",
     path: `/api/nutrition/${id}`,
+  });
+}
+
+export async function fetchWaterDay(date?: string): Promise<WaterDay> {
+  return api.request({
+    path: "/api/water",
+    query: date ? { date } : undefined,
+    schema: waterDaySchema,
+  });
+}
+
+export async function addWater(ml: number): Promise<WaterEntry> {
+  return api.request({
+    method: "POST",
+    path: "/api/water",
+    body: { ml, consumedAt: new Date().toISOString() },
+    schema: waterEntrySchema,
+  });
+}
+
+export async function deleteWater(id: string): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/water/${id}`,
   });
 }
 

@@ -87,7 +87,10 @@
     "dayList": "Bugun yenenler",
     "empty": "Bu gun icin kayit yok.",
     "delete": "Sil",
-    "deleteConfirm": "Bu kaydi sil?"
+    "deleteConfirm": "Bu kaydi sil?",
+    "waterTitle": "Su",
+    "waterTotal": "Bugun {ml} ml",
+    "waterUndo": "Son yudumu geri al"
   },
   "metrics": {
     "title": "Vucut metrikleri",
