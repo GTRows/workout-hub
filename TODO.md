@@ -13,9 +13,6 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Active
 
-- [t-88] [p14] V20 achievements + user_achievements + rule evaluator
-  - Acceptance: 10 seeded achievement definitions; evaluator runs on set-save and session-finish; per-achievement unit tests cover unlock conditions + idempotency (double-unlock prevented).
-
 - [t-89] [p14] /achievements page (unlocked grid + progress to next)
   - Acceptance: /api/achievements/me lists unlocked + next-3 progress; RTL covers render with mocked payload + progress bars.
 
@@ -148,3 +145,4 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-85] 2026-04-25 -- Google Fit parser (Jackson, dataPoint+session shapes) + /api/health/import/google-fit
 - [t-86] 2026-04-25 -- Hand-rolled Garmin .fit parser + V20 heart_rate_avg_bpm + /api/health/import/fit
 - [t-87] 2026-04-25 -- V21 webhook_tokens + /api/webhooks/scale/{token} + profile token UI; Phase 13 complete
+- [t-88] 2026-04-25 -- V22 achievements + 10 seed defs + AchievementEvaluator hooks (session/set) + /api/achievements/me
