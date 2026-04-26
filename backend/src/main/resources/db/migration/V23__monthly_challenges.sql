@@ -5,7 +5,7 @@
 
 CREATE TABLE monthly_challenges (
     id              UUID PRIMARY KEY,
-    year_month      CHAR(7)      NOT NULL UNIQUE,
+    year_month      VARCHAR(7)   NOT NULL UNIQUE,
     name_tr         TEXT         NOT NULL,
     name_en         TEXT         NOT NULL,
     description_tr  TEXT,
