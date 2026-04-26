@@ -15,9 +15,7 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 
 ## Blocked
 
-- [t-92] [p15] Real app icon asset set (closes setup-icon DEFERRED)
-  - Acceptance: Designed 512/192/maskable/apple-touch PNGs committed; placeholder PNGs replaced; Lighthouse PWA >= 90; setup-icon removed from DEFERRED.md.
-  - Blocked: needs designed PNGs from the user (2026-04-25); not autonomously generatable.
+(none)
 
 ## Done
 
@@ -126,4 +124,5 @@ Ids are monotonic (`t-1`, `t-2`, ...). Never reuse. Never renumber.
 - [t-95] 2026-04-25 -- BottomNav <sm + top Nav hidden <sm + 360x800 Playwright responsive spec
 - [t-96] 2026-04-25 -- Class-based dark mode + auto/dark/light cycle toggle + V25 theme_preference column
 - [t-97] 2026-04-25 -- PrToast component + session-client integration (newPr=true gates the toast)
-- [t-98] 2026-04-25 -- ExerciseMedia component (IntersectionObserver gate, video > image fallback) on /exercises/[id]; v0.2 roadmap done except t-92 icon
+- [t-98] 2026-04-25 -- ExerciseMedia component (IntersectionObserver gate, video > image fallback) on /exercises/[id]
+- [t-92] 2026-04-26 -- Generated barbell-on-sky-blue icon set from SVG (sharp); 192/512/maskable-512/apple-touch + source.svg checked in; setup-icon DEFERRED entry removed

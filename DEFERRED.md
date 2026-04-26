@@ -20,9 +20,4 @@ Do not use TODO comments in code instead of this file. Code-level TODOs rot sile
 
 ## Entries
 
-## Real project icon at `assets/icon.png`
-
-- **Why deferred:** needs design input (logo, palette); no graphics tooling available in the current environment to generate a 512x512+ PNG from a source SVG
-- **Trigger:** before the first public release OR when the user supplies an icon asset to place
-- **Owner:** project owner (product/branding)
-- **Added:** 2026-04-22
+(none)
