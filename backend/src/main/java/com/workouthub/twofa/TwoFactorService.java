@@ -18,6 +18,7 @@ import dev.samstevens.totp.secret.SecretGenerator;
 import dev.samstevens.totp.time.SystemTimeProvider;
 import dev.samstevens.totp.time.TimeProvider;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,7 @@ public class TwoFactorService {
     private final SecretGenerator secretGenerator;
     private final CodeVerifier verifier;
 
+    @Autowired
     public TwoFactorService(UserTotpRepository repo, UserRepository users) {
         this(repo, users,
                 new DefaultSecretGenerator(),
