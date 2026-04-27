@@ -86,7 +86,9 @@ class V2UsersAndProfileMigrationTest extends AbstractIntegrationTest {
                 ORDER BY ordinal_position
                 """,
                 String.class);
-        assertThat(columns).containsExactly(
+        // Later migrations append columns to user_profile (nutrition goals,
+        // streak freeze, theme); assert only that the V2-introduced set is present.
+        assertThat(columns).contains(
                 "user_id", "height_cm", "weight_kg", "birth_date", "gender",
                 "health_notes", "goals", "created_at", "updated_at");
     }

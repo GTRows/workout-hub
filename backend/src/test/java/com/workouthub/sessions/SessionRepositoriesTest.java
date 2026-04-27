@@ -59,6 +59,7 @@ class SessionRepositoriesTest extends AbstractIntegrationTest {
 
         WorkoutSession finished = new WorkoutSession();
         finished.setUserId(user.id());
+        finished.setStartedAt(Instant.now().minusSeconds(3600));
         finished.setEndedAt(Instant.now());
         sessions.save(finished);
 

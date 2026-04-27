@@ -14,7 +14,7 @@ public final class PrDetector {
         if (reps == 1) return weightKg;
         BigDecimal factor = BigDecimal.ONE.add(
                 BigDecimal.valueOf(reps).divide(REP_DENOM, 6, RoundingMode.HALF_UP));
-        return weightKg.multiply(factor);
+        return weightKg.multiply(factor).setScale(3, RoundingMode.HALF_UP);
     }
 
     public static boolean beatsPriorBest(

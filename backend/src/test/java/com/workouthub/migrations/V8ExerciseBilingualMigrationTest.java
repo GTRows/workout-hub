@@ -30,6 +30,9 @@ class V8ExerciseBilingualMigrationTest extends AbstractIntegrationTest {
 
     @Test
     void englishArrayColumnsAreTextArrays() {
+        // queryForList without an element type returns List<Map<String,Object>>;
+        // passing Map.class routes through SingleColumnRowMapper and fails on
+        // the two-column SELECT with "Incorrect column count".
         var rows = jdbc.queryForList(
                 """
                 SELECT column_name, udt_name
@@ -37,8 +40,7 @@ class V8ExerciseBilingualMigrationTest extends AbstractIntegrationTest {
                 WHERE table_name = 'exercises'
                   AND column_name IN ('form_tips_en', 'common_mistakes_en',
                                       'form_tips_tr', 'common_mistakes_tr')
-                """,
-                Map.class);
+                """);
         assertThat(rows).hasSize(4);
         assertThat(rows).allMatch(r -> "_text".equals(r.get("udt_name")),
                 "expected all four array columns to use the PostgreSQL text[] (_text) udt");
