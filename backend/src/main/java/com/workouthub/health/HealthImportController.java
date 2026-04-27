@@ -67,7 +67,7 @@ public class HealthImportController {
         try (var stream = file.getInputStream()) {
             HealthImportResultDto result = service.importGarminFit(principal.userId(), stream);
             return ResponseEntity.ok(result);
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
