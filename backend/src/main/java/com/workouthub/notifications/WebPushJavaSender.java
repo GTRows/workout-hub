@@ -34,15 +34,23 @@ public class WebPushJavaSender implements WebPushSender {
     private final PushService push;
 
     public WebPushJavaSender(VapidConfig vapid) {
+        PushService initialized;
         try {
-            this.push = new PushService(vapid.publicKey(), vapid.privateKey(), vapid.subject());
+            initialized = new PushService(vapid.publicKey(), vapid.privateKey(), vapid.subject());
         } catch (Exception ex) {
-            throw new IllegalStateException("Failed to initialize PushService", ex);
+            // VAPID keys are mis-formatted (common in tests / unconfigured envs).
+            // Stay loadable so the rest of the context comes up; degrade send().
+            log.warn("PushService init failed; webpush sender will be inert: {}", ex.getMessage());
+            initialized = null;
         }
+        this.push = initialized;
     }
 
     @Override
     public Outcome send(PushSubscription sub, String jsonPayload) {
+        if (push == null) {
+            return Outcome.TRANSIENT_FAILURE;
+        }
         try {
             Subscription.Keys keys = new Subscription.Keys(sub.getP256dhKey(), sub.getAuthKey());
             Subscription remote = new Subscription(sub.getEndpoint(), keys);
