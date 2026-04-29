@@ -56,15 +56,16 @@ Report each mismatch as: `drift: <path> has <value>, expected <PROJECT.yaml valu
 Run `claude plugin list`. Cross-check against the recommended set:
 
 **Certain** — should always be installed:
-- `code-simplifier`
-- `commit-commands`
-- `pr-review-toolkit`
-- `claude-md-management`
-- `skill-creator`
-- `security-guidance`
+- `code-simplifier@claude-plugins-official`
+- `commit-commands@claude-plugins-official`
+- `pr-review-toolkit@claude-plugins-official`
+- `claude-md-management@claude-plugins-official`
+- `skill-creator@claude-plugins-official`
+- `security-guidance@claude-plugins-official`
+- `oh-my-claudecode@omc` — also verify the `omc` marketplace exists via `claude plugin marketplace list`
 
 **Conditional** — only if the project has a UI:
-- `frontend-design`
+- `frontend-design@claude-code-plugins`
 
 Report any missing certain-set plugins.
 
@@ -104,7 +105,18 @@ Report only file paths and line numbers — **never print the secret itself**.
 ## 8. Template version
 
 - If `.claude/VERSION` exists, print its content.
-- You do not know the canonical latest — just report what is in the file.
+- Run `gh release list --repo GTRows/claude-code-template --limit 1 --json tagName --jq '.[0].tagName'` (or `git ls-remote --tags` fallback) to fetch the upstream latest tag.
+- If the upstream tag is newer, print: `template update available: vX → vY (run /update)`.
+- If `gh` and network are unavailable, print: `cannot reach upstream — skipped version drift check`.
+
+## 9. Template manifest drift
+
+- If `.claude/.template-manifest.json` exists, run:
+  ```bash
+  python .claude/scripts/manifest.py --check
+  ```
+- Report the list of paths the user has modified relative to the recorded manifest. This is informational only — modifications are normal. Useful before running `/update` so the user knows which files will hit the conflict path.
+- If the manifest is missing, suggest running `/update` (which will regenerate it) or `python .claude/scripts/manifest.py --write` to seed it.
 
 ---
 

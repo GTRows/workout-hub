@@ -33,6 +33,8 @@ PROTECTED_EXACT = {
     "build.gradle.kts",
     "gradlew",
     "gradlew.bat",
+    "compose.yml",
+    "compose.yaml",
     "project.yaml",
     "changelog.md",
     "release.md",
@@ -41,8 +43,6 @@ PROTECTED_EXACT = {
     "dockerfile",
     "docker-compose.yml",
     "docker-compose.yaml",
-    "compose.yml",
-    "compose.yaml",
 }
 
 # File suffixes that are always protected
@@ -65,6 +65,7 @@ EXEMPT_DIRS = (
     ".claude/skills",
     ".claude/hooks",
     ".claude/agents",
+    ".claude/scripts",
 )
 # -----------------------------------
 
