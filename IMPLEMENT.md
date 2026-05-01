@@ -42,7 +42,7 @@ Read, do NOT blindly copy. Decide per-file whether to merge, skip, or ask.
 | `.claude/TIPS.md` | **Copy** | Reference doc. |
 | `.claude/VERSION` | **Copy** | Template version pin. |
 | `CLAUDE.md` | **Merge carefully** | See section 4. |
-| `PROJECT.yaml` | **Create if missing** | If present, leave it alone. |
+| `IDENTITY.yaml` | **Create if missing** | If present, leave it alone. |
 | `TODO.md` | **Create if missing** | Do NOT overwrite existing. |
 | `DEFERRED.md` | **Create if missing** | Do NOT overwrite existing. |
 | `CHANGELOG.md` | **Ask** | Only if the project does not already have one. |
@@ -74,7 +74,7 @@ Show the user the diff before writing.
 
 ## 4. Merging `CLAUDE.md`
 
-If the target has no `CLAUDE.md`, copy ours and then run `/setup` (section 8).
+If the target has no `CLAUDE.md`, copy ours and then run `/gtr:setup` (section 8).
 
 If one exists, do NOT overwrite. Instead, offer to add only the sections that are missing:
 
@@ -129,14 +129,14 @@ Do NOT push. Let the user review and push themselves.
 
 ---
 
-## 8. Run `/setup`
+## 8. Run `/gtr:setup`
 
 Tell the user:
 
-> I have merged the template. Run `/setup` now to let me detect your stack
-> and fill in `CLAUDE.md` / `PROJECT.yaml`.
+> I have merged the template. Run `/gtr:setup` now to let me detect your stack
+> and fill in `CLAUDE.md` / `IDENTITY.yaml`.
 
-`/setup` is idempotent. It will not re-do anything that is already filled in.
+`/gtr:setup` is idempotent. It will not re-do anything that is already filled in.
 
 ---
 
@@ -148,7 +148,7 @@ Remove `/tmp/ccp-template` only after the user confirms everything looks right.
 
 ## Non-goals
 
-- Do NOT install plugins silently — `/setup` will ask.
+- Do NOT install plugins silently — `/gtr:setup` will ask.
 - Do NOT rewrite the user's existing CI or release workflows.
 - Do NOT change the user's commit message style or branch strategy unless asked.
 - Do NOT delete anything the user had before.

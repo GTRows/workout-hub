@@ -1,8 +1,10 @@
 ---
-description: "[TEMPLATE] First-time project setup wizard. Detects stack, fills CLAUDE.md, installs plugins, creates task files, writes setup marker."
+description: "[TEMPLATE] First-time project setup wizard. Detects stack, fills CLAUDE.md, installs plugins, hands off planning to GSD, writes setup marker."
 ---
 
 You are the **template setup wizard**. Run this once per project. It is idempotent — safe to re-run to refresh detected values.
+
+`$ARGUMENTS` may include `--extras`. When present, **skip steps 1–11 entirely** and run only step 12 (Optional scaffolding) plus the closing manifest refresh and summary. Use this when the user already finished core setup and wants to add LICENSE / SECURITY.md / ADR / dependabot etc. without re-answering the stack-detection and language questions.
 
 Do not narrate each step while running. Execute them, then print the summary in the final step.
 
@@ -38,9 +40,9 @@ Summarize detection in one short paragraph. **Confirm with the user** before pro
 
 ---
 
-## 3. Fill `PROJECT.yaml` (single source of truth)
+## 3. Fill `IDENTITY.yaml` (single source of truth)
 
-`PROJECT.yaml` at repo root is the canonical identity and release config. Every other manifest derives from it.
+`IDENTITY.yaml` at repo root is the canonical identity and release config. Every other manifest derives from it.
 
 If missing, copy the template skeleton. Then fill:
 
@@ -51,26 +53,26 @@ If missing, copy the template skeleton. Then fill:
 | `identity.description` | README first paragraph, or ask. |
 | `identity.homepage` | `package.json#homepage`, else empty. |
 | `identity.license` | `LICENSE` header or `package.json#license`. Ask if ambiguous. |
-| `identity.icon` | `assets/icon.*`, `static/icon.*`, `src-tauri/icons/`. If none, leave as `assets/icon.png` and open a TODO. |
+| `identity.icon` | `assets/icon.*`, `static/icon.*`, `src-tauri/icons/`. If none, leave as `assets/icon.png` and add a line to `.claude/setup-followups.md`. |
 | `version` | Highest of `package.json#version` / `pyproject.toml` / `Cargo.toml`. Default `0.1.0`. Flag drift. |
 | `release.platforms` | Infer from stack (Electron → windows+macos; CLI binary → windows-x64+linux-x64+macos-arm64; web-only → empty). |
 
-If any derived manifest disagrees with `PROJECT.yaml#version` after filling, sync it to `PROJECT.yaml`'s value and open a TODO to verify downstream.
+If any derived manifest disagrees with `IDENTITY.yaml#version` after filling, sync it to `IDENTITY.yaml`'s value and add a line to `.claude/setup-followups.md` to verify downstream.
 
 ---
 
 ## 4. Fill `CLAUDE.md`
 
-Replace placeholder blocks using values from `PROJECT.yaml`:
+Replace placeholder blocks using values from `IDENTITY.yaml`:
 
 - `PROJECT_NAME` → `identity.name`
 - `Description` → `identity.description`
 - `Tech Stack` → from detection
 - `Platform` → from detection
 
-**Development Commands**: pull from `package.json#scripts`, Python entry points, `Makefile`, etc. Placeholders you cannot fill confidently stay as-is and become TODO tasks in step 8.
+**Development Commands**: pull from `package.json#scripts`, Python entry points, `Makefile`, etc. Placeholders you cannot fill confidently stay as-is and become follow-ups captured in `.claude/setup-followups.md`.
 
-**Sections to leave placeholder** when the code doesn't tell you — open a follow-up TODO instead of fabricating:
+**Sections to leave placeholder** when the code doesn't tell you — add a line to `.claude/setup-followups.md` instead of fabricating:
 - `Architecture / Entry Flow`
 - `Module Breakdown`
 - `Data Storage`
@@ -132,14 +134,14 @@ Whatever the user picks, append a binding rule to `CLAUDE.md` under a new `## Co
 - Slash command output formatting (tables, status lines) stays English.
 ```
 
-This rule overrides any default. Do not switch languages mid-project unless the user re-runs `/setup`.
+This rule overrides any default. Do not switch languages mid-project unless the user re-runs `/gtr:setup`.
 
 **b. Project localization (i18n)**
 
 > Will this project ship to end users in multiple languages? (yes / no / later)
 
 - **no** → no further action.
-- **later** → open a TODO task `setup-i18n` with acceptance: "i18n strategy decided".
+- **later** → add a `setup-i18n` follow-up line to `.claude/setup-followups.md`: "i18n strategy decided".
 - **yes** → ask one follow-up: `Which UI languages will you support? (comma-separated, e.g. en, tr, de)`. Then append to `CLAUDE.md` under `## Localization`:
   ```
   - Supported UI languages: <list>.
@@ -148,7 +150,7 @@ This rule overrides any default. Do not switch languages mid-project unless the 
   - User-facing strings must NOT be hard-coded. Wrap them in the
     project's translation function.
   ```
-  Open a TODO task `pick-i18n-lib` with acceptance: "i18n library installed, default + at least one non-default locale rendering".
+  Add `pick-i18n-lib` follow-up to `.claude/setup-followups.md`: "i18n library installed, default + at least one non-default locale rendering".
 
 ---
 
@@ -183,21 +185,28 @@ claude plugin install <name>@<marketplace>
 
 Users running Claude Code with `--dangerously-skip-permissions` get silent installs; otherwise they get one prompt per plugin.
 
+**Step 8c — pin the installed set.** After installs land, write the pin file so `/gtr:doctor` can flag drift later:
+
+```bash
+python .claude/scripts/plugins.py --pin
+```
+
+This records `name@marketplace` for every currently installed plugin into `.claude/plugin-pin.json` (committed). The next `/gtr:doctor` run uses it to detect uninstalled or missing plugins.
+
 ---
 
-## 9. Create task files
+## 9. Planning hand-off (GSD)
 
-- Ensure `TODO.md` exists at repo root. Copy the template skeleton if missing (Active / Blocked / Done sections).
-- Ensure `DEFERRED.md` exists at repo root. Copy the template skeleton if missing.
+Ask exactly:
 
-For every `CLAUDE.md` section you could not fill in step 4, append a task to `TODO.md → Active`:
+> Do you want to use **GSD** for planning and execution? (recommended)
+> - **yes**   → I will run `/gsd:new-project` next (and `/gsd:map-codebase` first if this is an existing codebase). The brief is auto-filled from `IDENTITY.yaml` / `CLAUDE.md` / `README.md`; you only confirm or tweak.
+> - **no**    → skip planning. Template still works for hooks, releases, onboarding, doctor.
+> - **later** → captured in `.claude/setup-followups.md` (gitignored). `/gtr:doctor` surfaces it.
 
-```
-- [setup-N] Document {section} in CLAUDE.md
-  - Acceptance: {section} has concrete content, no `<!-- … -->` placeholders remain
-```
+For every `CLAUDE.md` section you could **not** fill in step 4, capture it in `.claude/setup-followups.md` (one line per gap with the section name). These become natural seeds for the first GSD plan when the user later runs `/gsd:plan-phase 1`.
 
-`N` is sequential, starting at 1 (`setup-1`, `setup-2`, ...).
+Do **NOT** create `TODO.md` or `DEFERRED.md` — both are removed in v0.2.0. Planning lives under `.planning/` (managed by GSD) or not at all.
 
 ---
 
@@ -208,11 +217,11 @@ Ask:
 > Do you want CI (lint + test on push/PR) wired up? (yes / no / later)
 
 - **no** → skip.
-- **later** → open TODO `setup-ci`, acceptance: "CI scaffolding decision revisited".
+- **later** → add `setup-ci` follow-up to `.claude/setup-followups.md`: "CI scaffolding decision revisited".
 - **yes** →
   1. If `.github/workflows/ci.yml` is missing and `ci.yml.template` exists, copy template → `ci.yml`. Do NOT delete the `.template`.
   2. Tell the user which `REPLACE` markers to customise (runtime setup, lint command, test command).
-  3. Open TODO `ci-verify`, acceptance: "push a dummy commit to a branch and confirm the CI job runs green".
+  3. Add `ci-verify` follow-up to `.claude/setup-followups.md`: "push a dummy commit to a branch and confirm the CI job runs green".
 
 ---
 
@@ -223,14 +232,14 @@ Ask:
 > Do you want release automation for this project? (yes / no / later)
 
 - **no** → skip entirely. Do not create `CHANGELOG.md`, `RELEASE.md`, or the workflow.
-- **later** → open TODO `setup-release`, acceptance: "release scaffolding decision revisited".
+- **later** → add `setup-release` follow-up to `.claude/setup-followups.md`: "release scaffolding decision revisited".
 - **yes** →
   1. If `CHANGELOG.md` is missing at repo root, copy the template skeleton.
   2. If `RELEASE.md` is missing at repo root, copy the template skeleton.
   3. If `.github/workflows/release.yml` is missing and `release.yml.template` exists, copy template → `release.yml`. Do NOT delete the `.template`.
   4. Tell the user which `REPLACE` markers to customise (test command, per-platform build command).
-  5. Reconcile `PROJECT.yaml#release.platforms` with the workflow matrix. Ask which platforms to enable; prune the rest from both files.
-  6. Open TODO `release-verify`, acceptance: "dry-run a pre-release tag (e.g. `v0.0.1-rc.1`) and confirm the draft release appears on GitHub".
+  5. Reconcile `IDENTITY.yaml#release.platforms` with the workflow matrix. Ask which platforms to enable; prune the rest from both files.
+  6. Add `release-verify` follow-up to `.claude/setup-followups.md`: "dry-run a pre-release tag (e.g. `v0.0.1-rc.1`) and confirm the draft release appears on GitHub".
 
 ---
 
@@ -250,15 +259,15 @@ Ask the user once, listing every option:
 
 For each picked option:
 
-- `LICENSE` → write the MIT text with `<year>` / `<owner>` filled in. Update `PROJECT.yaml#identity.license` to `MIT`.
-- `SECURITY.md` → minimal disclosure policy (email contact, expected response time, supported versions table — fill from `PROJECT.yaml`).
+- `LICENSE` → write the MIT text with `<year>` / `<owner>` filled in. Update `IDENTITY.yaml#identity.license` to `MIT`.
+- `SECURITY.md` → minimal disclosure policy (email contact, expected response time, supported versions table — fill from `IDENTITY.yaml`).
 - `CONTRIBUTING.md` → derive from this CLAUDE.md's `Git and Commits`, `Code Standards`, `File Organization` sections.
 - `.github/CODEOWNERS` → ask for the user's GitHub handle, default `* @<handle>`.
 - `.github/dependabot.yml` → infer ecosystem from detection in step 2 (npm, pip, cargo, gomod, ...).
 - `.pre-commit-config.yaml` → infer hooks from stack (ruff for Python, prettier for JS, etc.); leave a comment block of suggested hooks the user can opt into.
 - `.env.example` → only if the project already imports `dotenv` / uses `os.environ.get` patterns. Scan top-level source for variable names and stub them with empty values.
 
-For files the user did not pick, do nothing — do not open TODOs for them.
+For files the user did not pick, do nothing — do not add follow-ups for them.
 
 ---
 
@@ -282,7 +291,7 @@ type: <fork|primary>
 
 Ensure `.claude/.setup-complete` is listed in `.gitignore` — the marker is per-clone, not per-repo.
 
-Then write the template manifest so `/update` can later detect which files the user has modified:
+Then write the template manifest so `/gtr:update` can later detect which files the user has modified:
 
 ```bash
 python .claude/scripts/manifest.py --write
@@ -297,8 +306,8 @@ Add `.claude/.template-manifest.json` to git so it ships with the project.
 Print a short summary:
 
 - What you filled in `CLAUDE.md`
-- TODO tasks you left open (with their ids)
+- Follow-ups captured in `.claude/setup-followups.md`
 - Plugins installed
 - Fork or primary
 - Whether CI and release scaffolding were activated
-- Next step — usually `/task list` or starting the first TODO task
+- Next step — usually `/gsd:new-project` (if planning was opted in) or `/gtr:menu` for the option list

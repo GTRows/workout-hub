@@ -52,7 +52,7 @@ The next session's first job should be a single PR that fixes all three. Each is
 - `e2c0cc9` `WebPushJavaSender` stays loadable with placeholder VAPID keys
 - `4193a53` V2/V8 brittle assertions, Epley scale, session ts ordering, 401-on-anon entry point
 - `26b6636` `/api/health/import/fit` returns 400 (not 500) for bogus input
-- `a600a58` template pull from `claude-code-template` HEAD: new `/menu`, `/onboard`, `/update`, manifest system, hook tests, broader secret-file deny
+- `a600a58` template pull from `claude-code-template` HEAD: new `/gtr:menu`, `/gtr:onboard`, `/gtr:update`, manifest system, hook tests, broader secret-file deny
 
 ## Key files / pointers
 
@@ -68,7 +68,7 @@ The next session's first job should be a single PR that fixes all three. Each is
 
 1. **Fix the three pre-existing CI failures** (refresh-token collisions, brute-force lockout, export-format example). Single PR, three commits. Backend turns green.
 2. **Triage Dependabot alerts** — 1 high, 11 moderate. Mostly transitive `next` / `vite` chain.
-3. **Cut v0.2.0 release**: run `/release 0.2.0`, push the tag, let the release workflow draft the GitHub Release.
+3. **Cut v0.2.0 release**: run `/gtr:release 0.2.0`, push the tag, let the release workflow draft the GitHub Release.
 4. **Plan v0.3** with `/gsd:new-milestone`. Likely candidates: real-time sync (Phase 16), social/sharing layer, AI coach loopback (the deferred "AI olmaz" item the user explicitly declined — keep deferred unless they revisit), real branch protection once repo is public or upgraded.
 
 ## How to resume cleanly

@@ -5,16 +5,16 @@ This file provides guidance to Claude Code when working with code in this reposi
 ## First-time setup check
 
 Before doing any coding work, check for `.claude/.setup-complete`.
-- If missing: recommend `/setup` to the user and wait for confirmation before starting implementation. Read-only questions and template maintenance are fine without it.
+- If missing: recommend `/gtr:setup` to the user and wait for confirmation before starting implementation. Read-only questions and template maintenance are fine without it.
 - If present: proceed normally.
 
 ## Available commands
 
-- `/tpl` — list every template command, hook, and file in this repo.
-- `/setup` — first-time wizard (only needed once per clone).
+- `/gtr:help` — list every template command, hook, and file in this repo.
+- `/gtr:setup` — first-time wizard (only needed once per clone).
 - `/task <subcommand>` — manage persistent TODO.md tasks. `/task` with no args prints usage.
-- `/doctor` — read-only health check.
-- `/release <version>` — prepare a release (bump, rotate CHANGELOG, commit, tag). Never pushes.
+- `/gtr:doctor` — read-only health check.
+- `/gtr:release <version>` — prepare a release (bump, rotate CHANGELOG, commit, tag). Never pushes.
 - Plugin commands: `/commit`, `/commit-push-pr`, `/review-pr`, `/revise-claude-md`, `/create-skill`.
 
 ## Task workflow
@@ -171,7 +171,7 @@ Commands are placeholders until the PHASE 0 scaffolding lands. Update this secti
 
 The following files are protected by a pre-edit hook and require explicit user confirmation to edit:
 
-- `PROJECT.yaml`, `CHANGELOG.md`, `RELEASE.md`
+- `IDENTITY.yaml`, `CHANGELOG.md`, `RELEASE.md`
 - `pom.xml` (backend Maven); `build.gradle` / `build.gradle.kts` / `gradlew` / `gradlew.bat` if Gradle is ever added
 - `package.json`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` (frontend)
 - `Dockerfile`, `docker-compose.yml`, `docker-compose.yaml`, `compose.yml`, `compose.yaml`
@@ -214,9 +214,9 @@ See `.claude/TIPS.md` for the format. Do not leave TODO comments in code instead
 
 ## Release
 
-- **Identity**: `PROJECT.yaml` at repo root is the single source of truth for `name`, `display_name`, `version`, `icon`, license, and release config. Every derived manifest (`package.json`, `pyproject.toml`, etc.) follows it.
+- **Identity**: `IDENTITY.yaml` at repo root is the single source of truth for `name`, `display_name`, `version`, `icon`, license, and release config. Every derived manifest (`package.json`, `pyproject.toml`, etc.) follows it.
 - **Changelog**: `CHANGELOG.md` uses the Keep a Changelog format. The release workflow extracts notes from the matching `## [x.y.z]` section.
 - **Runbook**: See `RELEASE.md` for the end-to-end release procedure (preflight, cut, post-release, rollback).
 - **Automation**: `.github/workflows/release.yml` triggers on tag push `v*.*.*`. Release is test-gated, matrix-built per platform, checksum-signed, and draft-first — a maintainer publishes manually.
-- **Version bumps**: Use `/release <version>` to do the mechanical steps (bump `PROJECT.yaml`, rotate `CHANGELOG.md`, sync derived manifests, commit, tag). Push is always manual.
-- **Identity drift**: If `PROJECT.yaml` disagrees with a derived manifest, `PROJECT.yaml` wins. `/doctor` reports drift; fix it by updating the derived file, never the other direction.
+- **Version bumps**: Use `/gtr:release <version>` to do the mechanical steps (bump `IDENTITY.yaml`, rotate `CHANGELOG.md`, sync derived manifests, commit, tag). Push is always manual.
+- **Identity drift**: If `IDENTITY.yaml` disagrees with a derived manifest, `IDENTITY.yaml` wins. `/gtr:doctor` reports drift; fix it by updating the derived file, never the other direction.

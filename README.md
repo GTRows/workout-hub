@@ -21,10 +21,10 @@ rm -f .claude/.setup-complete
 # 3. Open Claude Code and run the wizard in a fresh session
 claude
 # then inside Claude Code:
-/setup
+/gtr:setup
 ```
 
-`/setup` detects the stack, fills `CLAUDE.md`, writes `PROJECT.yaml`, installs recommended plugins, and sets up task tracking. Idempotent — safe to re-run.
+`/gtr:setup` detects the stack, fills `CLAUDE.md`, writes `IDENTITY.yaml`, installs recommended plugins, and sets up task tracking. Idempotent — safe to re-run.
 
 ### B. Implement into an existing project
 
@@ -32,7 +32,7 @@ Open Claude Code inside your existing repo and say:
 
 > Implement https://github.com/GTRows/claude-code-template into this project. Follow IMPLEMENT.md from the template repo.
 
-Claude will clone the template, merge hooks and commands non-destructively, leave your `README.md` and existing configs untouched, and run `/setup` when done. See [IMPLEMENT.md](./IMPLEMENT.md) for the exact runbook.
+Claude will clone the template, merge hooks and commands non-destructively, leave your `README.md` and existing configs untouched, and run `/gtr:setup` when done. See [IMPLEMENT.md](./IMPLEMENT.md) for the exact runbook.
 
 ---
 
@@ -42,22 +42,22 @@ Claude will clone the template, merge hooks and commands non-destructively, leav
 
 | Command | Purpose |
 |---------|---------|
-| `/setup` | First-time project wizard. Fills CLAUDE.md, installs plugins, scaffolds task files. |
+| `/gtr:setup` | First-time project wizard. Fills CLAUDE.md, installs plugins, scaffolds task files. |
 | `/task <sub>` | Persistent TODO.md tasks. Subcommands: `list`, `next`, `add`, `done`, `block`, `update`, `plan`. |
-| `/doctor` | Read-only health check: setup marker, plugin status, CLAUDE.md placeholders, identity drift, secrets. |
-| `/release <ver>` | Prepare a release: bump PROJECT.yaml, rotate CHANGELOG, sync manifests, commit, tag. Never pushes. |
-| `/tpl` | Discovery: list every template command, hook, and file. |
-| `/new-migration` | Scaffold a DB migration following detected conventions. |
+| `/gtr:doctor` | Read-only health check: setup marker, plugin status, CLAUDE.md placeholders, identity drift, secrets. |
+| `/gtr:release <ver>` | Prepare a release: bump IDENTITY.yaml, rotate CHANGELOG, sync manifests, commit, tag. Never pushes. |
+| `/gtr:help` | Discovery: list every template command, hook, and file. |
+| `/gtr:new-migration` | Scaffold a DB migration following detected conventions. |
 
 ### Hooks (`.claude/hooks/`)
 
 | Hook | Event | Behavior |
 |------|-------|----------|
-| `pre_guard_release_files.py` | PreToolUse Write/Edit | Blocks edits to protected files (PROJECT.yaml, package.json, CHANGELOG.md, CI configs, lockfiles, ...) |
+| `pre_guard_release_files.py` | PreToolUse Write/Edit | Blocks edits to protected files (IDENTITY.yaml, package.json, CHANGELOG.md, CI configs, lockfiles, ...) |
 | `pre_guard_security.py` | PreToolUse Write/Edit | Blocks dangerous patterns (innerHTML, eval, `shell=True`, SQL injection, ...) |
 | `pre_guard_env_secrets.py` | PreToolUse Write/Edit | Blocks hardcoded secrets and writes to `.env*` files |
 | `post_validate_syntax.py` | PostToolUse Write/Edit | Validates Python / JS / JSON syntax after writes |
-| `session_check_setup.py` | SessionStart | Injects `/setup` reminder when marker is missing |
+| `session_check_setup.py` | SessionStart | Injects `/gtr:setup` reminder when marker is missing |
 | `pre_check_setup.py` | UserPromptSubmit | Injects the same reminder on every prompt until setup completes (soft, never blocks) |
 | `optional/pre_warn_win32_danger.py` | opt-in | Warns on HKLM writes, `SystemParametersInfo`, UAC elevation, `advapi32` calls |
 
@@ -72,11 +72,11 @@ Three layers:
 
 | File | Role |
 |------|------|
-| `PROJECT.yaml` | Single source of truth for name, display_name, version, icon, license, release config. Every derived manifest follows it. |
+| `IDENTITY.yaml` | Single source of truth for name, display_name, version, icon, license, release config. Every derived manifest follows it. |
 | `CHANGELOG.md` | Keep-a-Changelog format. Release notes extracted from `## [x.y.z]` section matching the pushed tag. |
 | `RELEASE.md` | End-to-end runbook: preflight, cut, post-release, rollback, versioning rules. |
-| `.github/workflows/release.yml.template` | Tag-triggered, test-gated, matrix build, checksum, draft-first GitHub Release. Activated by `/setup` on opt-in. |
-| `.github/workflows/ci.yml.template` | Lint + test on push/PR. Activated by `/setup` on opt-in. |
+| `.github/workflows/release.yml.template` | Tag-triggered, test-gated, matrix build, checksum, draft-first GitHub Release. Activated by `/gtr:setup` on opt-in. |
+| `.github/workflows/ci.yml.template` | Lint + test on push/PR. Activated by `/gtr:setup` on opt-in. |
 
 ### Task tracking
 
@@ -88,7 +88,7 @@ A verification gate in `/task done` checks: acceptance met, test present (or wai
 
 ### Recommended plugins
 
-Installed globally (user scope) by `/setup`:
+Installed globally (user scope) by `/gtr:setup`:
 
 | Plugin | What it does |
 |--------|--------------|
@@ -106,9 +106,9 @@ Plugins live in user scope, so one install covers every project.
 
 ## Philosophy
 
-- **Single source of truth.** Identity lives in `PROJECT.yaml`. Everything else derives. `/doctor` reports drift.
+- **Single source of truth.** Identity lives in `IDENTITY.yaml`. Everything else derives. `/gtr:doctor` reports drift.
 - **Hooks over vibes.** Guardrails are enforced by scripts, not reminders. You cannot accidentally commit an `.env` or force-push main.
-- **Opt-in over magic.** Release automation and optional hooks are copied on opt-in during `/setup`, not imposed.
+- **Opt-in over magic.** Release automation and optional hooks are copied on opt-in during `/gtr:setup`, not imposed.
 - **Two-tier tasks.** Persistent work lives in `TODO.md` across sessions; ephemeral breakdown lives in Claude's built-in task list within a session.
 - **Plugins over bundled skills.** General-purpose capabilities live in global plugins; only project-specific skills go in `.claude/skills/`.
 - **Senior-level releases.** Tag-triggered, test-gated, draft-first, checksum-signed, rollback-documented.
@@ -117,13 +117,13 @@ Plugins live in user scope, so one install covers every project.
 
 ## Customization
 
-After `/setup`:
+After `/gtr:setup`:
 
-- **Identity**: edit `PROJECT.yaml`. Run `/doctor` to catch drift in derived manifests.
+- **Identity**: edit `IDENTITY.yaml`. Run `/gtr:doctor` to catch drift in derived manifests.
 - **Protected files**: adjust `PROTECTED_EXACT` / `PROTECTED_DIRS` in `.claude/hooks/pre_guard_release_files.py`.
 - **Security patterns**: extend `DANGEROUS_PATTERNS` in `.claude/hooks/pre_guard_security.py` for project-specific sinks.
 - **Secret patterns**: extend `SECRET_PATTERNS` in `.claude/hooks/pre_guard_env_secrets.py` for vendor token formats.
-- **Release platforms**: edit `PROJECT.yaml#release.platforms` and the matrix in `.github/workflows/release.yml`.
+- **Release platforms**: edit `IDENTITY.yaml#release.platforms` and the matrix in `.github/workflows/release.yml`.
 - **Permissions**: project-wide rules in `.claude/settings.json`; personal allowlists in `.claude/settings.local.json`.
 
 See `.claude/TIPS.md` for the long-form reference (hooks API, MCP servers, permissions, workflow tips).
