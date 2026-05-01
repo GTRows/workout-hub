@@ -62,6 +62,6 @@ class ExportFormatExampleTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Creatine"))
-                .andExpect(jsonPath("$[0].timing").value("MORNING"));
+                .andExpect(jsonPath("$[0].timing").value("morning"));
     }
 }
