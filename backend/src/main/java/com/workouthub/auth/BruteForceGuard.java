@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
  * that email out for 1 hour counted from the most recent failure.
  */
 @Component
-@Transactional
 public class BruteForceGuard {
 
     static final int MAX_FAILURES = 10;
@@ -31,6 +31,7 @@ public class BruteForceGuard {
     }
 
     /** Throws HTTP 423 if the email is currently locked out. */
+    @Transactional(readOnly = true)
     public void assertNotLocked(String email) {
         Instant now = Instant.now(clock);
         long failures = attempts.countFailuresSince(
@@ -41,10 +42,12 @@ public class BruteForceGuard {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordSuccess(String email) {
         record(email, true);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordFailure(String email) {
         record(email, false);
     }
