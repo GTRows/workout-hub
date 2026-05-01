@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 @AutoConfigureMockMvc
 class DefaultPlanSeederTest extends AbstractIntegrationTest {
@@ -32,6 +33,7 @@ class DefaultPlanSeederTest extends AbstractIntegrationTest {
     @Autowired DefaultPlanSeeder seeder;
 
     @Test
+    @Transactional
     void creatingUserViaAdminApiSeedsAnActiveStarterPlan() throws Exception {
         SeededUser admin = helpers.seed(
                 "planadm-" + System.nanoTime() + "@test.local", ADMIN_SECRET, Role.ADMIN);
