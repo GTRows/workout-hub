@@ -93,6 +93,8 @@ def _render(item) -> str | None:
         market = item.get("marketplace") or item.get("source")
         if name and market:
             return f"{name}@{market}"
+        if name and "@" in name:
+            return name
     return None
 
 

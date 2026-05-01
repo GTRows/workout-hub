@@ -22,7 +22,7 @@ identity:
 
   # Authoritative app icon path. All platforms derive from this.
   # Keep the source as a high-res PNG or SVG; generate per-platform variants during build.
-  icon: assets/icon.png
+  icon: assets/icon.svg
 
   # License SPDX id (MIT, Apache-2.0, GPL-3.0-only, etc.)
   license: MIT

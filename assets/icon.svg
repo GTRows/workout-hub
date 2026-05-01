@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="WorkoutHub">
+  <title>WorkoutHub</title>
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <g fill="none" stroke="#22d3ee" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="116" y1="256" x2="396" y2="256" stroke-width="28"/>
+    <rect x="84"  y="200" width="40" height="112" rx="10" fill="#22d3ee" stroke="none"/>
+    <rect x="388" y="200" width="40" height="112" rx="10" fill="#22d3ee" stroke="none"/>
+    <rect x="56"  y="220" width="28" height="72"  rx="8"  fill="#22d3ee" stroke="none"/>
+    <rect x="428" y="220" width="28" height="72"  rx="8"  fill="#22d3ee" stroke="none"/>
+  </g>
+</svg>

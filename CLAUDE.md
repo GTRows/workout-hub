@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code when working with code in this repository.
 
+## Self-hosted contract (read first)
+
+All operational and deployment rules for this application live in `docs/SELF_HOSTED_CONTRACT.md`. Before writing or changing anything that touches the Compose file, port bindings, env vars, volumes, healthchecks, logging format, metrics, backup hooks, image publishing, release flow, or CI gates: **read `docs/SELF_HOSTED_CONTRACT.md` first** and obey it. The contract overrides any conflicting guidance below.
+
+The contract decides things like:
+- Pinned image tags, multi-arch builds, no `:latest`.
+- Bind addresses parametric (`${BIND_ADDR:-127.0.0.1}`), never `0.0.0.0`.
+- Bind-mount volumes under `./data/<component>/`, never named volumes.
+- Healthcheck split: `/livez` (process up) vs `/healthz` (real readiness).
+- Structured JSON logs, secret deny-list, request-id correlation.
+- `pg_dump` sidecar opt-in only (`ENABLE_PG_DUMP=true`).
+- Auth: built-in JWT default; `AUTH_MODE=forward-auth` opt-in. No OIDC client in this repo.
+- Updates: `vX.Y.Z` tag publish to GHCR. Operator (homelab repo) handles deployment, Renovate, reverse proxy, TLS, backups.
+
 ## First-time setup check
 
 Before doing any coding work, check for `.claude/.setup-complete`.
@@ -17,7 +31,7 @@ Before doing any coding work, check for `.claude/.setup-complete`.
 - `/gtr:release <version>` — prepare a release (bump, rotate CHANGELOG, commit, tag). Never pushes.
 - Plugin commands: `/commit`, `/commit-push-pr`, `/review-pr`, `/revise-claude-md`, `/create-skill`.
 
-## Task workflow
+## Planning workflow
 
 Two layers — do not conflate them:
 
