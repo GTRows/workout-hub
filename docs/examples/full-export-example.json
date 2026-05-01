@@ -33,7 +33,7 @@
       "id": "ffffffff-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
       "name": "Creatine",
       "dosage": "5g",
-      "timing": "morning",
+      "timing": "MORNING",
       "active": true
     }
   ]
