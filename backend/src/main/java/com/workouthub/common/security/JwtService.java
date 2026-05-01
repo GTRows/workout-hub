@@ -51,6 +51,7 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expires = now.plus(ttlSeconds, ChronoUnit.SECONDS);
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(userId.toString())
                 .claim("role", role)
                 .claim("type", type)
