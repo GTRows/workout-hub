@@ -39,7 +39,7 @@ public class SecurityConfig {
                                 "/api/auth/oidc/callback").permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/webhooks/scale/**").permitAll()
-                        .requestMatchers("/livez", "/healthz",
+                        .requestMatchers("/livez", "/healthz", "/metrics",
                                 "/actuator/health", "/actuator/info",
                                 "/actuator/prometheus").permitAll()
                         .requestMatchers("/error").permitAll()
