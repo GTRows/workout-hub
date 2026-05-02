@@ -2,3 +2,11 @@ logging:
   structured:
     format:
       console: ecs
+    json:
+      customizer: com.workouthub.common.logging.SecretMaskingStructuredLoggingCustomizer
+  level:
+    root: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    com.workouthub: INFO
+  include-application-name: true
