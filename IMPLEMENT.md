@@ -43,8 +43,7 @@ Read, do NOT blindly copy. Decide per-file whether to merge, skip, or ask.
 | `.claude/VERSION` | **Copy** | Template version pin. |
 | `CLAUDE.md` | **Merge carefully** | See section 4. |
 | `IDENTITY.yaml` | **Create if missing** | If present, leave it alone. |
-| `TODO.md` | **Create if missing** | Do NOT overwrite existing. |
-| `DEFERRED.md` | **Create if missing** | Do NOT overwrite existing. |
+| `.planning/` | **Defer to GSD** | Do NOT create. After onboarding, suggest `/gsd:new-project` (or `/gsd:map-codebase` then `/gsd:new-project` for brownfield). The template no longer ships TODO.md / DEFERRED.md — planning is GSD's job. |
 | `CHANGELOG.md` | **Ask** | Only if the project does not already have one. |
 | `RELEASE.md` | **Ask** | Only if the user wants release automation. |
 | `.github/workflows/release.yml.template` | **Copy as `.template`** | Do NOT activate without asking. |

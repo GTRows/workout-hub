@@ -4,49 +4,6 @@ Source of truth for identity and release config: `IDENTITY.yaml`.
 Automation: `.github/workflows/release.yml`.
 Notes source: `CHANGELOG.md`.
 
-
-## Release strategy decision
-
-WorkoutHub is a **self-hosted app**. On every `v*.*.*` tag push the
-release workflow:
-
-1. Re-runs the full test suite (backend `mvn verify` + frontend typecheck/test).
-2. Builds the backend and frontend Docker images and pushes them to GHCR:
-   - `ghcr.io/<owner>/workouthub-backend:<version>`
-   - `ghcr.io/<owner>/workouthub-frontend:<version>`
-   - Plus `:latest` on stable releases (prereleases are tagged only with their explicit version).
-3. Bundles `compose.yml`, `compose.prod.yml`, `nginx/`, and the deploy/backup docs into
-   `workouthub-compose-v<version>.tar.gz` and attaches it to a **draft** GitHub Release.
-4. Release notes are extracted from the matching `## [x.y.z]` section of `CHANGELOG.md`
-   and include the pull commands for the two images.
-
-Operators update by editing their deployment to reference the new tag and running
-`docker compose pull && docker compose up -d`. GHCR images avoid having every
-operator rebuild from source; the compose bundle gives them the matching
-infrastructure files for that version in one download.
-
-A maintainer reviews and clicks Publish on the draft.
-
-## Dry-run a release
-
-Cut a prerelease tag to exercise the workflow without promoting images to `:latest`:
-
-```sh
-git tag v0.1.1-rc.1 -m "Dry-run: rc.1"
-git push --tags
-```
-
-The workflow pushes `ghcr.io/<owner>/workouthub-backend:0.1.1-rc.1` and
-`workouthub-frontend:0.1.1-rc.1` and creates a draft **prerelease**. Verify:
-
-```sh
-docker pull ghcr.io/<owner>/workouthub-backend:0.1.1-rc.1
-docker pull ghcr.io/<owner>/workouthub-frontend:0.1.1-rc.1
-```
-
-Delete the tag (locally and on GitHub) if you do not want it to persist. The
-draft release can be discarded from the GitHub UI.
-
 ## Versioning rules
 
 - Semantic versioning: `MAJOR.MINOR.PATCH`.
@@ -72,7 +29,7 @@ Every artifact is paired with a `SHA256SUMS` entry.
 
 Before cutting a release:
 
-- [ ] All targeted `TODO.md` tasks are in Done and the acceptance is verifiable.
+- [ ] All GSD plans included in this version are complete (`/gsd:progress` shows them done).
 - [ ] `CHANGELOG.md` has an `## [Unreleased]` section with the actual changes — no stubs.
 - [ ] `IDENTITY.yaml#version` matches the target version.
 - [ ] Derived manifests (`package.json`, `pyproject.toml`, `Cargo.toml`, etc.) match `IDENTITY.yaml#version`. Run `/gtr:doctor` to verify.

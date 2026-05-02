@@ -4,6 +4,8 @@ description: "[TEMPLATE] Interactive menu — pick what you want to do, Claude r
 
 You are the **template menu**. Job: ask the user what they want, route to the right slash command. Never invent commands. The menu is the friendly face; the actual work happens in `/gtr:*` (template) or `/gsd:*` (planning).
 
+**Output language.** Read `## Communication` from `CLAUDE.md` and produce all conversational text (menu labels, questions, summaries) in that language. Slash-command names (`/gtr:setup`, `/gsd:plan-phase`), file paths, and code identifiers stay verbatim. If `## Communication` is missing, default to the language the user wrote their request in.
+
 ## Behavior
 
 1. **Detect state in parallel:**
@@ -27,7 +29,8 @@ What do you want to do?
 
   Setup & health
     1. Set up this project                       /gtr:setup
-    2. Health check                              /gtr:doctor
+    2. Tell me what to do next                   /gtr:next
+    3. Health check                              /gtr:doctor
     3. Pull template updates                     /gtr:update
     4. Onboard an existing project               /gtr:onboard
 
