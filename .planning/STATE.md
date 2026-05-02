@@ -4,16 +4,18 @@
 
 Milestone: v0.3 Self-Hosted Contract Alignment
 Phase: 1 of 12 (Compose Refactor)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-02 - Milestone v0.3 created (12 phases)
+Plan: 1 of 2 in current phase complete (01-01 done; 01-02 next)
+Status: In progress
+Last activity: 2026-05-02 - Completed 01-01-PLAN.md (compose structural refactor)
 
-Progress: ░░░░░░░░░░ 0%
+Progress: █░░░░░░░░░ 4% (1 of 24 plans across milestone)
 
 ## Accumulated Context
 
 ### Decisions Locked-in (2026-05-02)
 
+- **Compose env var naming (Plan 01-01)**: `BACKEND_PORT` and `FRONTEND_PORT` introduced at the compose layer (replacing the literal `3000:3000` and `SERVER_PORT`'s double-duty). The backend application internally still reads `SERVER_PORT` - the compose-level rename is for unambiguous per-service env vars only.
+- **Gitignore pattern for `data/` (Plan 01-01)**: Cannot use `data/` + `!data/.gitkeep` because Git refuses to re-include files under an excluded parent. Use `data/*` + `!data/.gitkeep` + `!data/postgres/` + `data/postgres/*` + `!data/postgres/.gitkeep`. Pattern documented in ISSUES i-3 for future operators.
 - **Update model**: Renovate-pin (operator opens PR for new `vX.Y.Z`), not Watchtower / `:latest`. Reason: audit trail, rollback via `git revert`.
 - **Reverse proxy**: Out of scope for this repo. Operator brings their own (Caddy in maintainer's homelab). The application speaks plain HTTP behind whatever the operator chooses.
 - **Public exposure**: Tailnet-only for the maintainer's deployment, hardened later. Forbidden for this app to assume public exposure.
@@ -35,7 +37,8 @@ Progress: ░░░░░░░░░░ 0%
 
 - **i-1**: WorkoutDaysIntegrationTest helper NPE on response `id` (6 errors). Needs local Maven for breakpoint debugging. See `.planning/ISSUES.md`.
 - **i-2**: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport (1 failure). Same trigger as i-1.
-- Both blocked on local-Maven environment setup (memory: local_maven_gap).
+- Both i-1/i-2 blocked on local-Maven environment setup (memory: local_maven_gap).
+- **i-3**: Resolved at execution time (Plan 01-01 gitignore pattern correction). Logged for documentation.
 
 ### Roadmap Evolution
 
@@ -43,9 +46,9 @@ Progress: ░░░░░░░░░░ 0%
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~14:00 local
-Stopped at: Milestone v0.3 initialization
-Resume file: None (next action: `/gsd:plan-phase 1`)
+Last session: 2026-05-02 ~14:57 local
+Stopped at: Completed 01-01-PLAN.md (compose structural refactor)
+Resume file: None (next action: `/gsd:execute-plan .planning/phases/01-compose-refactor/01-02-PLAN.md`)
 
 ## Reference Documents
 

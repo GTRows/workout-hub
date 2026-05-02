@@ -31,6 +31,32 @@ Deferred work and known failing tests. Each entry includes the trigger that shou
 
 **Trigger to reopen:** Same as i-1 — needs local repro.
 
+### i-3 — Deviation: .gitignore data/ pattern adjusted to satisfy verification (Plan 01-01)
+
+**Context:** Plan 01-01 Task 2 prescribed:
+
+```
+data/
+!data/.gitkeep
+!data/postgres/.gitkeep
+```
+
+**Symptom:** Per Git's documented rule "It is not possible to re-include a file if a parent directory of that file is excluded", the `data/` directory exclusion prevents `!data/.gitkeep` and `!data/postgres/.gitkeep` from re-including their files. Verification step `git check-ignore data/postgres/.gitkeep` returned exit 0 (ignored) when it must return exit 1 (not ignored).
+
+**Resolution applied:** Replaced with the working glob form that does not exclude the parent directory:
+
+```
+data/*
+!data/.gitkeep
+!data/postgres/
+data/postgres/*
+!data/postgres/.gitkeep
+```
+
+This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) while satisfying both verification checks.
+
+**Trigger to reopen:** None — resolved at execution time.
+
 ## Closed
 
 (none)
