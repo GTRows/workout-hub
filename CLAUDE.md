@@ -16,6 +16,13 @@ The contract decides things like:
 - Auth: built-in JWT default; `AUTH_MODE=forward-auth` opt-in. No OIDC client in this repo.
 - Updates: `vX.Y.Z` tag publish to GHCR. Operator (homelab repo) handles deployment, Renovate, reverse proxy, TLS, backups.
 
+## Communication
+
+- Speak with the user in Turkish. All conversational responses, prompts, summaries, questions, and slash-command output (including /gtr:help, /gtr:doctor, /gsd:* commands) must be in this language.
+- Code, identifiers, comments, commit messages, and file contents must always be in English regardless of conversation language.
+- Status lines, table headers, and command names stay verbatim (e.g. `/gtr:setup`, `IDENTITY.yaml`) — do not translate them.
+- No emojis anywhere — not in text, code, or comments.
+
 ## First-time setup check
 
 Before doing any coding work, check for `.claude/.setup-complete`.
