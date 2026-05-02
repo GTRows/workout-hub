@@ -38,16 +38,16 @@ Plans:
 - [x] 01-01: Compose structural refactor (parametric ports, named network, bind-mount data/postgres/) - `01-01-SUMMARY.md`
 - [x] 01-02: Compose lifecycle hardening (healthchecks, depends_on service_healthy, resource limits) - `01-02-SUMMARY.md` (runtime verify deferred to operator)
 
-#### Phase 2: Backend Health Endpoints
+#### Phase 2: Backend Health Endpoints [COMPLETE 2026-05-02]
 
 **Goal**: Add `/healthz` (real readiness: DB reachable, Flyway applied) and `/livez` (process liveness) on the backend. Frontend exposes both as process-only liveness per the agreed simplification. Contract section 9.2.
 **Depends on**: Phase 1
 **Research**: Unlikely (Spring Boot Actuator + custom indicators; established pattern)
-**Plans**: 2 plans (1/2 complete)
+**Plans**: 2 plans (2/2 complete)
 
 Plans:
 - [x] 02-01: Backend HealthController with /livez and /healthz (DB+Flyway readiness) - `02-01-SUMMARY.md`
-- [ ] 02-02: Frontend /api/healthz + /api/livez and compose healthcheck retarget
+- [x] 02-02: Frontend /api/healthz + /api/livez and compose healthcheck retarget - `02-02-SUMMARY.md` (runtime verify deferred to operator)
 
 #### Phase 3: Structured Logging
 
@@ -163,7 +163,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | Phase | Milestone | Plans | Status      | Completed  |
 | ----- | --------- | ----- | ----------- | ---------- |
 | 1. Compose refactor | v0.3 | 2/2 | Complete | 2026-05-02 |
-| 2. Backend health endpoints | v0.3 | 1/2 | In progress | - |
+| 2. Backend health endpoints | v0.3 | 2/2 | Complete | 2026-05-02 |
 | 3. Structured logging | v0.3 | 0/? | Not started | - |
 | 4. Prometheus metrics on main listener | v0.3 | 0/? | Not started | - |
 | 5. Forward-auth mode | v0.3 | 0/? | Not started | - |
