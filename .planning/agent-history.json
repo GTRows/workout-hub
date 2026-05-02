@@ -61,6 +61,16 @@
       "timestamp": "2026-05-02T18:21:12Z",
       "status": "completed",
       "completion_timestamp": "2026-05-02T18:24:25Z"
+    },
+    {
+      "agent_id": "aaadd4f104f5fda69",
+      "task_description": "Execute full plan 05-01 (autonomous; includes OIDC deletion)",
+      "phase": "05-forward-auth-mode",
+      "plan": "01",
+      "segment": null,
+      "timestamp": "2026-05-02T20:59:10Z",
+      "status": "completed",
+      "completion_timestamp": "2026-05-02T21:02:50Z"
     }
   ]
 }

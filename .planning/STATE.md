@@ -3,17 +3,19 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 4 of 12 COMPLETE (2026-05-02); Phase 5 next (Forward-Auth + OIDC reconsideration - needs user architectural decision)
-Plan: 1 of 1 complete in Phase 4 (04-01 done; backend /metrics alias + frontend /api/metrics inline)
-Status: Phase complete; Phase 5 has a Rule 4 architectural choice before planning
-Last activity: 2026-05-02 - Completed 04-01-PLAN.md (Prometheus /metrics on main listener)
+Phase: 5 of 12 COMPLETE (2026-05-02); Phase 6 next (Env Vars and Override Example)
+Plan: 1 of 1 complete in Phase 5 (05-01 done; forward-auth + OIDC removed)
+Status: Phase complete; ready to plan Phase 6
+Last activity: 2026-05-02 - Completed 05-01-PLAN.md (forward-auth mode + OIDC removal)
 
-Progress: █████░░░░░ 27% (6 of 23 plans across milestone)
+Progress: ███████░░░ 32% (7 of 22 plans across milestone)
 
 ## Accumulated Context
 
 ### Decisions Locked-in (2026-05-02)
 
+- **Forward-auth + OIDC removal (Plan 05-01)**: Option A executed - OIDC client surface deleted entirely (`OidcController.java`, `OidcControllerIntegrationTest.java`, `AuthService.issueTokensForOidc`, `app.auth.oidc.*` YAML, SecurityConfig allowlist for `/api/auth/oidc/*`). Forward-auth filter loads only when `app.auth.mode=forward-auth` (ConditionalOnProperty); ignores headers when source IP not in TRUSTED_PROXIES CIDR; empty TRUSTED_PROXIES = trust nothing. Built-in JWT remains the default mode and is untouched.
+- **AppUserPrincipal record signature**: `(UUID userId, String role)` - 2 args. Earlier sketches showing 3-arg variants are wrong.
 - **Prometheus /metrics aliasing (Plan 04-01)**: Additive alias from `/metrics` to `PrometheusScrapeEndpoint`; `/actuator/prometheus` preserved for backward compat. Frontend `/api/metrics` is inline (no `prom-client` dep) emitting Node process gauges. Per-request HTTP histogram on the frontend deferred to v0.6 (ISSUES i-4) — Next App Router middleware integration is non-trivial and out of v0.3 contract baseline scope.
 - **Spring Boot 3.4.1 PrometheusScrapeEndpoint API**: signature is `scrape(PrometheusOutputFormat, Set<String>)` returning `byte[]` (NOT `TextOutputFormat` and NOT `String` as initial plan sketched - that is the deprecated `PrometheusSimpleclientScrapeEndpoint`). Decode via UTF-8 in the controller.
 - **Structured logging API (Plan 03-01)**: Spring Boot 3.4 native ECS structured logging chosen over logstash-logback-encoder (no new pom dep). Deny-list masking via `org.springframework.boot.json.JsonWriter.Members#applyingValueProcessor` (NOT `applyingNameProcessor` as initial plan sketched - the latter only renames keys). Customizer registration via `logging.structured.json.customizer` YAML property in `application-prod.yml` (NOT @Component/@Profile - LoggingApplicationListener runs before the application context exists, so SpringFactoriesLoader-style instantiation is the only available wiring path). Customizer class needs a public no-arg constructor and no Spring annotations.
@@ -54,9 +56,9 @@ Progress: █████░░░░░ 27% (6 of 23 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~18:24 local
-Stopped at: Completed 04-01-PLAN.md (Prometheus /metrics); Phase 4 complete
-Resume file: None (next action: user decision on OIDC removal/gate before `/gsd:plan-phase 5`)
+Last session: 2026-05-02 ~21:03 local
+Stopped at: Completed 05-01-PLAN.md (forward-auth + OIDC removal); Phase 5 complete
+Resume file: None (next action: `/gsd:plan-phase 6`)
 
 ## Reference Documents
 

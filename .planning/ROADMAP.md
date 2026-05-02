@@ -69,15 +69,15 @@ Plans:
 Plans:
 - [x] 04-01: Prometheus /metrics alias on backend + inline frontend /api/metrics (no prom-client dep) - `04-01-SUMMARY.md`
 
-#### Phase 5: Forward-Auth Mode and OIDC Reconsideration
+#### Phase 5: Forward-Auth Mode and OIDC Reconsideration [COMPLETE 2026-05-02]
 
 **Goal**: Implement `AUTH_MODE=forward-auth` filter that reads `X-Forwarded-User`, `X-Forwarded-Email`, `X-Forwarded-Groups`. Source-IP gated by `TRUSTED_PROXIES` CIDR list - non-optional. Default mode stays built-in JWT. Decide whether to remove or gate the existing `OidcController` per contract section 7 (which forbids OIDC client code in this repo).
 **Depends on**: Phase 1
-**Research**: Likely (forward-auth header semantics across Authentik / Authelia / oauth2-proxy; secure decommission path for OIDC)
-**Research topics**: Identity header naming conventions, TRUSTED_PROXIES enforcement patterns, OIDC removal vs gate
+**Research**: Resolved - chose option A (delete OIDC entirely) per contract and STATE pre-decision
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 05-01: TBD
+- [x] 05-01: Forward-auth filter with TRUSTED_PROXIES gate + OIDC removal - `05-01-SUMMARY.md`
 
 #### Phase 6: Env Vars and Override Example
 
@@ -167,7 +167,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 2. Backend health endpoints | v0.3 | 2/2 | Complete | 2026-05-02 |
 | 3. Structured logging | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 4. Prometheus metrics on main listener | v0.3 | 1/1 | Complete | 2026-05-02 |
-| 5. Forward-auth mode | v0.3 | 0/? | Not started | - |
+| 5. Forward-auth mode | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 6. Env vars and override example | v0.3 | 0/? | Not started | - |
 | 7. Optional pg_dump sidecar | v0.3 | 0/? | Not started | - |
 | 8. Dependabot alert triage | v0.3 | 0/? | Not started | - |
