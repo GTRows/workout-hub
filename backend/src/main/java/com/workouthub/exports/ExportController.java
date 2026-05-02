@@ -158,8 +158,8 @@ public class ExportController {
     @PostMapping(value = "/import/csv", consumes = "text/csv")
     public CsvImportResultDto importSessionsCsv(
             @AuthenticationPrincipal AppUserPrincipal principal,
-            @RequestBody String csv) {
-        return csvImport.importSessionsCsv(principal.userId(), csv);
+            @RequestBody(required = false) String csv) {
+        return csvImport.importSessionsCsv(principal.userId(), csv == null ? "" : csv);
     }
 
     @GetMapping(value = "/csv/sessions", produces = "text/csv; charset=utf-8")

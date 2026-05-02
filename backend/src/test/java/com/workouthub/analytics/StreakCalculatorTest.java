@@ -111,14 +111,13 @@ class StreakCalculatorTest {
 
     @Test
     void streakDoesNotSurviveSecondGapWhenSeparated() {
-        // Two distinct 2-day gaps: -3 -> -1 needs the freeze and -8 -> -6
-        // would too. After spending the freeze on the recent hop, the walk
-        // stops at the older gap -- so the run does NOT include -8.
+        // -7 -> -5 is a 2-day gap with no freeze left; the walk stops there.
+        // Run includes today, -1, -3 (after freeze), -4, -5 - five dates.
         var r = StreakCalculator.computeWithFreeze(
                 List.of(
-                        TODAY.minusDays(8),
-                        TODAY.minusDays(6),
+                        TODAY.minusDays(7),
                         TODAY.minusDays(5),
+                        TODAY.minusDays(4),
                         TODAY.minusDays(3),
                         TODAY.minusDays(1),
                         TODAY),
