@@ -5,9 +5,11 @@ services:
     env_file:
       - .env
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${BIND_ADDR:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - workouthub-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -25,7 +27,9 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "${SERVER_PORT:-8080}:8080"
+      - "${BIND_ADDR:-127.0.0.1}:${BACKEND_PORT:-8080}:8080"
+    networks:
+      - workouthub-net
 
   frontend:
     build:
@@ -36,7 +40,13 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "${BIND_ADDR:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - workouthub-net
 
 volumes:
   db_data:
+
+networks:
+  workouthub-net:
+    name: workouthub-net
