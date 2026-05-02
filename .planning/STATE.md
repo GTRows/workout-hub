@@ -3,17 +3,19 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 1 of 12 (Compose Refactor)
-Plan: 1 of 2 in current phase complete (01-01 done; 01-02 next)
-Status: In progress
-Last activity: 2026-05-02 - Completed 01-01-PLAN.md (compose structural refactor)
+Phase: 1 of 12 COMPLETE (2026-05-02); Phase 2 next (Backend Health Endpoints)
+Plan: 2 of 2 complete in Phase 1 (01-01 done; 01-02 done with deferred runtime verify)
+Status: Phase complete; ready to plan Phase 2
+Last activity: 2026-05-02 - Completed 01-02-PLAN.md (compose lifecycle hardening)
 
-Progress: █░░░░░░░░░ 4% (1 of 24 plans across milestone)
+Progress: ██░░░░░░░░ 8% (2 of 24 plans across milestone)
 
 ## Accumulated Context
 
 ### Decisions Locked-in (2026-05-02)
 
+- **Healthcheck probe binary (Plan 01-02)**: Backend uses `wget --spider` (busybox, ships with `eclipse-temurin:21-jre-alpine`) instead of `curl`. Frontend uses Node 22 built-in `fetch`. Zero Dockerfile changes. Both probes are PROVISIONAL - Phase 2 re-points them to `/healthz`.
+- **Resource ceiling (Plan 01-02)**: 4 CPU / 1536 MB total across 3 services (db 1.0/512M, backend 2.0/768M, frontend 1.0/256M). Sized for x86_64 PC primary host; ARM/lighter overrides via Phase 6 `docker-compose.override.yml.example`.
 - **Compose env var naming (Plan 01-01)**: `BACKEND_PORT` and `FRONTEND_PORT` introduced at the compose layer (replacing the literal `3000:3000` and `SERVER_PORT`'s double-duty). The backend application internally still reads `SERVER_PORT` - the compose-level rename is for unambiguous per-service env vars only.
 - **Gitignore pattern for `data/` (Plan 01-01)**: Cannot use `data/` + `!data/.gitkeep` because Git refuses to re-include files under an excluded parent. Use `data/*` + `!data/.gitkeep` + `!data/postgres/` + `data/postgres/*` + `!data/postgres/.gitkeep`. Pattern documented in ISSUES i-3 for future operators.
 - **Update model**: Renovate-pin (operator opens PR for new `vX.Y.Z`), not Watchtower / `:latest`. Reason: audit trail, rollback via `git revert`.
@@ -39,6 +41,7 @@ Progress: █░░░░░░░░░ 4% (1 of 24 plans across milestone)
 - **i-2**: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport (1 failure). Same trigger as i-1.
 - Both i-1/i-2 blocked on local-Maven environment setup (memory: local_maven_gap).
 - **i-3**: Resolved at execution time (Plan 01-01 gitignore pattern correction). Logged for documentation.
+- **Deferred runtime verification (Plan 01-02 Task 3)**: `docker compose up -d` smoke test deferred. Repo's `.env` is gitignored AND blocked from being created via Bash (`pre_guard_secrets.py`) AND blocked via Write (deny rule on `.env*`). Operator can run the 9-step checkpoint from `01-02-PLAN.md` after creating `.env` from `.env.example`. Naturally re-validated as part of Phase 12 (Release v0.3.0).
 
 ### Roadmap Evolution
 
@@ -46,9 +49,9 @@ Progress: █░░░░░░░░░ 4% (1 of 24 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~14:57 local
-Stopped at: Completed 01-01-PLAN.md (compose structural refactor)
-Resume file: None (next action: `/gsd:execute-plan .planning/phases/01-compose-refactor/01-02-PLAN.md`)
+Last session: 2026-05-02 ~17:00 local
+Stopped at: Completed 01-02-PLAN.md (compose lifecycle hardening); Phase 1 complete
+Resume file: None (next action: `/gsd:plan-phase 2`)
 
 ## Reference Documents
 

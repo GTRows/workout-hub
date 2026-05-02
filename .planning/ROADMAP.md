@@ -27,16 +27,16 @@ None - project is application code; planning draws from `docs/SELF_HOSTED_CONTRA
 **Pre-existing items (already done):**
 - ✅ PR #18 merged (2026-05-02): cleared 12 of 19 pre-existing test failures - refresh-token jti, brute-force REQUIRES_NEW, ResponseStatusException handler, SupplementTiming JsonValue, HttpMessageNotReadableException handler, Streak fixture, DefaultPlanSeeder LazyInit, CSV empty body. Two test classes still red (i-1 WorkoutDays, i-2 RoundTrip) tracked separately.
 
-#### Phase 1: Compose Refactor
+#### Phase 1: Compose Refactor [COMPLETE 2026-05-02]
 
 **Goal**: Bring `compose.yml` into compliance with contract sections 3.1-3.7. Parametric `BIND_ADDR`, named network, bind mount under `./data/postgres/`, healthchecks on every service that something else depends on, resource limits, `condition: service_healthy` for the frontend's dependency on backend.
 **Depends on**: Nothing
 **Research**: Unlikely (contract is prescriptive, no decisions left)
-**Plans**: 2 plans (1/2 complete)
+**Plans**: 2 plans (2/2 complete)
 
 Plans:
 - [x] 01-01: Compose structural refactor (parametric ports, named network, bind-mount data/postgres/) - `01-01-SUMMARY.md`
-- [ ] 01-02: Compose lifecycle hardening (healthchecks, depends_on service_healthy, resource limits)
+- [x] 01-02: Compose lifecycle hardening (healthchecks, depends_on service_healthy, resource limits) - `01-02-SUMMARY.md` (runtime verify deferred to operator)
 
 #### Phase 2: Backend Health Endpoints
 
@@ -161,7 +161,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 
 | Phase | Milestone | Plans | Status      | Completed  |
 | ----- | --------- | ----- | ----------- | ---------- |
-| 1. Compose refactor | v0.3 | 1/2 | In progress | - |
+| 1. Compose refactor | v0.3 | 2/2 | Complete | 2026-05-02 |
 | 2. Backend health endpoints | v0.3 | 0/? | Not started | - |
 | 3. Structured logging | v0.3 | 0/? | Not started | - |
 | 4. Prometheus metrics on main listener | v0.3 | 0/? | Not started | - |
