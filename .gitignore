@@ -42,6 +42,13 @@ Desktop.ini
 credentials.json
 service-account.json
 
+# Self-hosted bind-mount data root (operator state - never committed)
+data/*
+!data/.gitkeep
+!data/postgres/
+data/postgres/*
+!data/postgres/.gitkeep
+
 # Logs
 *.log
 logs/
