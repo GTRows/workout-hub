@@ -3,17 +3,19 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 3 of 12 COMPLETE (2026-05-02); Phase 4 next (Prometheus /metrics on main listener)
-Plan: 1 of 1 complete in Phase 3 (03-01 done with structured logging + masking)
-Status: Phase complete; ready to plan Phase 4
-Last activity: 2026-05-02 - Completed 03-01-PLAN.md (structured logging with deny-list mask)
+Phase: 4 of 12 COMPLETE (2026-05-02); Phase 5 next (Forward-Auth + OIDC reconsideration - needs user architectural decision)
+Plan: 1 of 1 complete in Phase 4 (04-01 done; backend /metrics alias + frontend /api/metrics inline)
+Status: Phase complete; Phase 5 has a Rule 4 architectural choice before planning
+Last activity: 2026-05-02 - Completed 04-01-PLAN.md (Prometheus /metrics on main listener)
 
-Progress: ████░░░░░░ 22% (5 of 23 plans across milestone)
+Progress: █████░░░░░ 27% (6 of 23 plans across milestone)
 
 ## Accumulated Context
 
 ### Decisions Locked-in (2026-05-02)
 
+- **Prometheus /metrics aliasing (Plan 04-01)**: Additive alias from `/metrics` to `PrometheusScrapeEndpoint`; `/actuator/prometheus` preserved for backward compat. Frontend `/api/metrics` is inline (no `prom-client` dep) emitting Node process gauges. Per-request HTTP histogram on the frontend deferred to v0.6 (ISSUES i-4) — Next App Router middleware integration is non-trivial and out of v0.3 contract baseline scope.
+- **Spring Boot 3.4.1 PrometheusScrapeEndpoint API**: signature is `scrape(PrometheusOutputFormat, Set<String>)` returning `byte[]` (NOT `TextOutputFormat` and NOT `String` as initial plan sketched - that is the deprecated `PrometheusSimpleclientScrapeEndpoint`). Decode via UTF-8 in the controller.
 - **Structured logging API (Plan 03-01)**: Spring Boot 3.4 native ECS structured logging chosen over logstash-logback-encoder (no new pom dep). Deny-list masking via `org.springframework.boot.json.JsonWriter.Members#applyingValueProcessor` (NOT `applyingNameProcessor` as initial plan sketched - the latter only renames keys). Customizer registration via `logging.structured.json.customizer` YAML property in `application-prod.yml` (NOT @Component/@Profile - LoggingApplicationListener runs before the application context exists, so SpringFactoriesLoader-style instantiation is the only available wiring path). Customizer class needs a public no-arg constructor and no Spring annotations.
 - **Backend readiness check (Plan 02-01)**: `/healthz` returns 200 only when (a) DataSource.getConnection.isValid(1s) AND (b) Flyway.info().pending() is empty. Spring is implicitly up if the controller responds at all. `/livez` returns 200 unconditionally (process liveness). Both endpoints publicly allowlisted in SecurityConfig; no Authorization header required by container probes.
 - **Healthcheck probe binary (Plan 01-02)**: Backend uses `wget --spider` (busybox, ships with `eclipse-temurin:21-jre-alpine`) instead of `curl`. Frontend uses Node 22 built-in `fetch`. Zero Dockerfile changes. Both probes are PROVISIONAL - Phase 2 re-points them to `/healthz`.
@@ -43,7 +45,8 @@ Progress: ████░░░░░░ 22% (5 of 23 plans across milestone)
 - **i-2**: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport (1 failure). Same trigger as i-1.
 - Both i-1/i-2 blocked on local-Maven environment setup (memory: local_maven_gap).
 - **i-3**: Resolved at execution time (Plan 01-01 gitignore pattern correction). Logged for documentation.
-- **Deferred runtime verification (Plan 01-02 Task 3)**: `docker compose up -d` smoke test deferred. Repo's `.env` is gitignored AND blocked from being created via Bash (`pre_guard_secrets.py`) AND blocked via Write (deny rule on `.env*`). Operator can run the 9-step checkpoint from `01-02-PLAN.md` after creating `.env` from `.env.example`. Naturally re-validated as part of Phase 12 (Release v0.3.0).
+- **i-4** (NEW Plan 04-01): Frontend per-request HTTP metrics deferred to v0.6.
+- **Deferred runtime verification (Plans 01-02 Task 3 and 02-02 Task 3)**: `docker compose up -d` smoke test deferred. Repo's `.env` is gitignored AND blocked from being created via Bash (`pre_guard_secrets.py`) AND blocked via Write (deny rule on `.env*`). Operator can run the 9-step checkpoint from `01-02-PLAN.md` after creating `.env` from `.env.example`. Naturally re-validated as part of Phase 12 (Release v0.3.0).
 
 ### Roadmap Evolution
 
@@ -51,9 +54,9 @@ Progress: ████░░░░░░ 22% (5 of 23 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~18:13 local
-Stopped at: Completed 03-01-PLAN.md (structured logging); Phase 3 complete
-Resume file: None (next action: `/gsd:plan-phase 4`)
+Last session: 2026-05-02 ~18:24 local
+Stopped at: Completed 04-01-PLAN.md (Prometheus /metrics); Phase 4 complete
+Resume file: None (next action: user decision on OIDC removal/gate before `/gsd:plan-phase 5`)
 
 ## Reference Documents
 

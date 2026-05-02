@@ -59,14 +59,15 @@ Plans:
 Plans:
 - [x] 03-01: Structured logging for production profile (ECS JSON, deny-list mask, user_id MDC) - `03-01-SUMMARY.md`
 
-#### Phase 4: Prometheus Metrics on Main Listener
+#### Phase 4: Prometheus Metrics on Main Listener [COMPLETE 2026-05-02]
 
 **Goal**: Expose `/metrics` on the main HTTP listener (currently only `/actuator/prometheus`). Decide between rebinding the Actuator endpoint or adding a thin alias. Verify scrape format matches Prometheus expectations. Frontend gets a minimal `/metrics` via Next route handler with `prom-client`. Contract section 9.1.
 **Depends on**: Phase 1
-**Research**: Unlikely (Micrometer Prometheus already wired; alias pattern well-known)
+**Research**: Resolved during execution (PrometheusScrapeEndpoint signature in 3.4.1)
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 04-01: TBD
+- [x] 04-01: Prometheus /metrics alias on backend + inline frontend /api/metrics (no prom-client dep) - `04-01-SUMMARY.md`
 
 #### Phase 5: Forward-Auth Mode and OIDC Reconsideration
 
@@ -165,7 +166,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 1. Compose refactor | v0.3 | 2/2 | Complete | 2026-05-02 |
 | 2. Backend health endpoints | v0.3 | 2/2 | Complete | 2026-05-02 |
 | 3. Structured logging | v0.3 | 1/1 | Complete | 2026-05-02 |
-| 4. Prometheus metrics on main listener | v0.3 | 0/? | Not started | - |
+| 4. Prometheus metrics on main listener | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 5. Forward-auth mode | v0.3 | 0/? | Not started | - |
 | 6. Env vars and override example | v0.3 | 0/? | Not started | - |
 | 7. Optional pg_dump sidecar | v0.3 | 0/? | Not started | - |
