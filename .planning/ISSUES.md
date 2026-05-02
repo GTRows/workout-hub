@@ -57,6 +57,12 @@ This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) w
 
 **Trigger to reopen:** None — resolved at execution time.
 
+### i-4 — Frontend per-request HTTP metrics not yet exposed (Phase 4 follow-up)
+
+Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. Contract section 9.1 also mentions "HTTP request count and duration histogram" - that needs a Next.js App Router middleware-level instrumentation hook (or a small server-side counter store) to count fetch handler invocations and record latency histograms. Out of scope for the v0.3 contract baseline; track for v0.6 (Operational Maturity).
+
+**Trigger to reopen:** v0.6 milestone planning OR operator request for richer frontend telemetry.
+
 ## Closed
 
 (none)
