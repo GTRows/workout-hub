@@ -95,11 +95,6 @@ public class AuthService {
         return issueTokens(user, userAgent);
     }
 
-    /** Entry point used by the optional OIDC callback: skip password checks. */
-    public AuthResponse issueTokensForOidc(User user, String userAgent) {
-        return issueTokens(user, userAgent);
-    }
-
     private AuthResponse issueTokens(User user, String userAgent) {
         String access = jwtService.generateAccessToken(user.getId(), user.getRole().name());
         String refresh = jwtService.generateRefreshToken(user.getId(), user.getRole().name());

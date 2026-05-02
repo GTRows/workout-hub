@@ -38,9 +38,6 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/refresh",
                                 "/api/auth/reset-password").permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/auth/oidc/login",
-                                "/api/auth/oidc/callback").permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/webhooks/scale/**").permitAll()
                         .requestMatchers("/livez", "/healthz", "/metrics",
