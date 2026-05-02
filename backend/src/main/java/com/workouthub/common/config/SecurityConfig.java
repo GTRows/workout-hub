@@ -1,6 +1,8 @@
 package com.workouthub.common.config;
 
+import com.workouthub.common.security.ForwardAuthFilter;
 import com.workouthub.common.security.JwtAuthenticationFilter;
+import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,7 +26,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(
-            HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtFilter,
+            Optional<ForwardAuthFilter> forwardAuthFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -50,6 +54,8 @@ public class SecurityConfig {
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        forwardAuthFilter.ifPresent(f ->
+                http.addFilterBefore(f, JwtAuthenticationFilter.class));
         return http.build();
     }
 

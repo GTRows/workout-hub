@@ -41,13 +41,12 @@ app:
     password-hash: ${APP_ADMIN_PASSWORD_HASH:}
     display-name: ${APP_ADMIN_DISPLAY_NAME:Admin}
   auth:
-    oidc:
-      enabled: ${APP_AUTH_OIDC_ENABLED:false}
-      issuer-url: ${APP_AUTH_OIDC_ISSUER_URL:}
-      client-id: ${APP_AUTH_OIDC_CLIENT_ID:}
-      client-secret: ${APP_AUTH_OIDC_CLIENT_SECRET:}
-      redirect-uri: ${APP_AUTH_OIDC_REDIRECT_URI:}
-      auto-provision: ${APP_AUTH_OIDC_AUTO_PROVISION:true}
+    mode: ${APP_AUTH_MODE:builtin}
+    trusted-proxies: ${APP_AUTH_TRUSTED_PROXIES:}
+    headers:
+      user: ${APP_AUTH_HEADER_USER:X-Forwarded-User}
+      email: ${APP_AUTH_HEADER_EMAIL:X-Forwarded-Email}
+      groups: ${APP_AUTH_HEADER_GROUPS:X-Forwarded-Groups}
   push:
     vapid:
       public-key: ${APP_PUSH_VAPID_PUBLIC_KEY:}
