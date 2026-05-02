@@ -30,6 +30,17 @@ services:
       - "${BIND_ADDR:-127.0.0.1}:${BACKEND_PORT:-8080}:8080"
     networks:
       - workouthub-net
+    # Provisional probe: hits Spring Boot Actuator's /actuator/health.
+    # Phase 2 will introduce dedicated /healthz (readiness) and /livez
+    # (liveness) endpoints and re-point this healthcheck to /healthz.
+    # Uses busybox wget (shipped with eclipse-temurin:21-jre-alpine) so
+    # no extra packages are required in the runtime image.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   frontend:
     build:
@@ -38,11 +49,22 @@ services:
     env_file:
       - .env
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "${BIND_ADDR:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
     networks:
       - workouthub-net
+    # Provisional probe: hits the Next.js standalone server's root route,
+    # which proves the Node process accepts HTTP. Phase 2 will re-point
+    # this to a dedicated /healthz endpoint. Uses Node's built-in fetch
+    # (Node 18+; image is node:22-alpine).
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 networks:
   workouthub-net:
