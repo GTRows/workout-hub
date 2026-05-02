@@ -3,17 +3,18 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 2 of 12 COMPLETE (2026-05-02); Phase 3 next (Structured Logging)
-Plan: 2 of 2 complete in Phase 2 (02-01 done; 02-02 done with deferred runtime verify)
-Status: Phase complete; ready to plan Phase 3
-Last activity: 2026-05-02 - Completed 02-02-PLAN.md (frontend health endpoints + compose retarget)
+Phase: 3 of 12 COMPLETE (2026-05-02); Phase 4 next (Prometheus /metrics on main listener)
+Plan: 1 of 1 complete in Phase 3 (03-01 done with structured logging + masking)
+Status: Phase complete; ready to plan Phase 4
+Last activity: 2026-05-02 - Completed 03-01-PLAN.md (structured logging with deny-list mask)
 
-Progress: ███░░░░░░░ 17% (4 of 24 plans across milestone)
+Progress: ████░░░░░░ 22% (5 of 23 plans across milestone)
 
 ## Accumulated Context
 
 ### Decisions Locked-in (2026-05-02)
 
+- **Structured logging API (Plan 03-01)**: Spring Boot 3.4 native ECS structured logging chosen over logstash-logback-encoder (no new pom dep). Deny-list masking via `org.springframework.boot.json.JsonWriter.Members#applyingValueProcessor` (NOT `applyingNameProcessor` as initial plan sketched - the latter only renames keys). Customizer registration via `logging.structured.json.customizer` YAML property in `application-prod.yml` (NOT @Component/@Profile - LoggingApplicationListener runs before the application context exists, so SpringFactoriesLoader-style instantiation is the only available wiring path). Customizer class needs a public no-arg constructor and no Spring annotations.
 - **Backend readiness check (Plan 02-01)**: `/healthz` returns 200 only when (a) DataSource.getConnection.isValid(1s) AND (b) Flyway.info().pending() is empty. Spring is implicitly up if the controller responds at all. `/livez` returns 200 unconditionally (process liveness). Both endpoints publicly allowlisted in SecurityConfig; no Authorization header required by container probes.
 - **Healthcheck probe binary (Plan 01-02)**: Backend uses `wget --spider` (busybox, ships with `eclipse-temurin:21-jre-alpine`) instead of `curl`. Frontend uses Node 22 built-in `fetch`. Zero Dockerfile changes. Both probes are PROVISIONAL - Phase 2 re-points them to `/healthz`.
 - **Resource ceiling (Plan 01-02)**: 4 CPU / 1536 MB total across 3 services (db 1.0/512M, backend 2.0/768M, frontend 1.0/256M). Sized for x86_64 PC primary host; ARM/lighter overrides via Phase 6 `docker-compose.override.yml.example`.
@@ -50,9 +51,9 @@ Progress: ███░░░░░░░ 17% (4 of 24 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~18:00 local
-Stopped at: Completed 02-02-PLAN.md (frontend health endpoints); Phase 2 complete
-Resume file: None (next action: `/gsd:plan-phase 3`)
+Last session: 2026-05-02 ~18:13 local
+Stopped at: Completed 03-01-PLAN.md (structured logging); Phase 3 complete
+Resume file: None (next action: `/gsd:plan-phase 4`)
 
 ## Reference Documents
 

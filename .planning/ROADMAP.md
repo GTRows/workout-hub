@@ -49,15 +49,15 @@ Plans:
 - [x] 02-01: Backend HealthController with /livez and /healthz (DB+Flyway readiness) - `02-01-SUMMARY.md`
 - [x] 02-02: Frontend /api/healthz + /api/livez and compose healthcheck retarget - `02-02-SUMMARY.md` (runtime verify deferred to operator)
 
-#### Phase 3: Structured Logging
+#### Phase 3: Structured Logging [COMPLETE 2026-05-02]
 
 **Goal**: Production profile emits JSON to stdout with `ts`, `level`, `msg`, `service`, `request_id`, `user_id` fields. Deny-list filter for `password`, `token`, `secret`, `authorization`, `cookie`, `set_cookie`, `api_key`, `client_secret`, `private_key`. Request-id MDC propagation already exists (`TraceIdFilter`); harden it. Contract section 8.
 **Depends on**: Phase 1
-**Research**: Likely (Logback JSON encoder choice - logstash-logback-encoder vs Spring native Structured Logging in 3.4+)
-**Research topics**: Best Logback JSON encoder for Spring Boot 3.4, deny-list filter implementation patterns, performance impact
+**Research**: Resolved during planning - chose Spring Boot 3.4 native ECS structured logging (no new dep)
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 03-01: TBD
+- [x] 03-01: Structured logging for production profile (ECS JSON, deny-list mask, user_id MDC) - `03-01-SUMMARY.md`
 
 #### Phase 4: Prometheus Metrics on Main Listener
 
@@ -164,7 +164,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | ----- | --------- | ----- | ----------- | ---------- |
 | 1. Compose refactor | v0.3 | 2/2 | Complete | 2026-05-02 |
 | 2. Backend health endpoints | v0.3 | 2/2 | Complete | 2026-05-02 |
-| 3. Structured logging | v0.3 | 0/? | Not started | - |
+| 3. Structured logging | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 4. Prometheus metrics on main listener | v0.3 | 0/? | Not started | - |
 | 5. Forward-auth mode | v0.3 | 0/? | Not started | - |
 | 6. Env vars and override example | v0.3 | 0/? | Not started | - |
