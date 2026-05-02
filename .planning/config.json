@@ -1,0 +1,9 @@
+{
+  "depth": "comprehensive",
+  "mode": "interactive",
+  "language": "tr",
+  "gates": {
+    "confirm_phases": true,
+    "confirm_plan": true
+  }
+}
