@@ -3,17 +3,18 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 1 of 12 COMPLETE (2026-05-02); Phase 2 next (Backend Health Endpoints)
-Plan: 2 of 2 complete in Phase 1 (01-01 done; 01-02 done with deferred runtime verify)
-Status: Phase complete; ready to plan Phase 2
-Last activity: 2026-05-02 - Completed 01-02-PLAN.md (compose lifecycle hardening)
+Phase: 2 of 12 (Backend Health Endpoints) IN PROGRESS
+Plan: 1 of 2 complete in Phase 2 (02-01 done; 02-02 next)
+Status: In progress
+Last activity: 2026-05-02 - Completed 02-01-PLAN.md (HealthController with /livez and /healthz)
 
-Progress: ██░░░░░░░░ 8% (2 of 24 plans across milestone)
+Progress: ██░░░░░░░░ 12% (3 of 24 plans across milestone)
 
 ## Accumulated Context
 
 ### Decisions Locked-in (2026-05-02)
 
+- **Backend readiness check (Plan 02-01)**: `/healthz` returns 200 only when (a) DataSource.getConnection.isValid(1s) AND (b) Flyway.info().pending() is empty. Spring is implicitly up if the controller responds at all. `/livez` returns 200 unconditionally (process liveness). Both endpoints publicly allowlisted in SecurityConfig; no Authorization header required by container probes.
 - **Healthcheck probe binary (Plan 01-02)**: Backend uses `wget --spider` (busybox, ships with `eclipse-temurin:21-jre-alpine`) instead of `curl`. Frontend uses Node 22 built-in `fetch`. Zero Dockerfile changes. Both probes are PROVISIONAL - Phase 2 re-points them to `/healthz`.
 - **Resource ceiling (Plan 01-02)**: 4 CPU / 1536 MB total across 3 services (db 1.0/512M, backend 2.0/768M, frontend 1.0/256M). Sized for x86_64 PC primary host; ARM/lighter overrides via Phase 6 `docker-compose.override.yml.example`.
 - **Compose env var naming (Plan 01-01)**: `BACKEND_PORT` and `FRONTEND_PORT` introduced at the compose layer (replacing the literal `3000:3000` and `SERVER_PORT`'s double-duty). The backend application internally still reads `SERVER_PORT` - the compose-level rename is for unambiguous per-service env vars only.
@@ -49,9 +50,9 @@ Progress: ██░░░░░░░░ 8% (2 of 24 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~17:00 local
-Stopped at: Completed 01-02-PLAN.md (compose lifecycle hardening); Phase 1 complete
-Resume file: None (next action: `/gsd:plan-phase 2`)
+Last session: 2026-05-02 ~17:47 local
+Stopped at: Completed 02-01-PLAN.md (backend health endpoints)
+Resume file: None (next action: `/gsd:execute-plan .planning/phases/02-backend-health-endpoints/02-02-PLAN.md`)
 
 ## Reference Documents
 
