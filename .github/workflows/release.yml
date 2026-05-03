@@ -102,7 +102,10 @@ jobs:
         id: tags
         shell: bash
         run: |
+          # GHCR (Docker registry) repo names must be lowercase. github.repository_owner
+          # preserves the original casing (e.g. GTRows), so lowercase the full prefix.
           IMAGE="${REGISTRY}/${IMAGE_PREFIX}-${{ matrix.component }}"
+          IMAGE="${IMAGE,,}"
           # Contract section 3.1: pinned vX.Y.Z only. No :latest, no floating alias.
           echo "tags=$IMAGE:${{ steps.ver.outputs.version }}" >> "$GITHUB_OUTPUT"
 
@@ -163,6 +166,9 @@ jobs:
           fi
           BACKEND_DIGEST=$(cat digests/backend.txt)
           FRONTEND_DIGEST=$(cat digests/frontend.txt)
+          # GHCR repo names must be lowercase; IMAGE_PREFIX preserves the
+          # original github.repository_owner casing, so lowercase it here too.
+          IMAGE_PREFIX="${IMAGE_PREFIX,,}"
           BT=$(printf '\140')
           {
             printf '\n## Container images (multi-arch: amd64 + arm64)\n\nPull the matching tag from GHCR:\n\n'
