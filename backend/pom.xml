@@ -112,13 +112,19 @@
             <artifactId>web-push</artifactId>
             <version>${webpush.version}</version>
         </dependency>
-        <!-- web-push 5.1.2 demoted httpasyncclient/httpcore to runtime scope; we
-             need org.apache.http.HttpResponse on the compile classpath for
-             WebPushJavaSender. Pin to httpasyncclient 4.1.5 (matches webpush). -->
+        <!-- web-push 5.1.2 demoted its declared deps to runtime scope; we need
+             org.apache.http.HttpResponse and org.jose4j.lang.JoseException on the
+             compile classpath for WebPushJavaSender (PushService.send signature).
+             Versions match the webpush runtime overrides above. -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
             <version>4.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bitbucket.b_c</groupId>
+            <artifactId>jose4j</artifactId>
+            <version>${jose4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
