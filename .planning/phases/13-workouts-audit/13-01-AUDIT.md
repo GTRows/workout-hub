@@ -107,3 +107,38 @@ All endpoints require a JWT-authenticated principal (`@AuthenticationPrincipal A
 | GET | `/api/workout-days/{id}` | `get` (`WorkoutDayByIdController.java:33`) | - | `WorkoutDayDto` | JWT user | 200 | Idempotent. Owner-scoped via `findByIdAndPlanUserId`. 404 otherwise. |
 
 Total: 15 endpoints across 3 controllers.
+
+## Section 3 - ProjectBrief Phase 3 Gap Matrix
+
+ProjectBrief Phase 3 endpoint list is at `ProjectBrief.md:271-281` (the brief's "Endpoints" subsection of Phase 3) plus the drag-and-drop reorder requirement at `ProjectBrief.md:283`.
+
+| ProjectBrief endpoint | Current implementation | Status | Evidence | Notes |
+| --- | --- | --- | --- | --- |
+| `GET /api/workout-plans` | `GET /api/workout-plans` | Implemented | `WorkoutPlansController.java:34` | Returns `List<WorkoutPlanSummaryDto>` (lightweight rows). Brief did not specify summary vs full shape; summary is the smaller surface. |
+| `POST /api/workout-plans` | `POST /api/workout-plans` | Implemented | `WorkoutPlansController.java:47` | Always creates with `active=false`; user must call `/activate` to flip. Brief does not constrain initial active state. |
+| `GET /api/workout-plans/:id` | `GET /api/workout-plans/{id}` | Implemented | `WorkoutPlansController.java:55` | Returns full `WorkoutPlanDto` with nested days and exercises, matching the brief's "plan + gunler + hareketler" requirement. |
+| `PUT /api/workout-plans/:id` | `PUT /api/workout-plans/{id}` | Partial | `WorkoutPlansController.java:62` | Patch-only on `name`. Brief's PUT shape is unspecified beyond "update plan", and there is no other plan-level mutable field in the schema, so this is a defensible partial. Flag for confirmation in Phase 14 planning. |
+| `DELETE /api/workout-plans/:id` | `DELETE /api/workout-plans/{id}` | Implemented | `WorkoutPlansController.java:70` | Returns 204; cascade-removes days and items via JPA cascade-all + orphan-removal. |
+| `POST /api/workout-plans/:id/activate` | `POST /api/workout-plans/{id}/activate` | Implemented | `WorkoutPlansController.java:78` | Idempotent; flips current active off then activates target. Two-write transaction with explicit flush against the partial unique index. |
+| `POST /api/workout-plans/:id/days` | `POST /api/workout-plans/{planId}/days` | Implemented | `WorkoutDaysController.java:35` | Path uses `{planId}` instead of `{id}`; semantically identical. 409 on duplicate `dayOfWeek`. |
+| `PUT /api/workout-plans/:id/days/:dayId/exercises/:exId` | `PUT /api/workout-plans/{planId}/days/{dayId}/exercises/{itemId}` | Different shape | `WorkoutDaysController.java:72` | Path id named `itemId` (workout_day_exercise.id), not `exId` (the catalog exercise id). Brief's `:exId` reads ambiguously; the implementation interprets it as the join-row id, which is the only addressable resource. The catalog `exercise_id` is set on create and not swappable on update. Drift is naming-only. |
+| `DELETE /api/workout-plans/:id/days/:dayId/exercises/:exId` | `DELETE /api/workout-plans/{planId}/days/{dayId}/exercises/{itemId}` | Different shape | `WorkoutDaysController.java:82` | Same naming drift as the PUT row above. Behavior matches: removes the join row, renumbers remaining `orderIndex` values 1..N. |
+| Drag-and-drop reorder (gunler ve hareketler) (`ProjectBrief.md:283`) | `POST /api/workout-plans/{planId}/days/{dayId}/exercises/reorder` for items only | Partial | `WorkoutDaysController.java:92` | Item reorder within a day is implemented (two-phase write to dodge the `(workout_day_id, order_index)` unique constraint). Day-of-week reorder across the plan is not exposed; users can only `PUT` an individual day's `dayOfWeek` (with 409 on collision). No bulk day reorder endpoint exists. Note: `WorkoutDay` table has no `order_index` column, only `day_of_week`, so "reorder" of days is implicit through the 1..7 slot. |
+
+### Bonus surface in current implementation, not in ProjectBrief Phase 3
+
+| Path | Method (file:line) | Note |
+| --- | --- | --- |
+| `GET /api/workout-plans/active` | `WorkoutPlansController.java:39` | Convenience endpoint for the dashboard "today's workout" card. Not in Phase 3 brief but called out as a Phase 5 dashboard requirement. |
+| `PUT /api/workout-plans/{planId}/days/{dayId}` | `WorkoutDaysController.java:44` | Day-level patch (name, focus, dayOfWeek, estimatedDurationMin). Brief did not enumerate it but Phase 3 implies "edit a day". |
+| `DELETE /api/workout-plans/{planId}/days/{dayId}` | `WorkoutDaysController.java:53` | Day deletion. Same Phase 3 implication argument. |
+| `POST /api/workout-plans/{planId}/days/{dayId}/exercises` | `WorkoutDaysController.java:62` | Add-item endpoint. Brief's `POST /api/workout-plans/:id/days` reads as "guen hareket ekle" (add exercise to day) but the implementation splits this into a dedicated nested route, which is the more conventional REST shape. |
+| `GET /api/workout-days/{id}` | `WorkoutDayByIdController.java:33` | Standalone day lookup. Brief did not specify it; Phase 4 (sessions) needs it because the session knows only `workoutDayId`, not the parent plan id. |
+
+### Counts
+
+- Implemented: 6 of 9 brief rows.
+- Partial: 2 of 9 (`PUT /api/workout-plans/:id`, drag-and-drop reorder).
+- Different shape (naming drift only): 2 of 9 (item PUT/DELETE path id `:exId` vs implementation `:itemId`).
+- Missing: 0 of 9.
+- Out-of-brief but in-implementation: 5 endpoints.
