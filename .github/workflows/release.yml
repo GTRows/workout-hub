@@ -151,6 +151,7 @@ jobs:
       - name: Extract release notes from CHANGELOG.md
         shell: bash
         run: |
+          # shellcheck disable=SC2016
           VERSION="${GITHUB_REF_NAME#v}"
           awk -v v="$VERSION" '
             $0 ~ "^## \\[" v "\\]" { capture=1; next }
