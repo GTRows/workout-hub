@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class MetricsController {
+public class PrometheusMetricsController {
 
     private static final String PROMETHEUS_TEXT_CONTENT_TYPE =
             "text/plain; version=0.0.4; charset=utf-8";
 
     private final PrometheusScrapeEndpoint scrape;
 
-    public MetricsController(PrometheusScrapeEndpoint scrape) {
+    public PrometheusMetricsController(PrometheusScrapeEndpoint scrape) {
         this.scrape = scrape;
     }
 

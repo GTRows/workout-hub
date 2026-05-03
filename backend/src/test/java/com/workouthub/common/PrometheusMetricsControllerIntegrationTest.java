@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc
-class MetricsControllerIntegrationTest extends AbstractIntegrationTest {
+class PrometheusMetricsControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired MockMvc mvc;
 
