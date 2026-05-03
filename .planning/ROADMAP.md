@@ -129,14 +129,15 @@ Plans:
 Plans:
 - [x] 10-01: 7 CI gate jobs + gitleaks baseline - `10-01-SUMMARY.md`
 
-#### Phase 11: GHCR Multi-Arch Image Publish
+#### Phase 11: GHCR Multi-Arch Image Publish [COMPLETE 2026-05-03]
 
 **Goal**: Extend `.github/workflows/release.yml` to build and push two multi-arch images per release: `ghcr.io/gtrows/workouthub-backend:vX.Y.Z` and `ghcr.io/gtrows/workouthub-frontend:vX.Y.Z` (linux/amd64 + linux/arm64). Digest pin in release notes. No `:latest`, no floating alias. Contract sections 3.1 and 10.
-**Depends on**: Phase 10 (Trivy needs an image to scan)
-**Research**: Unlikely (docker buildx + qemu pattern is standard)
+**Depends on**: Phase 10
+**Research**: None
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 11-01: TBD
+- [x] 11-01: Multi-arch + no :latest + digest pins - `11-01-SUMMARY.md`
 
 #### Phase 12: Release v0.3.0
 
@@ -176,5 +177,5 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 8. Dependabot alert triage | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 9. README and MIGRATION docs | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 10. CI gates | v0.3 | 1/1 | Complete | 2026-05-03 |
-| 11. GHCR multi-arch image publish | v0.3 | 0/? | Not started | - |
+| 11. GHCR multi-arch image publish | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 12. Release v0.3.0 | v0.3 | 0/? | Not started | - |

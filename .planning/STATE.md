@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 10 of 12 COMPLETE (2026-05-03); Phase 11 next (GHCR multi-arch publish)
-Plan: 1 of 1 complete in Phase 10 (10-01 done; 7 CI gates added)
-Status: Phase complete; ready to plan Phase 11
-Last activity: 2026-05-03 - Completed 10-01-PLAN.md (CI gates)
+Phase: 11 of 12 COMPLETE (2026-05-03); Phase 12 next (Release v0.3.0)
+Plan: 1 of 1 complete in Phase 11 (11-01 done; multi-arch GHCR + no :latest + digest pins)
+Status: Phase complete; ready to cut release
+Last activity: 2026-05-03 - Completed 11-01-PLAN.md (GHCR multi-arch publish)
 
-Progress: █████████████ 54% (12 of 22 plans across milestone)
+Progress: ██████████████ 59% (13 of 22 plans across milestone)
 
 ## Accumulated Context
 
