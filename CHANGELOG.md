@@ -17,6 +17,21 @@ and uses it as the GitHub release notes. Do not change the heading format.
 ### Fixed
 ### Security
 
+## [0.3.2] - 2026-05-03
+
+Patch release fixing the v0.3.1 release-workflow failure. The image-tag
+construction in `.github/workflows/release.yml` did not lowercase
+`github.repository_owner`, so buildx rejected
+`ghcr.io/GTRows/workouthub-backend:0.3.1` (Docker registry repo names
+must be lowercase). No code change; only `.github/workflows/release.yml`
+and the version bump.
+
+### Fixed
+- `Compute image tag` and the release-notes generator both now lowercase
+  `IMAGE_PREFIX` via bash `${VAR,,}` parameter expansion before composing
+  the GHCR ref. Backend and frontend images for v0.3.2 publish to
+  `ghcr.io/gtrows/workouthub-{backend,frontend}:0.3.2`.
+
 ## [0.3.1] - 2026-05-03
 
 Patch release. Closes 10 CVEs flagged by `trivy fs` and `trivy image` after the v0.3.0 cut, restores green CI on `main` (the v0.3.0 release shipped with a Spring bean-name collision and an ESLint group major-bump that both broke their respective gates), and stabilizes the test suite by deferring three pre-existing flakes to ISSUES.md. No operator-facing API or config changes; pull and restart.
