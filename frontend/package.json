@@ -1,7 +1,7 @@
 {
   "name": "workout-hub-frontend",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "WorkoutHub frontend (Next.js 15 + React 19 + TypeScript + Tailwind v4)",
   "scripts": {
