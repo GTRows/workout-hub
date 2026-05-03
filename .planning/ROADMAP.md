@@ -119,15 +119,15 @@ Plans:
 Plans:
 - [x] 09-01: README rewrite + MIGRATION.md seed - `09-01-SUMMARY.md`
 
-#### Phase 10: CI Gates
+#### Phase 10: CI Gates [COMPLETE 2026-05-03]
 
 **Goal**: Add `gitleaks-action`, `trivy fs .`, `trivy image <built-tag>`, `docker compose -f compose.yml config`, `hadolint`, `actionlint`, `shellcheck` to `.github/workflows/ci.yml`. All gating merge to main. Contract section 12.
-**Depends on**: Nothing (parallelizable with feature phases)
-**Research**: Likely (current versions and configuration of each action; CodeQL interaction)
-**Research topics**: Trivy ignore-policy patterns, gitleaks baseline file, hadolint rule selection
+**Depends on**: Nothing
+**Research**: Resolved during execution
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 10-01: TBD
+- [x] 10-01: 7 CI gate jobs + gitleaks baseline - `10-01-SUMMARY.md`
 
 #### Phase 11: GHCR Multi-Arch Image Publish
 
@@ -175,6 +175,6 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 7. Optional pg_dump sidecar | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 8. Dependabot alert triage | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 9. README and MIGRATION docs | v0.3 | 1/1 | Complete | 2026-05-03 |
-| 10. CI gates | v0.3 | 0/? | Not started | - |
+| 10. CI gates | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 11. GHCR multi-arch image publish | v0.3 | 0/? | Not started | - |
 | 12. Release v0.3.0 | v0.3 | 0/? | Not started | - |
