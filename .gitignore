@@ -48,6 +48,9 @@ data/*
 !data/postgres/
 data/postgres/*
 !data/postgres/.gitkeep
+!data/backups/
+data/backups/*
+!data/backups/.gitkeep
 
 # Compose local override (operator copies .example, gitignored)
 docker-compose.override.yml
