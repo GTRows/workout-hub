@@ -83,6 +83,11 @@ jobs:
             echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Set up QEMU (multi-arch emulation)
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -93,27 +98,41 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute image tags
+      - name: Compute image tag
         id: tags
         shell: bash
         run: |
           IMAGE="${REGISTRY}/${IMAGE_PREFIX}-${{ matrix.component }}"
-          TAGS="$IMAGE:${{ steps.ver.outputs.version }}"
-          if [[ "${{ steps.ver.outputs.is_prerelease }}" == "false" ]]; then
-            TAGS="$TAGS,$IMAGE:latest"
-          fi
-          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+          # Contract section 3.1: pinned vX.Y.Z only. No :latest, no floating alias.
+          echo "tags=$IMAGE:${{ steps.ver.outputs.version }}" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push
+      - name: Build and push (multi-arch)
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: ./${{ matrix.component }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          provenance: true
+          sbom: true
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.ver.outputs.version }}
+
+      - name: Capture digest
+        shell: bash
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          echo "${{ steps.build.outputs.digest }}" > "${{ runner.temp }}/digests/${{ matrix.component }}.txt"
+
+      - name: Upload digest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ matrix.component }}
+          path: ${{ runner.temp }}/digests/${{ matrix.component }}.txt
+          if-no-files-found: error
 
   release:
     name: Draft GitHub Release
@@ -121,6 +140,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download digest artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: digests
+          pattern: digest-*
+          merge-multiple: true
 
       - name: Extract release notes from CHANGELOG.md
         shell: bash
@@ -135,19 +161,31 @@ jobs:
             echo "::error::Empty release notes for v${VERSION}."
             exit 1
           fi
+          BACKEND_DIGEST=$(cat digests/backend.txt)
+          FRONTEND_DIGEST=$(cat digests/frontend.txt)
           {
-            printf '\n## Container images\n\nPull the matching tag from GHCR:\n\n'
+            printf '\n## Container images (multi-arch: amd64 + arm64)\n\nPull the matching tag from GHCR:\n\n'
             printf -- '- `%s/%s-backend:%s`\n'  "$REGISTRY" "$IMAGE_PREFIX" "$VERSION"
             printf -- '- `%s/%s-frontend:%s`\n' "$REGISTRY" "$IMAGE_PREFIX" "$VERSION"
+            printf '\n### Image digests (pinned by digest, no :latest)\n\n'
+            printf -- '- `%s/%s-backend@%s`\n'  "$REGISTRY" "$IMAGE_PREFIX" "$BACKEND_DIGEST"
+            printf -- '- `%s/%s-frontend@%s`\n' "$REGISTRY" "$IMAGE_PREFIX" "$FRONTEND_DIGEST"
+            printf '\n## Operator migration notes\n\nSee [docs/MIGRATION.md](docs/MIGRATION.md) for the per-version migration steps.\n'
           } >> RELEASE_NOTES.md
 
-      - name: Bundle compose files
+      - name: Bundle deployment artifacts
         shell: bash
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           mkdir -p dist
           tar -czf "dist/workouthub-compose-v${VERSION}.tar.gz" \
-              compose.yml compose.prod.yml nginx/ docs/DEPLOYMENT.md docs/BACKUP.md
+              compose.yml \
+              docker-compose.override.yml.example \
+              .env.example \
+              docs/MIGRATION.md \
+              docs/DEPLOYMENT.md \
+              docs/BACKUP.md \
+              docs/SELF_HOSTED_CONTRACT.md
 
       - name: Determine prerelease
         id: prerelease
