@@ -61,9 +61,9 @@ Progress: ██████████████████████ 100
 
 ## Session Continuity
 
-Last session: 2026-05-03 ~02:00 local
-Stopped at: Completed 10-01-PLAN.md (CI gates); Phase 10 complete
-Resume file: None (next action: `/gsd:plan-phase 11`)
+Last session: 2026-05-03 ~02:35 local
+Stopped at: Released v0.3.0; release.yml run 25266454100 in progress
+Resume file: None (next action: `/gsd:complete-milestone` once draft release published)
 
 ## Reference Documents
 

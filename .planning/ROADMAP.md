@@ -13,7 +13,7 @@ None - project is application code; planning draws from `docs/SELF_HOSTED_CONTRA
 ## Milestones
 
 - ⚪ **v0.1 / v0.2** - shipped pre-GSD (informal); see `.planning/HANDOFF.md` for state snapshot
-- 🚧 **v0.3 Self-Hosted Contract Alignment** - Phases 1-12 (in progress)
+- ✅ **v0.3 Self-Hosted Contract Alignment** - Phases 1-12 (shipped 2026-05-03)
 - 📋 **v0.4 Backend Feature Completion** - planned (workouts, sessions, metrics, export modules per ProjectBrief phases 3-5)
 - 📋 **v0.5 Frontend Completion** - planned (auth pages, dashboard, plan editor, session execution UI, history, metrics, profile, export)
 - 📋 **v0.6 Operational Maturity** - planned (richer metrics, error states, performance budgeting)
@@ -139,14 +139,15 @@ Plans:
 Plans:
 - [x] 11-01: Multi-arch + no :latest + digest pins - `11-01-SUMMARY.md`
 
-#### Phase 12: Release v0.3.0
+#### Phase 12: Release v0.3.0 [COMPLETE 2026-05-03]
 
 **Goal**: Cut the first contract-compliant release. Run `/gtr:release 0.3.0`, push tag, validate workflow draft, attach `MIGRATION.md` excerpt to release notes, publish.
-**Depends on**: All previous phases in this milestone, plus i-1 and i-2 resolved (or explicitly carried forward as known issues in the release notes)
-**Research**: Unlikely
+**Depends on**: All previous phases in this milestone, plus i-1 and i-2 carried forward as known issues in the release notes
+**Research**: None
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 12-01: TBD
+- [x] 12-01: CHANGELOG + version bumps + tag v0.3.0 pushed - `12-01-SUMMARY.md`
 
 ### 📋 v0.4 Backend Feature Completion (Planned)
 
@@ -178,4 +179,4 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 9. README and MIGRATION docs | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 10. CI gates | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 11. GHCR multi-arch image publish | v0.3 | 1/1 | Complete | 2026-05-03 |
-| 12. Release v0.3.0 | v0.3 | 0/? | Not started | - |
+| 12. Release v0.3.0 | v0.3 | 1/1 | Complete | 2026-05-03 |
