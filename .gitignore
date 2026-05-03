@@ -69,3 +69,13 @@ htmlcov/
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# Snapshots taken by /gtr:update before applying breaking migrations
+.claude/commands.pre-*/
+.claude/migration-log.md
+
+# Token usage telemetry (per-clone, never shipped)
+.claude/usage-log.jsonl
+
+# Hook block audit (per-clone, never shipped)
+.claude/hook-audit.log
