@@ -2,13 +2,13 @@
 
 ## Current Position
 
-Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 11 of 12 COMPLETE (2026-05-03); Phase 12 next (Release v0.3.0)
-Plan: 1 of 1 complete in Phase 11 (11-01 done; multi-arch GHCR + no :latest + digest pins)
-Status: Phase complete; ready to cut release
-Last activity: 2026-05-03 - Completed 11-01-PLAN.md (GHCR multi-arch publish)
+Milestone: v0.3 Self-Hosted Contract Alignment **COMPLETE** (2026-05-03)
+Phase: 12 of 12 COMPLETE; v0.3.0 released, draft GitHub release pending operator publish
+Plan: 1 of 1 complete in Phase 12 (12-01 done; tag pushed, release.yml firing)
+Status: Milestone complete; ready for /gsd:complete-milestone
+Last activity: 2026-05-03 - Released v0.3.0 (commit 32473fb, tag v0.3.0)
 
-Progress: ██████████████ 59% (13 of 22 plans across milestone)
+Progress: ██████████████████████ 100% of v0.3 (14 of 14 plans)
 
 ## Accumulated Context
 
