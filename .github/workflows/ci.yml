@@ -99,6 +99,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "1"
           ignore-unfixed: true
+          trivyignores: .trivyignore
 
   trivy_image:
     name: trivy image (${{ matrix.component }})
@@ -117,6 +118,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "1"
           ignore-unfixed: true
+          trivyignores: .trivyignore
 
   compose_config:
     name: docker compose config

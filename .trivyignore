@@ -1,0 +1,10 @@
+# Trivy ignore file
+# Format: one CVE per line, optional `# comment` on the same line
+# https://aquasecurity.github.io/trivy/v0.36/docs/vulnerability/examples/filter/
+
+# CVE-2026-33671 — picomatch ReDoS
+# Source: vendored copy inside next/dist/compiled/picomatch (Next.js 15.5.15)
+# Fix: requires Next.js to update its bundled picomatch. Cannot be patched via
+# pnpm overrides because Next compiles its own copy at npm-publish time.
+# Tracked: ISSUES.md i-6 (next 15 -> 16 bump deferred to v0.5).
+CVE-2026-33671
