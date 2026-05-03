@@ -112,6 +112,14 @@
             <artifactId>web-push</artifactId>
             <version>${webpush.version}</version>
         </dependency>
+        <!-- web-push 5.1.2 demoted httpasyncclient/httpcore to runtime scope; we
+             need org.apache.http.HttpResponse on the compile classpath for
+             WebPushJavaSender. Pin to httpasyncclient 4.1.5 (matches webpush). -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+            <version>4.1.5</version>
+        </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
