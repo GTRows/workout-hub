@@ -89,15 +89,15 @@ Plans:
 Plans:
 - [x] 06-01: Canonical .env.example + override example + deny rule narrowing - `06-01-SUMMARY.md`
 
-#### Phase 7: Optional pg_dump Sidecar
+#### Phase 7: Optional pg_dump Sidecar [COMPLETE 2026-05-02]
 
 **Goal**: Opt-in sidecar container, off by default, that runs `pg_dump --format=custom` on `PG_DUMP_SCHEDULE` cron and prunes by `PG_DUMP_RETENTION_DAYS`. Writes to `./data/backups/<date>.dump`. Contract section 5.2.
 **Depends on**: Phase 1
-**Research**: Likely (sidecar image choice - postgres:16-alpine + cron vs prodrigestivill/postgres-backup-local)
-**Research topics**: Maintained backup sidecar images, retention pruning idiom
+**Research**: Resolved - chose prodrigestivill/postgres-backup-local:16 (multi-arch, maintained)
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 07-01: TBD
+- [x] 07-01: pg_dump sidecar profile-gated by `backup` - `07-01-SUMMARY.md`
 
 #### Phase 8: Dependabot Alert Triage
 
@@ -170,7 +170,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 4. Prometheus metrics on main listener | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 5. Forward-auth mode | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 6. Env vars and override example | v0.3 | 1/1 | Complete | 2026-05-02 |
-| 7. Optional pg_dump sidecar | v0.3 | 0/? | Not started | - |
+| 7. Optional pg_dump sidecar | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 8. Dependabot alert triage | v0.3 | 0/? | Not started | - |
 | 9. README and MIGRATION docs | v0.3 | 0/? | Not started | - |
 | 10. CI gates | v0.3 | 0/? | Not started | - |

@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 6 of 12 COMPLETE (2026-05-02); Phase 7 next (Optional pg_dump sidecar)
-Plan: 1 of 1 complete in Phase 6 (06-01 done; .env.example + override example + deny narrowing)
-Status: Phase complete; ready to plan Phase 7
-Last activity: 2026-05-02 - Completed 06-01-PLAN.md (env vars and override example)
+Phase: 7 of 12 COMPLETE (2026-05-02); Phase 8 next (Dependabot Alert Triage)
+Plan: 1 of 1 complete in Phase 7 (07-01 done; pg_dump sidecar profile-gated)
+Status: Phase complete; ready to plan Phase 8
+Last activity: 2026-05-02 - Completed 07-01-PLAN.md (pg_dump backup sidecar)
 
-Progress: ████████░░ 36% (8 of 22 plans across milestone)
+Progress: █████████░ 41% (9 of 22 plans across milestone)
 
 ## Accumulated Context
 
@@ -57,9 +57,9 @@ Progress: ████████░░ 36% (8 of 22 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~21:25 local
-Stopped at: Completed 06-01-PLAN.md (env vars and override example); Phase 6 complete
-Resume file: None (next action: `/gsd:plan-phase 7`)
+Last session: 2026-05-02 ~21:45 local
+Stopped at: Completed 07-01-PLAN.md (pg_dump sidecar); Phase 7 complete
+Resume file: None (next action: `/gsd:plan-phase 8`)
 
 ## Reference Documents
 
