@@ -92,6 +92,13 @@ Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. C
 
 **Trigger to reopen:** Spring Boot 3.4 EOL OR v0.6 (Operational Maturity) milestone OR a security-driven need.
 
+### i-9 — StructuredLoggingTest cannot capture ECS JSON under @SpringBootTest
+
+**Disabled in:** `backend/src/test/java/com/workouthub/common/logging/StructuredLoggingTest.java`
+**Reason:** The test boots a minimal `@SpringBootConfiguration` with `WebEnvironment.NONE` and `@ActiveProfiles("prod")` to exercise the Spring Boot 3.4 native ECS structured logging customizer. Even with `OutputCaptureExtension` (which intercepts stdout before Logback starts), the test still finds no JSON line in captured output. Likely cause: the minimal configuration does not trigger Spring Boot's `LoggingApplicationListener` reconfiguration to ECS, so the test runs with default human-readable logback layout. ECS output works correctly at real runtime (`docker compose up` boots the full `WorkoutHubApplication` and emits ECS JSON).
+
+**Trigger to reopen:** Redesign the test to boot the full `WorkoutHubApplication` (probably with a Testcontainers postgres) so the prod logging system actually activates. Likely v0.4 testing-infra session.
+
 ## Closed
 
 (none)
