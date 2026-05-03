@@ -30,10 +30,10 @@ None - project is application code; planning draws from `docs/SELF_HOSTED_CONTRA
 **Goal:** Inventory the existing `workouts/` package state, list missing endpoints from ProjectBrief Phase 3, and review mapper/cascade behavior to scope hardening work.
 **Depends on:** v0.3 archive complete
 **Research:** Unlikely (internal patterns)
-**Plans:** TBD
+**Plans:** 1
 
 Plans:
-- [ ] 13-01: TBD (run /gsd:plan-phase 13 to break down)
+- [x] 13-01: workouts-audit
 
 #### Phase 14: workouts-hardening
 
@@ -156,7 +156,7 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | Phase                       | Milestone | Plans | Status      | Completed  |
 | --------------------------- | --------- | ----- | ----------- | ---------- |
 | 1-12 (v0.3 scope)           | v0.3      | 14/14 | Complete    | 2026-05-03 |
-| 13. workouts-audit          | v0.4      | 0/?   | Not started | -          |
+| 13. workouts-audit          | v0.4      | 1/1   | Complete    | 2026-05-04 |
 | 14. workouts-hardening      | v0.4      | 0/?   | Not started | -          |
 | 15. sessions-core           | v0.4      | 0/?   | Not started | -          |
 | 16. sessions-analytics      | v0.4      | 0/?   | Not started | -          |
