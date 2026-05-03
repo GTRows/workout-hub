@@ -63,6 +63,35 @@ Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. C
 
 **Trigger to reopen:** v0.6 milestone planning OR operator request for richer frontend telemetry.
 
+### i-5 — Defer next-intl 3 -> 4 major bump (PR #2)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/2
+**Closes vuln alerts:** #8 and #11 (open redirect, severity medium)
+**Reason for defer:** Major API change; requires migration of `frontend/messages/*.json` and `i18n/request.ts`. Out of v0.3 self-hosted-contract scope. The open-redirect risk is mitigated for v0.3 by the operator's reverse-proxy configuration (Caddy / nginx header rewrite); documented in Phase 9 README.
+
+**Trigger to reopen:** v0.4 frontend work OR a careful next-intl 4 migration session.
+
+### i-6 — Defer next 15 -> 16 major framework bump (PR #13)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/13
+**Reason for defer:** Next.js 16 has its own migration story (App Router conventions, breaking changes in middleware, async dynamic APIs). Cannot ship in v0.3 without absorbing the migration cost. Stays on 15.x line.
+
+**Trigger to reopen:** v0.5 milestone (frontend completion phase) OR Next 15 LTS end-of-life signal.
+
+### i-7 — Defer testcontainers 1.x -> 2.x major bump (PR #11)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/11
+**Reason for defer:** Major bump on test infrastructure. Could break the `AbstractIntegrationTest` base class and migration tests. Currently on 1.20.4 which is well-supported. Risk vs benefit not justified for v0.3.
+
+**Trigger to reopen:** Next time test infrastructure receives attention (likely after a CI flake batch or v0.4 backend feature work).
+
+### i-8 — Defer Spring Boot 3.4 -> 4.0 major framework bump (PR #8)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/8
+**Reason for defer:** Spring Boot 4 brings Servlet 6 / Hibernate 7 / Spring Framework 7 changes. Cannot land in v0.3 self-hosted-contract scope. The Spring Boot 3.4.x line is still actively patched.
+
+**Trigger to reopen:** Spring Boot 3.4 EOL OR v0.6 (Operational Maturity) milestone OR a security-driven need.
+
 ## Closed
 
 (none)

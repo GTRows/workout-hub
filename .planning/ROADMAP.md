@@ -99,14 +99,15 @@ Plans:
 Plans:
 - [x] 07-01: pg_dump sidecar profile-gated by `backup` - `07-01-SUMMARY.md`
 
-#### Phase 8: Dependabot Alert Triage
+#### Phase 8: Dependabot Alert Triage [COMPLETE 2026-05-03]
 
 **Goal**: Resolve the 12 outstanding security alerts (1 high, 11 moderate). Group by transitive dependency chain; bump or pin where possible; document accept-with-mitigation otherwise. No new dependencies without justification per contract section 13.
 **Depends on**: Nothing (independent housekeeping)
-**Research**: Unlikely (CVE-by-CVE)
+**Research**: None
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 08-01: TBD
+- [x] 08-01: Triage 17 Dependabot PRs (12 merged, 4 deferred via ISSUES) - `08-01-SUMMARY.md`
 
 #### Phase 9: README and MIGRATION Docs
 
@@ -171,7 +172,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 5. Forward-auth mode | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 6. Env vars and override example | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 7. Optional pg_dump sidecar | v0.3 | 1/1 | Complete | 2026-05-02 |
-| 8. Dependabot alert triage | v0.3 | 0/? | Not started | - |
+| 8. Dependabot alert triage | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 9. README and MIGRATION docs | v0.3 | 0/? | Not started | - |
 | 10. CI gates | v0.3 | 0/? | Not started | - |
 | 11. GHCR multi-arch image publish | v0.3 | 0/? | Not started | - |

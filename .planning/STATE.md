@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 7 of 12 COMPLETE (2026-05-02); Phase 8 next (Dependabot Alert Triage)
-Plan: 1 of 1 complete in Phase 7 (07-01 done; pg_dump sidecar profile-gated)
-Status: Phase complete; ready to plan Phase 8
-Last activity: 2026-05-02 - Completed 07-01-PLAN.md (pg_dump backup sidecar)
+Phase: 8 of 12 COMPLETE (2026-05-03); Phase 9 next (README and MIGRATION docs)
+Plan: 1 of 1 complete in Phase 8 (08-01 done; 12 of 17 Dependabot PRs merged, 4 deferred)
+Status: Phase complete; ready to plan Phase 9
+Last activity: 2026-05-03 - Completed 08-01-PLAN.md (Dependabot triage)
 
-Progress: █████████░ 41% (9 of 22 plans across milestone)
+Progress: ██████████ 45% (10 of 22 plans across milestone)
 
 ## Accumulated Context
 
@@ -47,8 +47,12 @@ Progress: █████████░ 41% (9 of 22 plans across milestone)
 - **i-1**: WorkoutDaysIntegrationTest helper NPE on response `id` (6 errors). Needs local Maven for breakpoint debugging. See `.planning/ISSUES.md`.
 - **i-2**: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport (1 failure). Same trigger as i-1.
 - Both i-1/i-2 blocked on local-Maven environment setup (memory: local_maven_gap).
-- **i-3**: Resolved at execution time (Plan 01-01 gitignore pattern correction). Logged for documentation.
-- **i-4** (NEW Plan 04-01): Frontend per-request HTTP metrics deferred to v0.6.
+- **i-3**: Resolved at execution time (Plan 01-01 gitignore pattern correction).
+- **i-4** (Plan 04-01): Frontend per-request HTTP metrics deferred to v0.6.
+- **i-5** (Plan 08-01): next-intl 3->4 major bump deferred (mitigation via reverse-proxy header rewrite).
+- **i-6** (Plan 08-01): Next 15->16 major bump deferred to v0.5.
+- **i-7** (Plan 08-01): testcontainers 1->2 major bump deferred to next test-infra session.
+- **i-8** (Plan 08-01): Spring Boot 3.4->4.0 major bump deferred to v0.6.
 - **Deferred runtime verification (Plans 01-02 Task 3 and 02-02 Task 3)**: `docker compose up -d` smoke test deferred. Repo's `.env` is gitignored AND blocked from being created via Bash (`pre_guard_secrets.py`) AND blocked via Write (deny rule on `.env*`). Operator can run the 9-step checkpoint from `01-02-PLAN.md` after creating `.env` from `.env.example`. Naturally re-validated as part of Phase 12 (Release v0.3.0).
 
 ### Roadmap Evolution
@@ -57,9 +61,9 @@ Progress: █████████░ 41% (9 of 22 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~21:45 local
-Stopped at: Completed 07-01-PLAN.md (pg_dump sidecar); Phase 7 complete
-Resume file: None (next action: `/gsd:plan-phase 8`)
+Last session: 2026-05-03 ~00:45 local
+Stopped at: Completed 08-01-PLAN.md (Dependabot triage); Phase 8 complete
+Resume file: None (next action: `/gsd:plan-phase 9`)
 
 ## Reference Documents
 
