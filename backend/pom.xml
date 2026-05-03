@@ -23,7 +23,9 @@
         <testcontainers.version>1.20.4</testcontainers.version>
         <jacoco.version>0.8.14</jacoco.version>
         <jacoco.line.coverage.min>0.70</jacoco.line.coverage.min>
-        <webpush.version>5.1.1</webpush.version>
+        <webpush.version>5.1.2</webpush.version>
+        <asynchttpclient.version>2.12.4</asynchttpclient.version>
+        <jose4j.version>0.9.6</jose4j.version>
         <bouncycastle.version>1.84</bouncycastle.version>
     </properties>
 
@@ -35,6 +37,18 @@
                 <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- Override transitive deps from web-push to close CVEs:
+                 CVE-2024-53990 (async-http-client), CVE-2023-31582 + CVE-2024-29371 (jose4j) -->
+            <dependency>
+                <groupId>org.asynchttpclient</groupId>
+                <artifactId>async-http-client</artifactId>
+                <version>${asynchttpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bitbucket.b_c</groupId>
+                <artifactId>jose4j</artifactId>
+                <version>${jose4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
