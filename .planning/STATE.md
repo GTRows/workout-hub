@@ -3,17 +3,18 @@
 ## Current Position
 
 Milestone: v0.3 Self-Hosted Contract Alignment
-Phase: 5 of 12 COMPLETE (2026-05-02); Phase 6 next (Env Vars and Override Example)
-Plan: 1 of 1 complete in Phase 5 (05-01 done; forward-auth + OIDC removed)
-Status: Phase complete; ready to plan Phase 6
-Last activity: 2026-05-02 - Completed 05-01-PLAN.md (forward-auth mode + OIDC removal)
+Phase: 6 of 12 COMPLETE (2026-05-02); Phase 7 next (Optional pg_dump sidecar)
+Plan: 1 of 1 complete in Phase 6 (06-01 done; .env.example + override example + deny narrowing)
+Status: Phase complete; ready to plan Phase 7
+Last activity: 2026-05-02 - Completed 06-01-PLAN.md (env vars and override example)
 
-Progress: ███████░░░ 32% (7 of 22 plans across milestone)
+Progress: ████████░░ 36% (8 of 22 plans across milestone)
 
 ## Accumulated Context
 
 ### Decisions Locked-in (2026-05-02)
 
+- **Env vars + override (Plan 06-01)**: `.env.example` is canonical contract source for env var surface; rewritten to cover all 11 sections. `docker-compose.override.yml.example` shipped for ARM-friendly resource tuning; operator-edited `docker-compose.override.yml` is gitignored. `.claude/settings.json` deny patterns narrowed from `**/.env.*` to specific filenames so `.env.example` stays editable by Claude Code automation.
 - **Forward-auth + OIDC removal (Plan 05-01)**: Option A executed - OIDC client surface deleted entirely (`OidcController.java`, `OidcControllerIntegrationTest.java`, `AuthService.issueTokensForOidc`, `app.auth.oidc.*` YAML, SecurityConfig allowlist for `/api/auth/oidc/*`). Forward-auth filter loads only when `app.auth.mode=forward-auth` (ConditionalOnProperty); ignores headers when source IP not in TRUSTED_PROXIES CIDR; empty TRUSTED_PROXIES = trust nothing. Built-in JWT remains the default mode and is untouched.
 - **AppUserPrincipal record signature**: `(UUID userId, String role)` - 2 args. Earlier sketches showing 3-arg variants are wrong.
 - **Prometheus /metrics aliasing (Plan 04-01)**: Additive alias from `/metrics` to `PrometheusScrapeEndpoint`; `/actuator/prometheus` preserved for backward compat. Frontend `/api/metrics` is inline (no `prom-client` dep) emitting Node process gauges. Per-request HTTP histogram on the frontend deferred to v0.6 (ISSUES i-4) — Next App Router middleware integration is non-trivial and out of v0.3 contract baseline scope.
@@ -56,9 +57,9 @@ Progress: ███████░░░ 32% (7 of 22 plans across milestone)
 
 ## Session Continuity
 
-Last session: 2026-05-02 ~21:03 local
-Stopped at: Completed 05-01-PLAN.md (forward-auth + OIDC removal); Phase 5 complete
-Resume file: None (next action: `/gsd:plan-phase 6`)
+Last session: 2026-05-02 ~21:25 local
+Stopped at: Completed 06-01-PLAN.md (env vars and override example); Phase 6 complete
+Resume file: None (next action: `/gsd:plan-phase 7`)
 
 ## Reference Documents
 

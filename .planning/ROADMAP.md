@@ -79,14 +79,15 @@ Plans:
 Plans:
 - [x] 05-01: Forward-auth filter with TRUSTED_PROXIES gate + OIDC removal - `05-01-SUMMARY.md`
 
-#### Phase 6: Env Vars and Override Example
+#### Phase 6: Env Vars and Override Example [COMPLETE 2026-05-02]
 
 **Goal**: Audit and rewrite `.env.example` to enumerate every variable the app reads with one-line comments per contract section 4.1. Add `BIND_ADDR`, `HTTP_PORT`, `AUTH_MODE`, `TRUSTED_PROXIES`, `ENABLE_PG_DUMP`, `PG_DUMP_SCHEDULE`, `PG_DUMP_RETENTION_DAYS`. Ship `docker-compose.override.yml.example` for local-dev tweaks (loopback-only ports, lighter resource limits).
-**Depends on**: Phase 1, Phase 5 (AUTH_MODE), Phase 7 (PG_DUMP_*)
-**Research**: Unlikely
+**Depends on**: Phase 1, Phase 5 (AUTH_MODE)
+**Research**: None
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 06-01: TBD
+- [x] 06-01: Canonical .env.example + override example + deny rule narrowing - `06-01-SUMMARY.md`
 
 #### Phase 7: Optional pg_dump Sidecar
 
@@ -168,7 +169,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 3. Structured logging | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 4. Prometheus metrics on main listener | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 5. Forward-auth mode | v0.3 | 1/1 | Complete | 2026-05-02 |
-| 6. Env vars and override example | v0.3 | 0/? | Not started | - |
+| 6. Env vars and override example | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 7. Optional pg_dump sidecar | v0.3 | 0/? | Not started | - |
 | 8. Dependabot alert triage | v0.3 | 0/? | Not started | - |
 | 9. README and MIGRATION docs | v0.3 | 0/? | Not started | - |
