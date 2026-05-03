@@ -109,14 +109,15 @@ Plans:
 Plans:
 - [x] 08-01: Triage 17 Dependabot PRs (12 merged, 4 deferred via ISSUES) - `08-01-SUMMARY.md`
 
-#### Phase 9: README and MIGRATION Docs
+#### Phase 9: README and MIGRATION Docs [COMPLETE 2026-05-03]
 
 **Goal**: Bring `README.md` to contract section 11 spec: one-paragraph description, quick-start, configuration table from `.env.example`, exposure (Caddy / Traefik / nginx examples as references for operators), data and backup hooks, updating. Create `docs/MIGRATION.md` with v0.3.0 entry covering the named-volume to bind-mount migration.
 **Depends on**: Phases 1, 6 (env vars), 7 (backup hook docs)
-**Research**: Unlikely
+**Research**: None
+**Plans**: 1 plan (1/1 complete)
 
 Plans:
-- [ ] 09-01: TBD
+- [x] 09-01: README rewrite + MIGRATION.md seed - `09-01-SUMMARY.md`
 
 #### Phase 10: CI Gates
 
@@ -173,7 +174,7 @@ Phases execute in numeric order. Within v0.3, phases 8 and 10 are parallelizable
 | 6. Env vars and override example | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 7. Optional pg_dump sidecar | v0.3 | 1/1 | Complete | 2026-05-02 |
 | 8. Dependabot alert triage | v0.3 | 1/1 | Complete | 2026-05-03 |
-| 9. README and MIGRATION docs | v0.3 | 0/? | Not started | - |
+| 9. README and MIGRATION docs | v0.3 | 1/1 | Complete | 2026-05-03 |
 | 10. CI gates | v0.3 | 0/? | Not started | - |
 | 11. GHCR multi-arch image publish | v0.3 | 0/? | Not started | - |
 | 12. Release v0.3.0 | v0.3 | 0/? | Not started | - |
