@@ -151,7 +151,6 @@ jobs:
       - name: Extract release notes from CHANGELOG.md
         shell: bash
         run: |
-          # shellcheck disable=SC2016
           VERSION="${GITHUB_REF_NAME#v}"
           awk -v v="$VERSION" '
             $0 ~ "^## \\[" v "\\]" { capture=1; next }
@@ -164,13 +163,14 @@ jobs:
           fi
           BACKEND_DIGEST=$(cat digests/backend.txt)
           FRONTEND_DIGEST=$(cat digests/frontend.txt)
+          BT=$(printf '\140')
           {
             printf '\n## Container images (multi-arch: amd64 + arm64)\n\nPull the matching tag from GHCR:\n\n'
-            printf -- '- `%s/%s-backend:%s`\n'  "$REGISTRY" "$IMAGE_PREFIX" "$VERSION"
-            printf -- '- `%s/%s-frontend:%s`\n' "$REGISTRY" "$IMAGE_PREFIX" "$VERSION"
+            printf -- '- %s%s/%s-backend:%s%s\n' "$BT" "$REGISTRY" "$IMAGE_PREFIX" "$VERSION" "$BT"
+            printf -- '- %s%s/%s-frontend:%s%s\n' "$BT" "$REGISTRY" "$IMAGE_PREFIX" "$VERSION" "$BT"
             printf '\n### Image digests (pinned by digest, no :latest)\n\n'
-            printf -- '- `%s/%s-backend@%s`\n'  "$REGISTRY" "$IMAGE_PREFIX" "$BACKEND_DIGEST"
-            printf -- '- `%s/%s-frontend@%s`\n' "$REGISTRY" "$IMAGE_PREFIX" "$FRONTEND_DIGEST"
+            printf -- '- %s%s/%s-backend@%s%s\n' "$BT" "$REGISTRY" "$IMAGE_PREFIX" "$BACKEND_DIGEST" "$BT"
+            printf -- '- %s%s/%s-frontend@%s%s\n' "$BT" "$REGISTRY" "$IMAGE_PREFIX" "$FRONTEND_DIGEST" "$BT"
             printf '\n## Operator migration notes\n\nSee [docs/MIGRATION.md](docs/MIGRATION.md) for the per-version migration steps.\n'
           } >> RELEASE_NOTES.md
 
