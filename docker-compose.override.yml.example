@@ -1,0 +1,41 @@
+# docker-compose.override.yml.example
+# Copy to docker-compose.override.yml and edit. Compose v2 auto-merges
+# the override on top of compose.yml; the override file is gitignored
+# so each operator can have local-only customizations.
+#
+# Common reasons to override:
+#   - Lower resource limits for ARM / Raspberry Pi hosts (defaults assume x86_64 home server)
+#   - Bind to a different interface than 127.0.0.1 (set BIND_ADDR in .env instead - usually preferred)
+#   - Add a host bind mount for development (e.g. live-reload of frontend dist)
+#   - Enable extra services not in the base stack (Phase 7 ships pg_dump sidecar; reference here)
+
+services:
+  db:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+  backend:
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+  frontend:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 192M
+        reservations:
+          cpus: "0.1"
+          memory: 64M

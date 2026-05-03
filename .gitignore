@@ -49,6 +49,9 @@ data/*
 data/postgres/*
 !data/postgres/.gitkeep
 
+# Compose local override (operator copies .example, gitignored)
+docker-compose.override.yml
+
 # Logs
 *.log
 logs/
