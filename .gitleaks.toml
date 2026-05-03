@@ -1,0 +1,9 @@
+title = "WorkoutHub gitleaks config"
+
+# Empty allowlist for v0.3 baseline. Add per-finding allowlist entries here
+# only when a known false positive is verified (e.g. test fixture strings
+# that pattern-match a secret format but are intentionally sample data).
+
+[allowlist]
+description = "WorkoutHub gitleaks allowlist - empty for v0.3 baseline"
+paths = []

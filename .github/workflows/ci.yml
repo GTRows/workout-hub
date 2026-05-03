@@ -74,3 +74,108 @@ jobs:
           name: vitest-coverage
           path: frontend/coverage
           if-no-files-found: ignore
+
+  gitleaks:
+    name: gitleaks (secret scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  trivy_fs:
+    name: trivy fs (filesystem CVE scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
+  trivy_image:
+    name: trivy image (${{ matrix.component }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t workouthub-${{ matrix.component }}:ci ./${{ matrix.component }}
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: workouthub-${{ matrix.component }}:ci
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
+  compose_config:
+    name: docker compose config
+    runs-on: ubuntu-latest
+    env:
+      BIND_ADDR: 127.0.0.1
+      BACKEND_PORT: "8080"
+      FRONTEND_PORT: "3000"
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci-test-non-secret
+      POSTGRES_DB: ci
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ci
+      SPRING_DATASOURCE_USERNAME: ci
+      SPRING_DATASOURCE_PASSWORD: ci-test-non-secret
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: "8080"
+      APP_JWT_SECRET: ci-test-jwt-secret-32-bytes-min-0123456789abcdef
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize CI dotenv
+        run: env | grep -E '^(BIND_ADDR|BACKEND_PORT|FRONTEND_PORT|POSTGRES_|SPRING_|SERVER_PORT|APP_JWT_SECRET|NEXT_PUBLIC_)' > dotenv.tmp && mv dotenv.tmp .env
+      - name: Validate compose config
+        run: docker compose -f compose.yml config > /dev/null
+
+  hadolint:
+    name: hadolint (${{ matrix.component }} Dockerfile)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ${{ matrix.component }}/Dockerfile
+
+  actionlint:
+    name: actionlint (workflow lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+
+  shellcheck:
+    name: shellcheck (scripts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck
+        run: |
+          if [ -d scripts ] && find scripts -name '*.sh' -print -quit | grep -q .; then
+            sudo apt-get update && sudo apt-get install -y shellcheck
+            find scripts -name '*.sh' -print0 | xargs -0 shellcheck
+          else
+            echo "No scripts to lint."
+          fi
