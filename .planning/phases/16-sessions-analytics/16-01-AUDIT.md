@@ -174,3 +174,124 @@ Walk `ExerciseAnalyticsService.progress` (`ExerciseAnalyticsService.java:55-69`)
 2. Convention: every other analytics query in the codebase (`AnalyticsService.weeklyVolume`, `oneRepMax`, `personalRecords`, `heatmap`) uses Java-side aggregation. Inverting only `ExerciseAnalyticsService.progress` would create a one-off pattern.
 3. Trigger for revisiting: when Phase 31 (charts-stats) introduces a multi-exercise dashboard view OR row counts exceed a documented threshold (e.g., 5000 rows scanned per request) under realistic seed data. Mark a deferred-issue stub in plan 16-02+ scope ("perf-pushdown bucket").
 
+## Section 5 - PR Durability Decision
+
+Phase 15-04 documented create-only `newPr` (regression test `newPrFlagPresentOnCreateButOmittedOnDetailReread` at `SessionSetsIntegrationTest.java:282-294`). Phase 16 owns the durability decision per Phase 15-01 audit Section 6 D1 / FG2.
+
+### Direction A: persist `is_pr` on `session_sets` (V27)
+
+- Add `is_pr BOOLEAN NOT NULL DEFAULT false` to `session_sets` via `V27__session_sets_is_pr.sql`.
+- Backfill existing rows by computing best Epley per `(user_id, exercise_id)` and marking that single row as `is_pr = true`. Draft SQL (NOT executed; feasibility check inline):
+
+  ```sql
+  -- V27 backfill: mark the highest-Epley completed set per (user, exercise) as is_pr.
+  WITH ranked AS (
+      SELECT
+          ss.id AS set_id,
+          ROW_NUMBER() OVER (
+              PARTITION BY ws.user_id, ss.exercise_id
+              ORDER BY
+                  CASE
+                      WHEN ss.weight_kg IS NULL OR ss.reps_done <= 0 THEN NULL
+                      WHEN ss.reps_done = 1 THEN ss.weight_kg
+                      ELSE ss.weight_kg * (1 + ss.reps_done::numeric / 30)
+                  END DESC NULLS LAST,
+                  ss.created_at ASC
+          ) AS rk
+      FROM session_sets ss
+      JOIN workout_sessions ws ON ws.id = ss.session_id
+      WHERE ss.completed = TRUE
+        AND ws.ended_at IS NOT NULL
+  )
+  UPDATE session_sets
+  SET is_pr = TRUE
+  FROM ranked
+  WHERE session_sets.id = ranked.set_id
+    AND ranked.rk = 1;
+  ```
+
+  Postgres 16 supports `ROW_NUMBER() OVER` natively; Epley expression is inline arithmetic (no UDF). Tie-break by `created_at ASC` so the EARLIEST set holding the best 1RM gets the badge (matches the "first-time-PR was set then" semantic).
+
+- Add `boolean isPr` field to `SessionSet` entity (column-mapped; getter/setter). Include in `SessionSetDto` as `Boolean isPr` (nullable to keep Jackson NON_NULL when false-equivalent if desired, OR primitive `boolean` always serialized; recommend nullable for parity with current `newPr` shape).
+- Flip `SessionSetsService.add` to set `set.setPr(isPr)` before persist (`SessionSetsService.java:81-93` block becomes one extra setter call); remove the `(set, Boolean newPr)` overload from `SessionsMapper` (or keep as deprecated no-op for back-compat). `update` path: when `repsDone`/`weightKg` change, re-evaluate `isPr` against current best-prior; if the updated set was previously the PR but no longer beats prior, set `isPr=false` and recompute the next-best PR (or accept lazy correction on next create — doc-level decision).
+- Update `newPrFlagPresentOnCreateButOmittedOnDetailReread` to assert PR survives detail re-read (`$.sets[0].isPr=true`). Add `prSurvivesUpdateThatStillBeatsPrior`, `prClearedWhenUpdatedBelowPrior` regression tests.
+
+**Pros:** closes Phase 15-04 contract gap end-to-end; offline drainer's GET-after-POST shows the PR badge correctly; `/api/exercises/:id/progress` becomes a trivial `prSessionId` derivation (any session containing a PR-flagged set); Phase 25 (frontend session-execution) and Phase 31 (charts-stats) both gain a stable badge.
+
+**Cons:** V27 migration with backfill SQL must be tested by `V27MigrationTest` (seed pre-migration rows, run migration, assert `is_pr=true` on the expected one); update-path complexity (re-evaluation cost on `PUT /sets/:setId`); coverage cost = 2-3 new integration tests; `is_pr` is logically derivable from history so introduces a denormalization risk if logic drifts.
+
+### Direction B: stay create-only, enrich progress DTO
+
+- Keep `newPr` as a flash flag on the create response only.
+- Add `prSessionId UUID` (nullable) to `ProgressPointDto`: in `ExerciseAnalyticsService.progress`, compute the per-exercise best Epley once over the full history then mark the session containing that top set with `prSessionId = session.getId()`; rest get null. Frontend renders the PR badge on history rows by checking `prSessionId != null`.
+- Optionally add `bestEverEstimatedOneRmKg` once per `/progress` response (envelope-level field) so the UI can render "this session's 1RM = X, best-ever = Y."
+
+**Pros:** no migration; no entity change; no update-path complexity; matches the brief shape (PRs surfaced by progress, not by set list); avoids the `is_pr` denormalization.
+
+**Cons:** PR badge UX is unstable on detail re-read after offline-queue drain (badge shown on POST response, gone on the next GET); frontend must always cross-reference `/progress` to render the badge on the session-execution screen; per-exercise PR (one per exercise) is not the same surface as per-set PR (one badge per achievement event); existing `PrDetectionIntegrationTest` continues asserting create-only behavior.
+
+### Recommendation
+
+**Persist direction (V27).** Justification:
+
+1. Backfill SQL is feasible with a single window-function expression (drafted above). Postgres 16 handles it natively.
+2. Phase 25 (session-execution UI) wants a stable badge across screen transitions; Phase 31 (charts-stats) `personalRecords` already iterates `findFinishedSince` to find the per-exercise best at `AnalyticsService.java:165-200` - a denormalized `is_pr` flag would let `/api/analytics/prs` query a single indexed lookup instead of full-history scan.
+3. Update-path complexity is bounded: `PUT /sets/:setId` is rare (the offline queue drains POSTs, not PUTs). Re-evaluation cost is one prior-best query per update, identical to the cost already paid at create time.
+4. Migration test (`V27MigrationTest`) seeds pre-PR rows, runs migration, asserts `is_pr=true` on the highest-Epley row. Pattern mirrors V26 and V25 migration tests already in the repo.
+
+**Phase 16 PR durability work MUST keep `newPrFlagPresentOnCreateButOmittedOnDetailReread` green semantically by replacing it with `prFlagPresentOnCreateAndOnDetailReread` (asserting `$.sets[0].isPr=true` on both paths).**
+
+## Section 6 - Recommended Phase 16 plan-02+ Scope
+
+### package-extraction bucket
+
+- **PE1: Move analytics scaffold from `sessions/` to `com.workouthub.analytics`.**
+  - Targets: rename-move `sessions/ExerciseAnalyticsController.java` -> `analytics/ExerciseAnalyticsController.java`; same for `ExerciseAnalyticsService.java`, `dto/LastPerformanceDto.java`, `dto/ProgressPointDto.java`, `PrDetector.java`. Add 1 import line in `sessions/SessionSetsService.java` (PrDetector). Update package declarations in 3 test files (`ExerciseAnalyticsIntegrationTest`, `PrDetectorTest`, `PrDetectionIntegrationTest`).
+  - Test pickup: existing tests cover the move; no new tests required. CI compiles and runs them under the new package.
+  - Rationale (Section 4 Part A verdict: extract): grep confirms only `SessionSetsService` imports `PrDetector` cross-package; no other backend feature consumes the analytics DTOs. The pre-existing `com.workouthub.analytics` package is the natural destination and would let Phase 31 charts-stats consolidate Epley duplication (`sessions/PrDetector.epleyOneRm` vs `analytics/AnalyticsService.epley`) in a follow-up. Move is mechanical and one-commit-shaped.
+
+### epley-projection bucket
+
+- **EP1: Add `estimatedOneRmKg` to `ProgressPointDto` and compute in `summarize`.**
+  - Targets: append `BigDecimal estimatedOneRmKg` as the 7th record component on `ProgressPointDto` (record component order matters for clients reading by name, not position; appending is safe). In `ExerciseAnalyticsService.summarize` (`ExerciseAnalyticsService.java:71-93`), add `BigDecimal estimatedOneRmKg = PrDetector.epleyOneRm(maxWeight, topReps)` (or pick top-Epley set semantic to match `AnalyticsService.oneRepMax` at `analytics/AnalyticsService.java:113-123`; pick one and document).
+  - Test pickup: extend `ExerciseAnalyticsIntegrationTest.progressReturnsPerSessionSummariesNewestFirst` to assert `$[0].estimatedOneRmKg`. Add `progressEstimatedOneRmIsAbsentForUnweightedSets` if Epley returns null for null weight.
+  - Rationale (Section 3 Part B verdict: Partial - logic exists, DTO does not expose): cheapest Phase 16 deliverable. Closes the "1RM (Epley) projections at the query layer" ROADMAP gap with one DTO field plus one mapper line.
+
+### pr-durability bucket
+
+- **PD1: V27 migration `is_pr BOOLEAN NOT NULL DEFAULT false` plus backfill.**
+  - Targets: new file `backend/src/main/resources/db/migration/V27__session_sets_is_pr.sql` (column add plus backfill window-function update; SQL drafted in Section 5). New `V27MigrationTest` in `backend/src/test/java/com/workouthub/migration/` (or wherever V25/V26 tests live) seeds pre-PR rows then asserts `is_pr=true` on the highest-Epley row.
+  - Rationale (Section 5 verdict: persist): Postgres 16 window function is feasible; backfill is correct because Epley expression is inline arithmetic (no UDF). Migration test mirrors V26 pattern.
+
+- **PD2: Entity field plus mapper plus service mutation.**
+  - Targets: add `boolean isPr` field plus getter/setter to `SessionSet` (`SessionSet.java`); add `Boolean isPr` to `SessionSetDto` (append, parallel to `newPr`); flip `SessionsMapper.toSetDto(set)` to read `set.isPr() ? Boolean.TRUE : null` (Jackson NON_NULL omits when false-equivalent); remove or deprecate the `(set, Boolean newPr)` overload; `SessionSetsService.add` sets `set.setPr(isPr)` before save (`SessionSetsService.java:84-93` block).
+  - Test pickup: rewrite `newPrFlagPresentOnCreateButOmittedOnDetailReread` -> `prFlagPresentOnCreateAndOnDetailReread`. Update `PrDetectionIntegrationTest` three tests to assert `$.isPr` (not `$.newPr`) AND that detail re-read also carries the flag.
+  - Rationale (Section 5 verdict: persist): closes the create-vs-reread contract gap end-to-end.
+
+- **PD3: Update path re-evaluation.**
+  - Targets: `SessionSetsService.update` (`SessionSetsService.java:117-129`) recomputes `isPr` after applying patch; if the updated set was the PR and no longer beats prior, set `isPr=false` and (optionally) re-elect the new PR among existing sets via a single helper.
+  - Test pickup: `prSurvivesUpdateThatStillBeatsPrior`, `prClearedWhenUpdatedBelowPrior`.
+  - Rationale (Section 5 verdict: persist): the update path is the correctness-critical edge case; the doc-level alternative (lazy correction) is acceptable but ships a known-stale flag.
+
+### perf-pushdown bucket
+
+- **None for Phase 16.** Section 4 Part B verdict: Java-side aggregation is acceptable for v0.4. Deferred to Phase 31 (charts-stats) when a multi-exercise dashboard or row-count threshold (>= 5000 rows scanned per request under realistic seed data) forces the SQL aggregate. No file-level entries.
+
+### defer bucket (explicit non-goals)
+
+- **D1: Phase 31 charts-stats SQL pushdown.** `ExerciseAnalyticsService.progress` SQL aggregate query. Trigger: dashboard view OR seed-data row-count threshold.
+- **D2: Phase 31 Epley consolidation.** Merge `sessions/PrDetector.epleyOneRm` (or post-PE1 `analytics/PrDetector.epleyOneRm`) with `analytics/AnalyticsService.epley` into a single helper. After PE1 they live in the same package, making this a near-trivial follow-up.
+- **D3: Phase 25 frontend integration.** Wire the new `isPr` field and `estimatedOneRmKg` into the session-execution and exercise-detail screens.
+- **D4: PR badge per-set policy refinements.** "Multi-PR per session" or "PR window per N days" semantics. Out of scope; current single-PR-per-(user, exercise) is the v1.0 shape.
+- **D5: ApiError code on 404 for unknown exerciseId.** `NotFoundException` codes are explicitly out of scope per Phase 15-04 SUMMARY decision.
+
+### Plan-count recommendation
+
+**Four plans for Phase 16** (this audit plus three hardening plans):
+
+- **Plan 16-01 (this audit) - shipped via this deliverable.**
+- **Plan 16-02: package-extraction.** Move PE1. One-commit-shaped mechanical move plus 1 import line plus 3 test package declarations. Independent of 16-03 and 16-04 (those can land in `sessions/` or `analytics/` without conflict; sequencing 16-02 first avoids re-doing work).
+- **Plan 16-03: epley-projection.** EP1. Single DTO append plus one mapper line plus test extension. Depends on 16-02 only for file location; logically independent.
+- **Plan 16-04: pr-durability.** PD1 + PD2 + PD3. V27 migration plus migration test plus entity field plus mapper update plus service mutation plus update-path re-evaluation plus 3-4 integration test rewrites. Largest plan; matches Phase 14/15 precedent of one bug-shape per plan (PR durability is one bug-shape with three coupled change sites).
+
+Bucket totals: 1 package-extraction file move (5 source files plus 3 test files), 1 epley-projection field, 3 pr-durability entries, 0 perf-pushdown entries, 5 defer markers.
