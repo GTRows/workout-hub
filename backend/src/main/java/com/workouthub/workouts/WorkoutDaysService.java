@@ -6,6 +6,8 @@ import com.workouthub.exercises.domain.Exercise;
 import com.workouthub.exercises.domain.ExerciseRepository;
 import com.workouthub.workouts.domain.WorkoutDay;
 import com.workouthub.workouts.domain.WorkoutDayExercise;
+import com.workouthub.workouts.domain.WorkoutDayExerciseRepository;
+import com.workouthub.workouts.domain.WorkoutDayRepository;
 import com.workouthub.workouts.domain.WorkoutPlan;
 import com.workouthub.workouts.domain.WorkoutPlanRepository;
 import com.workouthub.workouts.dto.AddDayExerciseRequest;
@@ -28,14 +30,20 @@ public class WorkoutDaysService {
     private final WorkoutPlansService plansService;
     private final WorkoutPlanRepository plans;
     private final ExerciseRepository exerciseRepo;
+    private final WorkoutDayRepository daysRepo;
+    private final WorkoutDayExerciseRepository itemsRepo;
 
     public WorkoutDaysService(
             WorkoutPlansService plansService,
             WorkoutPlanRepository plans,
-            ExerciseRepository exerciseRepo) {
+            ExerciseRepository exerciseRepo,
+            WorkoutDayRepository daysRepo,
+            WorkoutDayExerciseRepository itemsRepo) {
         this.plansService = plansService;
         this.plans = plans;
         this.exerciseRepo = exerciseRepo;
+        this.daysRepo = daysRepo;
+        this.itemsRepo = itemsRepo;
     }
 
     public WorkoutDayDto createDay(UUID userId, UUID planId, CreateWorkoutDayRequest req) {
@@ -49,7 +57,7 @@ public class WorkoutDaysService {
         day.setFocus(req.focus());
         day.setEstimatedDurationMin(req.estimatedDurationMin());
         plan.addDay(day);
-        plans.saveAndFlush(plan);
+        daysRepo.saveAndFlush(day);
         return WorkoutPlanMapper.toDayDto(day);
     }
 
@@ -92,7 +100,7 @@ public class WorkoutDaysService {
         item.setRestSeconds(req.restSeconds());
         item.setNotes(req.notes());
         day.addExercise(item);
-        plans.saveAndFlush(plan);
+        itemsRepo.saveAndFlush(item);
         return WorkoutPlanMapper.toItemDto(item);
     }
 
