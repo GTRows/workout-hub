@@ -48,13 +48,19 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Creatine\",\"timing\":\"morning\"}"))
                 .andExpect(status().isCreated());
+        mvc.perform(post("/api/workout-plans")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Export Seed\"}"))
+                .andExpect(status().isCreated());
 
         mvc.perform(get("/api/export/full").header("Authorization", auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.schemaVersion").value(1))
                 .andExpect(jsonPath("$.user.email").value(u.email()))
                 .andExpect(jsonPath("$.bodyMetrics.length()").value(1))
-                .andExpect(jsonPath("$.supplements.length()").value(1));
+                .andExpect(jsonPath("$.supplements.length()").value(1))
+                .andExpect(jsonPath("$.plans.length()").value(1));
     }
 
     @Test
