@@ -11,4 +11,5 @@ public record SessionSummaryDto(
         boolean finished,
         int setCount,
         Short mood,
-        Short energyLevel) {}
+        Short energyLevel,
+        Short heartRateAvgBpm) {}

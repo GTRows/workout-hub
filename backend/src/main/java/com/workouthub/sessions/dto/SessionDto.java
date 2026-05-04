@@ -13,4 +13,5 @@ public record SessionDto(
         Short mood,
         Short energyLevel,
         boolean finished,
-        List<SessionSetDto> sets) {}
+        List<SessionSetDto> sets,
+        Short heartRateAvgBpm) {}

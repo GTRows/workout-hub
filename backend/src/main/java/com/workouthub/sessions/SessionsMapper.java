@@ -27,7 +27,8 @@ public final class SessionsMapper {
                 s.getMood(),
                 s.getEnergyLevel(),
                 s.isFinished(),
-                sets);
+                sets,
+                s.getHeartRateAvgBpm());
     }
 
     public static SessionSummaryDto toSummary(WorkoutSession s) {
@@ -39,7 +40,8 @@ public final class SessionsMapper {
                 s.isFinished(),
                 s.getSets() == null ? 0 : s.getSets().size(),
                 s.getMood(),
-                s.getEnergyLevel());
+                s.getEnergyLevel(),
+                s.getHeartRateAvgBpm());
     }
 
     public static SessionSetDto toSetDto(SessionSet set) {
