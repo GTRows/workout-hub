@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.4 Backend Feature Completion (active)
-Phase: 14 of 20 (workouts-hardening) - complete (2 of 2 plans shipped)
-Plan: 14-02 complete
-Status: Phase 14 complete; ready to plan Phase 15 (sessions-core)
-Last activity: 2026-05-04 - Completed 14-02-PLAN.md (workouts-hardening i-2 test-precondition fix)
+Phase: 15 of 20 (sessions-core) - in progress (1 of 4 plans shipped; audit complete)
+Plan: 15-01 complete (audit)
+Status: Phase 15 in progress; ready to plan 15-02 (contract-finalization, clientSetId idempotency key)
+Last activity: 2026-05-04 - Completed 15-01-PLAN.md (sessions-core audit; 3 plans recommended for hardening)
 
-Progress: v0.4 ####________________ 25% (2/8 phases)
+Progress: v0.4 ####________________ 25% (2/8 phases complete; Phase 15 in progress)
           v0.5 (planned) - Phases 21-30
           v0.6 (planned) - Phases 31-37
           v1.0 (planned) - Phases 38-44
@@ -21,8 +21,9 @@ Progress: v0.4 ####________________ 25% (2/8 phases)
 - See: `.planning/ISSUES.md` for open deferred issues (i-4, i-5, i-6, i-7, i-8, i-9 remain open; i-1 and i-2 closed by Phase 14)
 - See: `.planning/phases/13-workouts-audit/13-01-AUDIT.md` for the workouts audit deliverable.
 - See: `.planning/phases/14-workouts-hardening/14-01-SUMMARY.md` for the i-1 cascade-id fix.
+- See: `.planning/phases/15-sessions-core/15-01-AUDIT.md` for the sessions audit deliverable (251 lines, 6 sections).
 
-**Current focus:** Plan and execute Phase 15 (sessions-core). Phase 14 closed i-1 (cascade-id) and i-2 (test precondition); WorkoutDaysIntegrationTest is fully green; export round-trip test now seeds a plan.
+**Current focus:** Plan 15-02 (contract-finalization: clientSetId idempotency key). Phase 15 audit shipped; offline-first sync contract verdict is must-harden (4a/4b PARTIAL, 4c FAIL). Three hardening plans recommended: 15-02 (clientSetId), 15-03 (heart-rate exposure), 15-04 (auto-numbering verdict + typed 409 codes).
 
 ## Accumulated Context
 
@@ -46,6 +47,15 @@ Full decision log lives in `.planning/milestones/v0.3-ROADMAP.md` "Key Decisions
 - i-1 and i-2 do NOT share a root cause. Phase 14 plans two independent change sets.
 - Phase 14 confirmed: i-1 fix is service-layer only (`WorkoutDaysService.createDay`/`addItem` use `daysRepo`/`itemsRepo` `saveAndFlush` instead of `plans.saveAndFlush(plan)`); i-2 fix is test-only (added a seed-plan POST before the export GET in `FullExportImportIntegrationTest`). The audit's two-independent-root-causes verdict held.
 
+### Phase 15 Findings (sessions-core audit)
+
+- All 7 ProjectBrief Phase 4 endpoints are implemented today (no `Missing` rows). 21 files / 965 lines under `sessions/`. 10 endpoints exposed (8 Phase 15 + 2 Phase 16 leaks: `last-performance`, `progress`).
+- Phase 14 child-repo `saveAndFlush` lesson is already applied at `SessionSetsService.java:64` (`sets.saveAndFlush(set)`); cascade-id risk that motivated i-1 is mitigated for sessions.
+- Offline-first sync contract verdict: must-harden in plan 15-02+. Top 3 gaps: (1) no client-supplied idempotency key on `POST /sets` (4a PARTIAL: 409 conflates idempotent retry with set_number collision), (2) auto-numbering at `SessionSetsService.java:46-48` is unsafe for offline drain (4c FAIL: out-of-order without explicit `setNumber` corrupts row order), (3) 409 body lacks typed error code (4b PARTIAL: drainer cannot distinguish SESSION_FINISHED from SET_NUMBER_DUPLICATE).
+- `heartRateAvgBpm` field (V20 column, entity getter at `WorkoutSession.java:114`) is fed only by Garmin .fit importer at `HealthImportService.java:68`; not exposed on any DTO. Decision: expose read-only on `SessionDto` and `SessionSummaryDto` in plan 15-03; no client write path needed.
+- Phase 16 in-package leaks (`ExerciseAnalyticsController/Service`, `LastPerformanceDto`, `ProgressPointDto`, `PrDetector`, `SessionSetRepository.findHistoricalByUserAndExercise`) stay in package; plan 15-02+ MUST NOT modify them. `newPr` flag on create response is a Phase 16 leak that landed early but provides UX value; keep as-is, do not extend.
+- Plan-count: 3 hardening plans (15-02 idempotency key, 15-03 heart-rate exposure, 15-04 auto-numbering verdict + typed 409 codes). Phase 14 one-feature-per-plan precedent guided the split.
+
 ### Issue-to-Phase Mapping
 
 - i-1, i-2: closed by v0.4 Phase 14 (workouts-hardening) Plans 01 and 02 respectively.
@@ -60,11 +70,12 @@ Full decision log lives in `.planning/milestones/v0.3-ROADMAP.md` "Key Decisions
 - 2026-05-04: Phase 13 (workouts-audit) shipped (1 plan: 13-01). Audit deliverable at `.planning/phases/13-workouts-audit/13-01-AUDIT.md`.
 - 2026-05-04: Phase 14 plan 01 shipped. WorkoutDaysService cascade-id fix lands the explicit child-repo saveAndFlush from audit Section 5; 6 disabled WorkoutDaysIntegrationTest cases re-enabled and a regression assertion added to the green test. CI verification pending.
 - 2026-05-04: Phase 14 (workouts-hardening) shipped (2 plans: 14-01 cascade-id fix, 14-02 export round-trip test fix). Closed i-1 and i-2.
+- 2026-05-04: Phase 15 plan 01 (sessions-core audit) shipped. Audit deliverable at `.planning/phases/15-sessions-core/15-01-AUDIT.md`. Phase 15 plan-count revised from TBD to 4 plans (1 audit + 3 hardening). Plan 15-02+ scope finalized: 4 coverage tests, 3 contract-finalization items, 2 feature-gap, 5 defer. No new ISSUES.md entries (contract gaps belong to 15-02+ scope, not deferred-issues queue).
 
 ## Session Continuity
 
-Last session: 2026-05-04 - Phase 14 plan 02 complete
-Stopped at: Phase 14 closed (2 of 2 plans). Next action: `/gsd:plan-phase 15` to break down sessions-core.
+Last session: 2026-05-04 - Phase 15 plan 01 complete
+Stopped at: Phase 15 in progress (1 of 4 plans). Next action: `/gsd:plan-phase 15` (plan 15-02: clientSetId idempotency key) or `/gsd:execute-plan` once plan 15-02 is drafted.
 Resume file: None.
 
 ## Reference Documents
