@@ -64,10 +64,13 @@ Plans:
 **Goal:** Add `/exercises/:id/last-performance` and `/exercises/:id/progress` endpoints; introduce PR computation, volume aggregation, and 1RM (Epley) projections at the query layer.
 **Depends on:** Phase 15
 **Research:** Unlikely (internal patterns)
-**Plans:** TBD
+**Plans:** 4
 
 Plans:
-- [ ] 16-01: TBD
+- [x] 16-01: sessions-analytics audit
+- [ ] 16-02: package-extraction (move analytics scaffold to com.workouthub.analytics)
+- [ ] 16-03: epley-projection (add ProgressPointDto.estimatedOneRmKg)
+- [ ] 16-04: pr-durability (V27 is_pr persist plus entity/mapper/service plus update path)
 
 #### Phase 17: body-metrics
 
@@ -163,7 +166,7 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | 13. workouts-audit          | v0.4      | 1/1   | Complete    | 2026-05-04 |
 | 14. workouts-hardening      | v0.4      | 2/2   | Complete    | 2026-05-04 |
 | 15. sessions-core           | v0.4      | 4/4   | Complete    | 2026-05-04 |
-| 16. sessions-analytics      | v0.4      | 0/?   | Not started | -          |
+| 16. sessions-analytics      | v0.4      | 1/4   | In progress | -          |
 | 17. body-metrics            | v0.4      | 0/?   | Not started | -          |
 | 18. export-refinement       | v0.4      | 0/?   | Not started | -          |
 | 19. api-contract-docs       | v0.4      | 0/?   | Not started | -          |
