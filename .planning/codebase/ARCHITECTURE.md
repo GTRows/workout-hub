@@ -51,7 +51,7 @@
 1. User starts a session - `POST /api/sessions/start`.
 2. Each completed set is recorded client-side first via `frontend/src/lib/offline/session-set-queue.ts` (Dexie).
 3. Background drain loop attempts `POST /api/sessions/:id/sets`. Idempotency key `(sessionId, exerciseId, setNumber)`; 409 from backend is treated as "already synced".
-4. On reconnect, queue drains; backend canonicalises and PR detection runs (`backend/src/main/java/com/workouthub/sessions/PrDetector.java`).
+4. On reconnect, queue drains; backend canonicalises and PR detection runs (`backend/src/main/java/com/workouthub/analytics/PrDetector.java`).
 
 **State Management:**
 - Backend: stateless. JWT carries identity. No server-side sessions (rejected by `application.yml: open-in-view: false`).

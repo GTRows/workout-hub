@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.4 Backend Feature Completion (active)
-Phase: 16 of 20 (sessions-analytics) - in progress (1 of 4 plans shipped)
-Plan: 16-01 complete (sessions-analytics audit)
-Status: Phase 16 in progress; plan 16-01 audit shipped, plan 16-02 (package-extraction) is next
-Last activity: 2026-05-04 - Completed 16-01-PLAN.md (audit-only deliverable; 297 lines; verdicts: extract analytics scaffold to existing com.workouthub.analytics package, persist is_pr via V27 with window-function backfill, Java-side aggregation acceptable for v0.4 with SQL pushdown deferred to Phase 31; 4-plan recommendation for Phase 16)
+Phase: 16 of 20 (sessions-analytics) - in progress (2 of 4 plans shipped)
+Plan: 16-02 complete (package-extraction)
+Status: Phase 16 in progress; plans 16-01 (audit) and 16-02 (package-extraction) shipped, plan 16-03 (epley-projection) is next
+Last activity: 2026-05-04 - Completed 16-02-PLAN.md (mechanical move of 5 source plus 3 test files to com.workouthub.analytics; SessionSetsService one-import touch; 9-file rename with 71-99 percent similarity; local mvn gate skipped per host gap, delegated to CI)
 
-Progress: v0.4 ########____________ 44% (3/8 phases complete plus Phase 16-01 of 4 plans; Phase 15 done, Phase 16 in progress)
+Progress: v0.4 #########___________ 47% (3/8 phases complete plus Phase 16-02 of 4 plans; Phase 15 done, Phase 16 in progress)
           v0.5 (planned) - Phases 21-30
           v0.6 (planned) - Phases 31-37
           v1.0 (planned) - Phases 38-44
@@ -27,8 +27,9 @@ Progress: v0.4 ########____________ 44% (3/8 phases complete plus Phase 16-01 of
 - See: `.planning/phases/15-sessions-core/15-03-SUMMARY.md` for the heart-rate exposure plan deliverable.
 - See: `.planning/phases/15-sessions-core/15-04-SUMMARY.md` for the typed 409 codes + auto-numbering verdict plan deliverable.
 - See: `.planning/phases/16-sessions-analytics/16-01-AUDIT.md` for the sessions-analytics audit deliverable (297 lines, 6 sections; package-boundary, PR durability, perf, plan-count verdicts).
+- See: `.planning/phases/16-sessions-analytics/16-02-SUMMARY.md` for the package-extraction plan deliverable (5 source plus 3 test rename to com.workouthub.analytics; one-import touch on SessionSetsService).
 
-**Current focus:** Phase 16 in progress. 16-01 audit shipped; next action: Phase 16 plan 16-02 (package-extraction: move `ExerciseAnalyticsController/Service`, `LastPerformanceDto`, `ProgressPointDto`, `PrDetector` from `sessions/` to existing `com.workouthub.analytics` package; one-import touch on `SessionSetsService`).
+**Current focus:** Phase 16 in progress. 16-01 audit and 16-02 package-extraction shipped; next action: Phase 16 plan 16-03 (epley-projection: append `estimatedOneRmKg` as 7th component on `ProgressPointDto` and compute via `PrDetector.epleyOneRm` in `ExerciseAnalyticsService.summarize`).
 
 ## Accumulated Context
 
@@ -89,11 +90,12 @@ Full decision log lives in `.planning/milestones/v0.3-ROADMAP.md` "Key Decisions
 - 2026-05-04: Phase 15 plan 03 (heart-rate exposure) shipped. `Short heartRateAvgBpm` appended to `SessionDto` and `SessionSummaryDto` records; `SessionsMapper.toDto`/`toSummary` populate the new field; two integration tests use direct `WorkoutSessionRepository.saveAndFlush` to mimic the Garmin .fit importer write path on detail/active/history endpoints. Audit Section 3 field-level drift and Section 6 FG1 closed; Section 6 C3 coverage gap closed.
 - 2026-05-04: Phase 15 plan 04 (typed 409 codes + auto-numbering verdict) shipped. `ApiError` gains optional trailing `String code` (Jackson NON_NULL omits when null - zero regression on existing 4xx/5xx); `ConflictException` two-arg constructor preserves single-arg back-compat. Four sessions/ throw sites carry codes: `SESSION_ALREADY_ACTIVE`, `SESSION_ALREADY_FINISHED`, `SESSION_FINISHED`, `SET_NUMBER_DUPLICATE`. Five existing 409 integration tests assert `$.code`. `SessionSetsService.add` Javadoc documents auto-numbering contract (live-online safe; offline drainers MUST send explicit setNumber) and idempotency contract (clientSetId replay does not re-fire side effects). `newPrFlagPresentOnCreateButOmittedOnDetailReread` documents create-vs-reread newPr flag behavior. Audit Section 4b PARTIAL closed; Section 4c FAIL verdict documented; Section 6 C4 closed. Phase 15 complete (4/4 plans shipped).
 - 2026-05-04: Phase 16 plan 01 (sessions-analytics audit) shipped. Audit deliverable at `.planning/phases/16-sessions-analytics/16-01-AUDIT.md` (297 lines). Phase 16 plan-count revised from TBD to 4 plans (1 audit + 3 hardening). Verdicts: package-boundary extract to existing `com.workouthub.analytics` package; PR durability persist `is_pr` via V27 window-function backfill; perf Java-side acceptable for v0.4 with SQL pushdown deferred to Phase 31. Plan 16-02 (package-extraction), 16-03 (epley-projection), 16-04 (pr-durability) scope finalized with file-level entries. Adjacent finding: `com.workouthub.analytics` package already exists with pre-GSD charts-stats scaffold (Epley re-implemented); deferred Epley consolidation marker for Phase 31.
+- 2026-05-04: Phase 16 plan 02 (package-extraction) shipped. 8 files renamed from `com.workouthub.sessions` (3 source root, 2 dto, 3 test) to `com.workouthub.analytics` (rename similarity 71-99 percent under git rename detection). `SessionSetsService` touched with a single new `import com.workouthub.analytics.PrDetector;` line (call sites at lines 83 and 111 unchanged; resolution via the new import). Cross-package patterns established: `analytics/ExerciseAnalyticsService` consumes `sessions/SessionsMapper.toSetDto` via public-static call; `analytics/dto/LastPerformanceDto` consumes `sessions/dto/SessionSetDto`. Public API paths (`/api/exercises/{id}/last-performance`, `/api/exercises/{id}/progress`) byte-for-byte identical (controller `@RequestMapping` unchanged). Local mvn verification gate skipped (this host has no `mvnw` script and no system `mvn` per local-maven-gap memory; full mvn test gate delegated to CI). `.planning/codebase/ARCHITECTURE.md:54` PR-detector path updated to track the move. Phase 15-01 audit Section 5 in-package leaks (5 files / 191 lines) closed. Audit Section 6 PE1 deliverable realized exactly: 5+3 moves, 1 single-line edit. Epley consolidation marker for Phase 31 stays open (both Epley implementations now live in the same package, simplifying the future work).
 
 ## Session Continuity
 
-Last session: 2026-05-04 - Phase 16 plan 01 (sessions-analytics audit) complete
-Stopped at: Phase 16 in progress (1 of 4 plans shipped). Next action: `/gsd:plan-phase 16-02` for plan 16-02 (package-extraction: move analytics scaffold to com.workouthub.analytics).
+Last session: 2026-05-04 - Phase 16 plan 02 (package-extraction) complete
+Stopped at: Phase 16 in progress (2 of 4 plans shipped). Next action: `/gsd:plan-phase 16-03` for plan 16-03 (epley-projection: append estimatedOneRmKg to ProgressPointDto record and compute in summarize).
 Resume file: None.
 
 ## Reference Documents
