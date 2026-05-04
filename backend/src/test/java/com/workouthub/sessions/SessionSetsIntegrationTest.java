@@ -80,7 +80,8 @@ class SessionSetsIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(setBody(1, 8, 60.0, null)))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SET_NUMBER_DUPLICATE"));
     }
 
     @Test
@@ -113,7 +114,8 @@ class SessionSetsIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"repsDone\":12}"))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SESSION_FINISHED"));
     }
 
     @Test
@@ -243,7 +245,8 @@ class SessionSetsIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(setBody(1, 8, 60.0, null, UUID.randomUUID())))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SET_NUMBER_DUPLICATE"));
     }
 
     @Test

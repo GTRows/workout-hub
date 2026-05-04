@@ -22,6 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SessionsService {
 
+    private static final String CODE_SESSION_ALREADY_ACTIVE = "SESSION_ALREADY_ACTIVE";
+    private static final String CODE_SESSION_ALREADY_FINISHED = "SESSION_ALREADY_FINISHED";
+    private static final String CODE_SESSION_FINISHED = "SESSION_FINISHED";
+
     private final WorkoutSessionRepository sessions;
     private final WorkoutDayRepository days;
     private final AchievementEvaluator achievements;
@@ -37,7 +41,8 @@ public class SessionsService {
 
     public SessionDto start(UUID userId, StartSessionRequest req) {
         if (sessions.findByUserIdAndEndedAtIsNull(userId).isPresent()) {
-            throw new ConflictException("You already have an active session");
+            throw new ConflictException(
+                    CODE_SESSION_ALREADY_ACTIVE, "You already have an active session");
         }
         WorkoutSession session = new WorkoutSession();
         session.setUserId(userId);
@@ -73,7 +78,8 @@ public class SessionsService {
         WorkoutSession session = sessions.findByIdAndUserId(sessionId, userId)
                 .orElseThrow(() -> new NotFoundException("Session not found: " + sessionId));
         if (session.isFinished()) {
-            throw new ConflictException("Session already finished");
+            throw new ConflictException(
+                    CODE_SESSION_ALREADY_FINISHED, "Session already finished");
         }
         session.setEndedAt(Instant.now());
         if (req != null) {
@@ -89,7 +95,8 @@ public class SessionsService {
         WorkoutSession session = sessions.findByIdAndUserId(sessionId, userId)
                 .orElseThrow(() -> new NotFoundException("Session not found: " + sessionId));
         if (session.isFinished()) {
-            throw new ConflictException("Session is finished and cannot be modified");
+            throw new ConflictException(
+                    CODE_SESSION_FINISHED, "Session is finished and cannot be modified");
         }
         return session;
     }

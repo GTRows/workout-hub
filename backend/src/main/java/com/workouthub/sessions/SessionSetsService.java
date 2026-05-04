@@ -23,6 +23,8 @@ public class SessionSetsService {
 
     public record AddSetResult(SessionSetDto dto, boolean idempotentHit) {}
 
+    private static final String CODE_SET_NUMBER_DUPLICATE = "SET_NUMBER_DUPLICATE";
+
     private final SessionsService sessionsService;
     private final SessionSetRepository sets;
     private final ExerciseRepository exercises;
@@ -76,6 +78,7 @@ public class SessionSetsService {
             return new AddSetResult(SessionsMapper.toSetDto(saved, isPr ? Boolean.TRUE : null), false);
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new ConflictException(
+                    CODE_SET_NUMBER_DUPLICATE,
                     "Set number " + setNumber + " already recorded for this exercise");
         }
     }

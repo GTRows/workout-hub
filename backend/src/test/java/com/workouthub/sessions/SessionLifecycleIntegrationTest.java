@@ -66,7 +66,8 @@ class SessionLifecycleIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SESSION_ALREADY_ACTIVE"));
 
         mvc.perform(post("/api/sessions/" + sessionId + "/finish")
                         .header("Authorization", auth)
@@ -86,7 +87,8 @@ class SessionLifecycleIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SESSION_ALREADY_FINISHED"));
     }
 
     @Test
