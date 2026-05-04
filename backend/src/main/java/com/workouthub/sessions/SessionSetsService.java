@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SessionSetsService {
 
+    public record AddSetResult(SessionSetDto dto, boolean idempotentHit) {}
+
     private final SessionsService sessionsService;
     private final SessionSetRepository sets;
     private final ExerciseRepository exercises;
@@ -37,11 +39,18 @@ public class SessionSetsService {
         this.achievements = achievements;
     }
 
-    public SessionSetDto add(UUID userId, UUID sessionId, AddSetRequest req) {
+    public AddSetResult add(UUID userId, UUID sessionId, AddSetRequest req) {
         WorkoutSession session = sessionsService.findActiveOwnedOrThrow(userId, sessionId);
         Exercise exercise = exercises.findById(req.exerciseId())
                 .orElseThrow(() -> new NotFoundException(
                         "Exercise not found: " + req.exerciseId()));
+
+        if (req.clientSetId() != null) {
+            var existing = sets.findBySessionIdAndClientSetId(sessionId, req.clientSetId());
+            if (existing.isPresent()) {
+                return new AddSetResult(SessionsMapper.toSetDto(existing.get()), true);
+            }
+        }
 
         short setNumber = req.setNumber() != null
                 ? req.setNumber()
@@ -59,11 +68,12 @@ public class SessionSetsService {
         set.setRpe(req.rpe());
         set.setCompleted(req.completed() == null ? Boolean.TRUE : req.completed());
         set.setNotes(req.notes());
+        set.setClientSetId(req.clientSetId());
         session.addSet(set);
         try {
             SessionSet saved = sets.saveAndFlush(set);
             achievements.onSetSaved(userId, isPr);
-            return SessionsMapper.toSetDto(saved, isPr ? Boolean.TRUE : null);
+            return new AddSetResult(SessionsMapper.toSetDto(saved, isPr ? Boolean.TRUE : null), false);
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new ConflictException(
                     "Set number " + setNumber + " already recorded for this exercise");

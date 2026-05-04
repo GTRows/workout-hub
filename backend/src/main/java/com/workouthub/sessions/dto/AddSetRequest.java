@@ -16,4 +16,5 @@ public record AddSetRequest(
         @DecimalMin("0.0") @DecimalMax("999.99") BigDecimal weightKg,
         @Min(1) @Max(10) Short rpe,
         Boolean completed,
-        @Size(max = 1000) String notes) {}
+        @Size(max = 1000) String notes,
+        UUID clientSetId) {}

@@ -1,6 +1,7 @@
 package com.workouthub.sessions;
 
 import com.workouthub.common.security.AppUserPrincipal;
+import com.workouthub.sessions.SessionSetsService.AddSetResult;
 import com.workouthub.sessions.dto.AddSetRequest;
 import com.workouthub.sessions.dto.SessionSetDto;
 import com.workouthub.sessions.dto.UpdateSetRequest;
@@ -32,8 +33,9 @@ public class SessionSetsController {
             @AuthenticationPrincipal AppUserPrincipal principal,
             @PathVariable UUID sessionId,
             @Valid @RequestBody AddSetRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.add(principal.userId(), sessionId, req));
+        AddSetResult result = service.add(principal.userId(), sessionId, req);
+        HttpStatus status = result.idempotentHit() ? HttpStatus.OK : HttpStatus.CREATED;
+        return ResponseEntity.status(status).body(result.dto());
     }
 
     @PutMapping("/{setId}")

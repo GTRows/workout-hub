@@ -11,6 +11,8 @@ public interface SessionSetRepository extends JpaRepository<SessionSet, UUID> {
 
     Optional<SessionSet> findByIdAndSessionId(UUID id, UUID sessionId);
 
+    Optional<SessionSet> findBySessionIdAndClientSetId(UUID sessionId, UUID clientSetId);
+
     List<SessionSet> findBySessionIdAndExerciseIdOrderBySetNumberAsc(
             UUID sessionId, UUID exerciseId);
 
