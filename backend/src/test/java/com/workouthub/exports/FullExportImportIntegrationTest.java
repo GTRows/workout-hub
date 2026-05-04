@@ -10,7 +10,6 @@ import com.workouthub.support.AbstractIntegrationTest;
 import com.workouthub.support.TestAuthHelpers;
 import com.workouthub.support.TestAuthHelpers.SeededUser;
 import com.workouthub.users.domain.Role;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -106,14 +105,18 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled("ISSUES.md i-2: same root cause as i-1; needs local Maven debugger")
     void importRoundTripPreservesPlansFromExport() throws Exception {
         SeededUser u = helpers.seed(
                 "rt-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
         String auth = "Bearer " + u.accessToken();
 
-        // The default plan seeder runs on user creation, so the initial
-        // export should already contain at least one plan.
+        // TestAuthHelpers.seed bypasses DefaultPlanSeeder, so create a plan explicitly before exporting.
+        mvc.perform(post("/api/workout-plans")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Round-Trip Seed\"}"))
+                .andExpect(status().isCreated());
+
         MvcResult exp = mvc.perform(get("/api/export/full").header("Authorization", auth))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -128,7 +131,7 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
                         org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
 
         mvc.perform(get("/api/workout-plans/active").header("Authorization", auth))
-                .andExpect(status().isOk());
+                .andExpect(status().is2xxSuccessful());
     }
 
     @Test
