@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.4 Backend Feature Completion (active)
-Phase: 13 of 20 (workouts-audit) - complete (1 of 1 plan shipped)
-Plan: 13-01 complete
-Status: Phase 13 complete; ready to plan Phase 14 (workouts-hardening)
-Last activity: 2026-05-04 - Completed 13-01-PLAN.md (workouts-audit)
+Phase: 14 of 20 (workouts-hardening) - in progress (1 of 2 plans shipped)
+Plan: 14-01 complete; 14-02 next
+Status: Phase 14 in progress; 14-01 (i-1 cascade-id fix) shipped, awaiting CI green; ready to execute 14-02 (i-2)
+Last activity: 2026-05-04 - Completed 14-01-PLAN.md (workouts-hardening i-1 fix)
 
-Progress: v0.4 ##__________________ 12.5% (1/8 phases)
+Progress: v0.4 ###_________________ 15.6% (1.5/8 phases)
           v0.5 (planned) - Phases 21-30
           v0.6 (planned) - Phases 31-37
           v1.0 (planned) - Phases 38-44
@@ -18,10 +18,11 @@ Progress: v0.4 ##__________________ 12.5% (1/8 phases)
 - See: `.planning/MILESTONES.md` for shipped milestone log
 - See: `.planning/milestones/v0.3-ROADMAP.md` for full v0.3 archive
 - See: `.planning/ROADMAP.md` for current roadmap (v0.4 detailed; v0.5/v0.6/v1.0 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9)
+- See: `.planning/ISSUES.md` for open deferred issues (i-1 fix shipped awaiting CI; i-2, i-4, i-5, i-6, i-7, i-8, i-9 remain open)
 - See: `.planning/phases/13-workouts-audit/13-01-AUDIT.md` for the workouts audit deliverable.
+- See: `.planning/phases/14-workouts-hardening/14-01-SUMMARY.md` for the i-1 cascade-id fix.
 
-**Current focus:** Plan and execute Phase 14 (workouts-hardening). Audit identifies two narrow change sets closing i-1 and i-2 with independent root causes.
+**Current focus:** Execute Phase 14 plan 02 (close i-2 round-trip export drop). Plan 14-01 closed i-1 with the explicit child-repo saveAndFlush fix per audit Section 5; awaiting CI green to mark i-1 Closed in ISSUES.md.
 
 ## Accumulated Context
 
@@ -56,11 +57,12 @@ Full decision log lives in `.planning/milestones/v0.3-ROADMAP.md` "Key Decisions
 
 - 2026-05-04: v0.4 milestone created with 8 phases (Phase 13-20). Full v1.0 path scoped: v0.5 frontend completion (Phase 21-30), v0.6 operational maturity (Phase 31-37), v1.0 release hardening (Phase 38-44). Total 32 phases to v1.0.
 - 2026-05-04: Phase 13 (workouts-audit) shipped (1 plan: 13-01). Audit deliverable at `.planning/phases/13-workouts-audit/13-01-AUDIT.md`.
+- 2026-05-04: Phase 14 plan 01 shipped. WorkoutDaysService cascade-id fix lands the explicit child-repo saveAndFlush from audit Section 5; 6 disabled WorkoutDaysIntegrationTest cases re-enabled and a regression assertion added to the green test. CI verification pending.
 
 ## Session Continuity
 
-Last session: 2026-05-04 - Phase 13 plan 01 complete
-Stopped at: 13-01 audit shipped; Phase 13 closed (1 of 1 plan). Next action: `/gsd:plan-phase 14` to break down workouts-hardening from the audit's Phase 14 scope buckets.
+Last session: 2026-05-04 - Phase 14 plan 01 complete
+Stopped at: 14-01 i-1 fix shipped (3 task commits + metadata). Next action: `/gsd:execute-plan .planning/phases/14-workouts-hardening/14-02-PLAN.md` to close i-2 (round-trip export plans drop).
 Resume file: None.
 
 ## Reference Documents

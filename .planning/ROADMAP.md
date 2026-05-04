@@ -40,10 +40,11 @@ Plans:
 **Goal:** Fix i-1 (WorkoutDaysIntegrationTest helper NPE, 6 disabled tests) and i-2 (FullExportImportIntegrationTest plan round-trip drop). Address mapper/cascade root causes uncovered in Phase 13.
 **Depends on:** Phase 13
 **Research:** Unlikely (internal debugging)
-**Plans:** TBD
+**Plans:** 2
 
 Plans:
-- [ ] 14-01: TBD
+- [x] 14-01: workouts-hardening i-1 (cascade-id fix in WorkoutDaysService)
+- [ ] 14-02: workouts-hardening i-2 (export round-trip plans drop)
 
 #### Phase 15: sessions-core
 
@@ -157,7 +158,7 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | --------------------------- | --------- | ----- | ----------- | ---------- |
 | 1-12 (v0.3 scope)           | v0.3      | 14/14 | Complete    | 2026-05-03 |
 | 13. workouts-audit          | v0.4      | 1/1   | Complete    | 2026-05-04 |
-| 14. workouts-hardening      | v0.4      | 0/?   | Not started | -          |
+| 14. workouts-hardening      | v0.4      | 1/2   | In progress | -          |
 | 15. sessions-core           | v0.4      | 0/?   | Not started | -          |
 | 16. sessions-analytics      | v0.4      | 0/?   | Not started | -          |
 | 17. body-metrics            | v0.4      | 0/?   | Not started | -          |
