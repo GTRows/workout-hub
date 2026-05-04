@@ -43,6 +43,19 @@ class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody().message()).isEqualTo("email taken");
+        assertThat(response.getBody().code()).isNull();
+    }
+
+    @Test
+    void conflictWithCodePropagatesCodeToApiError() {
+        var req = new MockHttpServletRequest("POST", "/api/auth/register");
+
+        var response = handler.handleConflict(
+                new ConflictException("EMAIL_TAKEN", "email taken"), req);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody().message()).isEqualTo("email taken");
+        assertThat(response.getBody().code()).isEqualTo("EMAIL_TAKEN");
     }
 
     @Test

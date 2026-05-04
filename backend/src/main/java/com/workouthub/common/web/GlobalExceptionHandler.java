@@ -29,19 +29,19 @@ public class GlobalExceptionHandler {
         List<ApiError.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
                 .map(fe -> new ApiError.FieldError(fe.getField(), fe.getDefaultMessage()))
                 .toList();
-        return build(HttpStatus.BAD_REQUEST, "Validation failed", req, fieldErrors);
+        return build(HttpStatus.BAD_REQUEST, "Validation failed", req, fieldErrors, null);
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(
             NotFoundException ex, HttpServletRequest req) {
-        return build(HttpStatus.NOT_FOUND, ex.getMessage(), req, null);
+        return build(HttpStatus.NOT_FOUND, ex.getMessage(), req, null, null);
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ApiError> handleConflict(
             ConflictException ex, HttpServletRequest req) {
-        return build(HttpStatus.CONFLICT, ex.getMessage(), req, null);
+        return build(HttpStatus.CONFLICT, ex.getMessage(), req, null, ex.code());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -51,14 +51,14 @@ public class GlobalExceptionHandler {
                 .map(v -> new ApiError.FieldError(
                         v.getPropertyPath().toString(), v.getMessage()))
                 .toList();
-        return build(HttpStatus.BAD_REQUEST, "Validation failed", req, fieldErrors);
+        return build(HttpStatus.BAD_REQUEST, "Validation failed", req, fieldErrors, null);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiError> handleMissingParam(
             MissingServletRequestParameterException ex, HttpServletRequest req) {
         return build(HttpStatus.BAD_REQUEST,
-                "Missing required parameter: " + ex.getParameterName(), req, null);
+                "Missing required parameter: " + ex.getParameterName(), req, null, null);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -66,25 +66,25 @@ public class GlobalExceptionHandler {
             MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
         String message = "Invalid value '" + ex.getValue() + "' for parameter '"
                 + ex.getName() + "'";
-        return build(HttpStatus.BAD_REQUEST, message, req, null);
+        return build(HttpStatus.BAD_REQUEST, message, req, null, null);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleBadCredentials(
             BadCredentialsException ex, HttpServletRequest req) {
-        return build(HttpStatus.UNAUTHORIZED, "Invalid credentials", req, null);
+        return build(HttpStatus.UNAUTHORIZED, "Invalid credentials", req, null, null);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleDenied(
             AccessDeniedException ex, HttpServletRequest req) {
-        return build(HttpStatus.FORBIDDEN, "Access denied", req, null);
+        return build(HttpStatus.FORBIDDEN, "Access denied", req, null, null);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadableBody(
             HttpMessageNotReadableException ex, HttpServletRequest req) {
-        return build(HttpStatus.BAD_REQUEST, "Malformed request body", req, null);
+        return build(HttpStatus.BAD_REQUEST, "Malformed request body", req, null, null);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -92,26 +92,28 @@ public class GlobalExceptionHandler {
             ResponseStatusException ex, HttpServletRequest req) {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
         String message = ex.getReason() != null ? ex.getReason() : status.getReasonPhrase();
-        return build(status, message, req, null);
+        return build(status, message, req, null, null);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnhandled(Exception ex, HttpServletRequest req) {
         log.error("Unhandled exception at {}", req.getRequestURI(), ex);
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", req, null);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", req, null, null);
     }
 
     private ResponseEntity<ApiError> build(
             HttpStatus status,
             String message,
             HttpServletRequest req,
-            List<ApiError.FieldError> errors) {
+            List<ApiError.FieldError> errors,
+            String code) {
         return ResponseEntity.status(status).body(new ApiError(
                 Instant.now(),
                 status.value(),
                 status.getReasonPhrase(),
                 message,
                 req.getRequestURI(),
-                errors));
+                errors,
+                code));
     }
 }
