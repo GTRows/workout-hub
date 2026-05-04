@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.workouthub.sessions.domain.WorkoutSession;
+import com.workouthub.sessions.domain.WorkoutSessionRepository;
 import com.workouthub.support.AbstractIntegrationTest;
 import com.workouthub.support.TestAuthHelpers;
 import com.workouthub.support.TestAuthHelpers.SeededUser;
@@ -26,6 +28,7 @@ class SessionLifecycleIntegrationTest extends AbstractIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired TestAuthHelpers helpers;
     @Autowired ObjectMapper objectMapper;
+    @Autowired WorkoutSessionRepository sessions;
 
     @Test
     void unauthenticatedStartReturns401() throws Exception {
@@ -140,5 +143,38 @@ class SessionLifecycleIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"mood\":9}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void heartRateAvgBpmIsNullByDefaultAndPopulatedAfterImporterWrite() throws Exception {
+        SeededUser user = helpers.seed(
+                "hr-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        MvcResult start = mvc.perform(post("/api/sessions/start")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID sessionId = UUID.fromString(objectMapper.readTree(
+                start.getResponse().getContentAsString()).get("id").asText());
+
+        mvc.perform(get("/api/sessions/" + sessionId).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.heartRateAvgBpm").doesNotExist());
+
+        WorkoutSession s = sessions.findById(sessionId).orElseThrow();
+        s.setHeartRateAvgBpm((short) 142);
+        sessions.saveAndFlush(s);
+
+        mvc.perform(get("/api/sessions/" + sessionId).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.heartRateAvgBpm").value(142));
+
+        mvc.perform(get("/api/sessions/active").header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(sessionId.toString()))
+                .andExpect(jsonPath("$.heartRateAvgBpm").value(142));
     }
 }

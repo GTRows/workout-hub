@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.workouthub.sessions.domain.WorkoutSession;
+import com.workouthub.sessions.domain.WorkoutSessionRepository;
 import com.workouthub.support.AbstractIntegrationTest;
 import com.workouthub.support.TestAuthHelpers;
 import com.workouthub.support.TestAuthHelpers.SeededUser;
@@ -27,6 +29,7 @@ class SessionHistoryIntegrationTest extends AbstractIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired TestAuthHelpers helpers;
     @Autowired ObjectMapper objectMapper;
+    @Autowired WorkoutSessionRepository sessions;
 
     @Test
     void historyReturnsOnlyCallerOwnSessionsMostRecentFirst() throws Exception {
@@ -97,6 +100,29 @@ class SessionHistoryIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.totalElements").value(Matchers.greaterThanOrEqualTo(3)));
+    }
+
+    @Test
+    void historyRowsExposeHeartRateAvgBpm() throws Exception {
+        SeededUser user = helpers.seed(
+                "hr-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        UUID firstId = startAndFinish(auth);
+        WorkoutSession first = sessions.findById(firstId).orElseThrow();
+        first.setHeartRateAvgBpm((short) 138);
+        sessions.saveAndFlush(first);
+
+        mvc.perform(get("/api/sessions/history").header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(firstId.toString()))
+                .andExpect(jsonPath("$.content[0].heartRateAvgBpm").value(138));
+
+        startAndFinish(auth);
+
+        mvc.perform(get("/api/sessions/history").header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].heartRateAvgBpm").doesNotExist());
     }
 
     private UUID startAndFinish(String auth) throws Exception {
