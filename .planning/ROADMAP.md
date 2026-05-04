@@ -57,7 +57,7 @@ Plans:
 - [x] 15-01: sessions-core audit
 - [x] 15-02: contract-finalization (clientSetId idempotency key)
 - [x] 15-03: heart-rate field exposure on session DTOs
-- [ ] 15-04: auto-numbering verdict and typed 409 error codes
+- [x] 15-04: auto-numbering verdict and typed 409 error codes
 
 #### Phase 16: sessions-analytics
 
@@ -162,7 +162,7 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | 1-12 (v0.3 scope)           | v0.3      | 14/14 | Complete    | 2026-05-03 |
 | 13. workouts-audit          | v0.4      | 1/1   | Complete    | 2026-05-04 |
 | 14. workouts-hardening      | v0.4      | 2/2   | Complete    | 2026-05-04 |
-| 15. sessions-core           | v0.4      | 3/4   | In progress | -          |
+| 15. sessions-core           | v0.4      | 4/4   | Complete    | 2026-05-04 |
 | 16. sessions-analytics      | v0.4      | 0/?   | Not started | -          |
 | 17. body-metrics            | v0.4      | 0/?   | Not started | -          |
 | 18. export-refinement       | v0.4      | 0/?   | Not started | -          |

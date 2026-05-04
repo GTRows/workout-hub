@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.4 Backend Feature Completion (active)
-Phase: 15 of 20 (sessions-core) - in progress (3 of 4 plans shipped)
-Plan: 15-03 complete (heart-rate exposure on session DTOs)
-Status: Phase 15 in progress; ready for plan 15-04 (auto-numbering + typed 409 codes)
-Last activity: 2026-05-04 - Completed 15-03-PLAN.md (Short heartRateAvgBpm appended to SessionDto + SessionSummaryDto; mapper updated; integration tests for detail/active/history endpoints via direct repository mutation)
+Phase: 15 of 20 (sessions-core) - complete (4 of 4 plans shipped)
+Plan: 15-04 complete (typed 409 codes + auto-numbering verdict)
+Status: Phase 15 complete; ready for Phase 16 (sessions-analytics)
+Last activity: 2026-05-04 - Completed 15-04-PLAN.md (ApiError gains optional trailing String code; ConflictException two-arg constructor; four sessions/ 409 throw sites carry SESSION_ALREADY_ACTIVE/SESSION_ALREADY_FINISHED/SESSION_FINISHED/SET_NUMBER_DUPLICATE codes; SessionSetsService.add Javadoc documents auto-numbering and idempotency contracts; newPrFlagPresentOnCreateButOmittedOnDetailReread test added; 5 existing 409 integration tests assert $.code)
 
-Progress: v0.4 ####________________ 25% (2/8 phases complete; Phase 15 in progress, 3/4 plans done)
+Progress: v0.4 ######______________ 38% (3/8 phases complete; Phase 15 done, Phase 16 next)
           v0.5 (planned) - Phases 21-30
           v0.6 (planned) - Phases 31-37
           v1.0 (planned) - Phases 38-44
@@ -24,8 +24,9 @@ Progress: v0.4 ####________________ 25% (2/8 phases complete; Phase 15 in progre
 - See: `.planning/phases/15-sessions-core/15-01-AUDIT.md` for the sessions audit deliverable (251 lines, 6 sections).
 - See: `.planning/phases/15-sessions-core/15-02-SUMMARY.md` for the clientSetId idempotency key plan deliverable.
 - See: `.planning/phases/15-sessions-core/15-03-SUMMARY.md` for the heart-rate exposure plan deliverable.
+- See: `.planning/phases/15-sessions-core/15-04-SUMMARY.md` for the typed 409 codes + auto-numbering verdict plan deliverable.
 
-**Current focus:** Plan 15-04 (auto-numbering verdict + typed 409 codes) is the last remaining Phase 15 hardening plan. Plan 15-03 shipped: audit Section 3 field-level drift "heartRateAvgBpm exposure gap" closed; Section 6 FG1 (heart-rate exposure on `SessionDto` + `SessionSummaryDto`) shipped; Section 6 C3 coverage gap (heart-rate field assertion) closed. Sections 4b PARTIAL and 4c FAIL remain open for plan 15-04.
+**Current focus:** Phase 15 complete. Next action: Phase 16 (sessions-analytics) - add `/exercises/:id/last-performance` and `/exercises/:id/progress` endpoints; introduce PR computation, volume aggregation, and 1RM (Epley) projections at the query layer. Phase 16 in-package leaks (`ExerciseAnalyticsController/Service`, `LastPerformanceDto`, `ProgressPointDto`, `PrDetector`, `SessionSetRepository.findHistoricalByUserAndExercise`) that have been guarded against modification through Plans 15-02/15-03/15-04 are the natural starting point - the analytics phase expands or formalizes them.
 
 ## Accumulated Context
 
@@ -53,10 +54,10 @@ Full decision log lives in `.planning/milestones/v0.3-ROADMAP.md` "Key Decisions
 
 - All 7 ProjectBrief Phase 4 endpoints are implemented today (no `Missing` rows). 21 files / 965 lines under `sessions/`. 10 endpoints exposed (8 Phase 15 + 2 Phase 16 leaks: `last-performance`, `progress`).
 - Phase 14 child-repo `saveAndFlush` lesson is already applied at `SessionSetsService.java:64` (`sets.saveAndFlush(set)`); cascade-id risk that motivated i-1 is mitigated for sessions.
-- Offline-first sync contract verdict: must-harden in plan 15-02+. Top 3 gaps: (1) no client-supplied idempotency key on `POST /sets` (4a PARTIAL: 409 conflates idempotent retry with set_number collision), (2) auto-numbering at `SessionSetsService.java:46-48` is unsafe for offline drain (4c FAIL: out-of-order without explicit `setNumber` corrupts row order), (3) 409 body lacks typed error code (4b PARTIAL: drainer cannot distinguish SESSION_FINISHED from SET_NUMBER_DUPLICATE).
+- Offline-first sync contract: fully hardened by Plans 15-02/15-04. (1) clientSetId idempotency key on `POST /sets` (15-02 closed 4a PARTIAL: 200 = replay, 201 = newly created). (2) Auto-numbering at `SessionSetsService.java:55-57` retained for live-online next-set UX; offline drainers MUST send explicit setNumber (15-04 documented 4c FAIL verdict in Javadoc). (3) Typed 409 codes propagated through `ApiError.code` for the four sessions throw sites (15-04 closed 4b PARTIAL: drainer can branch on SESSION_FINISHED vs SET_NUMBER_DUPLICATE without message parsing).
 - `heartRateAvgBpm` field (V20 column, entity getter at `WorkoutSession.java:114`) is fed only by Garmin .fit importer at `HealthImportService.java:68`. Plan 15-03 closed the exposure gap: `Short heartRateAvgBpm` is now read-only on `SessionDto` and `SessionSummaryDto`; Section 3 field-level drift and Section 6 FG1 closed.
-- Phase 16 in-package leaks (`ExerciseAnalyticsController/Service`, `LastPerformanceDto`, `ProgressPointDto`, `PrDetector`, `SessionSetRepository.findHistoricalByUserAndExercise`) stay in package; plan 15-02+ MUST NOT modify them. `newPr` flag on create response is a Phase 16 leak that landed early but provides UX value; keep as-is, do not extend.
-- Plan-count: 3 hardening plans (15-02 idempotency key, 15-03 heart-rate exposure, 15-04 auto-numbering verdict + typed 409 codes). Phase 14 one-feature-per-plan precedent guided the split.
+- Phase 16 in-package leaks (`ExerciseAnalyticsController/Service`, `LastPerformanceDto`, `ProgressPointDto`, `PrDetector`, `SessionSetRepository.findHistoricalByUserAndExercise`) stayed in package across all four 15-* plans; Phase 16 owns formalization. `newPr` flag on create response is a Phase 16 leak with UX value; the create-only behavior is now documentation-asserted by 15-04's `newPrFlagPresentOnCreateButOmittedOnDetailReread` test.
+- Plan-count: 4 plans (15-01 audit, 15-02 idempotency key, 15-03 heart-rate exposure, 15-04 typed codes + auto-numbering verdict). All shipped.
 
 ### Issue-to-Phase Mapping
 
@@ -75,11 +76,12 @@ Full decision log lives in `.planning/milestones/v0.3-ROADMAP.md` "Key Decisions
 - 2026-05-04: Phase 15 plan 01 (sessions-core audit) shipped. Audit deliverable at `.planning/phases/15-sessions-core/15-01-AUDIT.md`. Phase 15 plan-count revised from TBD to 4 plans (1 audit + 3 hardening). Plan 15-02+ scope finalized: 4 coverage tests, 3 contract-finalization items, 2 feature-gap, 5 defer. No new ISSUES.md entries (contract gaps belong to 15-02+ scope, not deferred-issues queue).
 - 2026-05-04: Phase 15 plan 02 (clientSetId idempotency key) shipped. V26 migration + entity field + migration test, service fast-path, 200/201 controller mapping, 4 integration tests. Audit Section 4a PARTIAL verdict closed; Sections 4b PARTIAL (typed 409 codes) and 4c FAIL (auto-numbering) remain open for plan 15-04.
 - 2026-05-04: Phase 15 plan 03 (heart-rate exposure) shipped. `Short heartRateAvgBpm` appended to `SessionDto` and `SessionSummaryDto` records; `SessionsMapper.toDto`/`toSummary` populate the new field; two integration tests use direct `WorkoutSessionRepository.saveAndFlush` to mimic the Garmin .fit importer write path on detail/active/history endpoints. Audit Section 3 field-level drift and Section 6 FG1 closed; Section 6 C3 coverage gap closed.
+- 2026-05-04: Phase 15 plan 04 (typed 409 codes + auto-numbering verdict) shipped. `ApiError` gains optional trailing `String code` (Jackson NON_NULL omits when null - zero regression on existing 4xx/5xx); `ConflictException` two-arg constructor preserves single-arg back-compat. Four sessions/ throw sites carry codes: `SESSION_ALREADY_ACTIVE`, `SESSION_ALREADY_FINISHED`, `SESSION_FINISHED`, `SET_NUMBER_DUPLICATE`. Five existing 409 integration tests assert `$.code`. `SessionSetsService.add` Javadoc documents auto-numbering contract (live-online safe; offline drainers MUST send explicit setNumber) and idempotency contract (clientSetId replay does not re-fire side effects). `newPrFlagPresentOnCreateButOmittedOnDetailReread` documents create-vs-reread newPr flag behavior. Audit Section 4b PARTIAL closed; Section 4c FAIL verdict documented; Section 6 C4 closed. Phase 15 complete (4/4 plans shipped).
 
 ## Session Continuity
 
-Last session: 2026-05-04 - Phase 15 plan 03 complete
-Stopped at: Phase 15 in progress (3 of 4 plans). Next action: `/gsd:execute-plan` with plan 15-04 (auto-numbering + typed 409 codes).
+Last session: 2026-05-04 - Phase 15 plan 04 complete; Phase 15 done
+Stopped at: Phase 15 complete (4 of 4 plans shipped). Next action: `/gsd:plan-phase 16` for Phase 16 (sessions-analytics).
 Resume file: None.
 
 ## Reference Documents
