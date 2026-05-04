@@ -1,6 +1,7 @@
 package com.workouthub.sessions;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -187,6 +188,93 @@ class SessionSetsIntegrationTest extends AbstractIntegrationTest {
         return exerciseRepo.save(e).getId();
     }
 
+    @Test
+    void sameClientSetIdRetryReturns200WithSameId() throws Exception {
+        UUID key = UUID.randomUUID();
+        MvcResult first = mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 10, 60.0, null, key)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String originalId = objectMapper.readTree(
+                first.getResponse().getContentAsString()).get("id").asText();
+
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 10, 60.0, null, key)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(originalId))
+                .andExpect(jsonPath("$.newPr").doesNotExist());
+    }
+
+    @Test
+    void sameClientSetIdReturnsOriginalRowEvenIfBodyDiffers() throws Exception {
+        UUID key = UUID.randomUUID();
+        MvcResult first = mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 10, 60.0, 7, key)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String originalId = objectMapper.readTree(
+                first.getResponse().getContentAsString()).get("id").asText();
+
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 12, 80.0, 9, key)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(originalId))
+                .andExpect(jsonPath("$.repsDone").value(10))
+                .andExpect(jsonPath("$.weightKg").value(60.0));
+    }
+
+    @Test
+    void differentClientSetIdSameSetNumberReturns409() throws Exception {
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 10, 60.0, null, UUID.randomUUID())))
+                .andExpect(status().isCreated());
+
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 8, 60.0, null, UUID.randomUUID())))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void outOfOrderDrainPreservesSetNumberOrdering() throws Exception {
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 10, 60.0, null)))
+                .andExpect(status().isCreated());
+
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(3, 10, 70.0, null)))
+                .andExpect(status().isCreated());
+
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(2, 10, 65.0, null)))
+                .andExpect(status().isCreated());
+
+        mvc.perform(get("/api/sessions/" + sessionId)
+                        .header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets.length()").value(3))
+                .andExpect(jsonPath("$.sets[0].setNumber").value(1))
+                .andExpect(jsonPath("$.sets[1].setNumber").value(2))
+                .andExpect(jsonPath("$.sets[2].setNumber").value(3));
+    }
+
     private String setBody(Integer setNumber, int reps, double weight, Integer rpe) {
         return "{\"exerciseId\":\"" + exerciseId + "\""
                 + (setNumber == null ? "" : ",\"setNumber\":" + setNumber)
@@ -194,5 +282,12 @@ class SessionSetsIntegrationTest extends AbstractIntegrationTest {
                 + ",\"weightKg\":" + weight
                 + (rpe == null ? "" : ",\"rpe\":" + rpe)
                 + "}";
+    }
+
+    private String setBody(Integer setNumber, int reps, double weight, Integer rpe, UUID clientSetId) {
+        String base = setBody(setNumber, reps, weight, rpe);
+        if (clientSetId == null) return base;
+        return base.substring(0, base.length() - 1)
+                + ",\"clientSetId\":\"" + clientSetId + "\"}";
     }
 }
