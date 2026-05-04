@@ -278,6 +278,21 @@ class SessionSetsIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.sets[2].setNumber").value(3));
     }
 
+    @Test
+    void newPrFlagPresentOnCreateButOmittedOnDetailReread() throws Exception {
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(setBody(1, 10, 60.0, null)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.newPr").value(true));
+
+        mvc.perform(get("/api/sessions/" + sessionId).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets.length()").value(1))
+                .andExpect(jsonPath("$.sets[0].newPr").doesNotExist());
+    }
+
     private String setBody(Integer setNumber, int reps, double weight, Integer rpe) {
         return "{\"exerciseId\":\"" + exerciseId + "\""
                 + (setNumber == null ? "" : ",\"setNumber\":" + setNumber)

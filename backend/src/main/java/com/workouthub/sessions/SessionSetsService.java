@@ -41,6 +41,25 @@ public class SessionSetsService {
         this.achievements = achievements;
     }
 
+    /**
+     * Adds a set to an active session.
+     *
+     * <p>Auto-numbering contract: when {@code req.setNumber()} is null, the server
+     * assigns {@code countBySessionIdAndExerciseId + 1}. This is safe ONLY for the
+     * live-online "next set" UX where a single client adds sets sequentially.
+     *
+     * <p>Offline-queue drainers MUST send an explicit {@code setNumber} on every
+     * POST. Out-of-order drain (e.g. sets {1, 3, 2}) without explicit numbers
+     * corrupts row order because each implicit insert sees a different in-flight
+     * count. The integration test
+     * {@code SessionSetsIntegrationTest.outOfOrderDrainPreservesSetNumberOrdering}
+     * proves the explicit-number path tolerates out-of-order drain.
+     *
+     * <p>Idempotency contract: when {@code req.clientSetId()} is non-null and a
+     * row already exists for {@code (sessionId, clientSetId)}, the persisted row
+     * is returned with {@code idempotentHit=true}. The PR detector and
+     * achievement evaluator are not re-fired on a replay.
+     */
     public AddSetResult add(UUID userId, UUID sessionId, AddSetRequest req) {
         WorkoutSession session = sessionsService.findActiveOwnedOrThrow(userId, sessionId);
         Exercise exercise = exercises.findById(req.exerciseId())
