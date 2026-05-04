@@ -172,3 +172,80 @@ If the client DOES send explicit `setNumber`, drain of set 3 works (server store
 3. **409 body lacks a typed error code.** Frontend cannot distinguish "set already saved" from "session finished" from "set number collision". Add an `ApiError.code` enum or extend the existing error body with a `code` string. Closes 4b PARTIAL verdict. Touches: `ApiError.java`, `GlobalExceptionHandler` (or new `ConflictException` subtypes), `SessionSetsService` throw sites. Test coverage gap: assert `$.code` value in 409 paths.
 
 **Verdict for v0.4: must-harden in plan 15-02+.** The current 409-only path "works" for a happy-path online flow but fails the offline-first contract that ProjectBrief Phase 4 explicitly mandates. Hardening is a 1-2 plan effort (one for the idempotency key + DB column, one optionally for typed error codes if scope budget allows).
+
+## Section 5 - Phase 16/17 Scope-Leak Inventory
+
+| File | Phase | Justification |
+| --- | --- | --- |
+| `SessionsController.java` | Phase 15 | Session lifecycle surface (start/active/finish/history/detail). |
+| `SessionSetsController.java` | Phase 15 | Set CRUD surface. |
+| `ExerciseAnalyticsController.java` | Phase 16 | Last-performance + progress endpoints; brief Phase 4 line 306-308 lists them but ROADMAP.md assigns them to Phase 16. Plan 15-02+ MUST NOT modify. |
+| `SessionsService.java` | Phase 15 | Lifecycle service. |
+| `SessionSetsService.java` | shared (Phase 15 + Phase 16 leak) | Set CRUD is Phase 15. The PR detection invocation at `SessionSetsService.java:50-52` and the `bestPriorOneRm` helper (`SessionSetsService.java:73-83`) are Phase 16 logic that landed early in the create path. Phase 15 plan-02+ should keep the call site but treat the analytics dependency as a known leak documented here. |
+| `ExerciseAnalyticsService.java` | Phase 16 | Pure analytics service. Plan 15-02+ MUST NOT modify. |
+| `SessionsMapper.java` | shared (Phase 15 + Phase 16 leak) | `toDto`, `toSummary`, `toSetDto` are Phase 15. The `newPr` parameter on `toSetDto` is Phase 16 PR-detection territory landed in the same mapper. |
+| `PrDetector.java` | Phase 16 | Epley 1RM and beats-prior-best predicate. Phase 16 logic invoked from Phase 15 set-add. The `newPr` flag on the create response is a Phase 16 leak; ProjectBrief Phase 4 does not require it. Plan 15-02+ MUST NOT modify the PrDetector itself. |
+| `domain/WorkoutSession.java` | Phase 15 (with Phase 17 leak field) | Entity is Phase 15. The `heartRateAvgBpm` column is fed exclusively by the `health/` Garmin import. Whether to expose it on the session DTOs is a Phase 15 contract decision (candidate task in Section 6); the column itself stays. |
+| `domain/SessionSet.java` | Phase 15 | Entity. |
+| `domain/WorkoutSessionRepository.java` | Phase 15 | Includes `findFinishedSince` which is used by analytics; the repo is shared but Phase 15 owns the CRUD-relevant methods. |
+| `domain/SessionSetRepository.java` | shared | `findHistoricalByUserAndExercise` is Phase 16-only; the rest are Phase 15. |
+| `dto/StartSessionRequest.java` | Phase 15 | Lifecycle DTO. |
+| `dto/FinishSessionRequest.java` | Phase 15 | Lifecycle DTO. |
+| `dto/AddSetRequest.java` | Phase 15 | Set CRUD DTO. |
+| `dto/UpdateSetRequest.java` | Phase 15 | Set CRUD DTO. |
+| `dto/SessionDto.java` | Phase 15 | Detail/finish response. |
+| `dto/SessionSummaryDto.java` | Phase 15 | History row. |
+| `dto/SessionSetDto.java` | shared | Set row plus `newPr` (Phase 16). |
+| `dto/LastPerformanceDto.java` | Phase 16 | Analytics-only. |
+| `dto/ProgressPointDto.java` | Phase 16 | Analytics-only. |
+| `db/migration/V5__sessions_and_sets.sql` | Phase 15 | Immutable; lifecycle schema. |
+| `db/migration/V20__sessions_heart_rate.sql` | Phase 17 (origin), Phase 15 (exposure decision) | Migration is owned by Phase 17 / health import; Phase 15 only decides whether to expose the column on session DTOs. |
+
+**`newPr` ownership verdict.** Phase 16 leak. ProjectBrief Phase 4 does not list PR detection; Phase 6 (charts-stats) and the brief's analytics endpoints do. Plan 15-02+ should NOT remove the `newPr` flag (it is a useful UX cue on the create response and the code is already shipped), but should NOT add new PR features either. PR durability across re-reads is a Phase 16 concern.
+
+**`heartRateAvgBpm` ownership verdict.** Phase 17 origin (Garmin import), Phase 15 exposure decision. Recommendation in Section 6 is to add the field to `SessionDto` and `SessionSummaryDto` in plan 15-03 (read-only, no client write path needed because Garmin is the only writer); a `Phase 19` (api-contract-docs) follow-up documents that the field is import-fed.
+
+## Section 6 - Recommended Phase 15 plan-02+ Scope
+
+### bug-fix bucket
+
+- None directly under "fix a broken thing." The Phase 4 endpoint surface is fully implemented; the gaps in Section 4 are contract-completeness, not bugs.
+
+### coverage bucket
+
+- **C1: Idempotent-retry test on `POST /sets`.** `SessionSetsIntegrationTest`. Add a test that POSTs the same body twice and asserts (a) first 201, (b) second 409 with the duplicate-set message. Documents the current behavior so plan 15-02 has a regression baseline before changing it.
+- **C2: Out-of-order drain ordering test.** `SessionSetsIntegrationTest` (new test). Drain sets {1, 3, 2} with explicit `setNumber` and assert `GET /api/sessions/{id}` returns them in order 1, 2, 3. Closes the 4c FAIL test-coverage gap.
+- **C3: Heart-rate field absence assertion.** `SessionLifecycleIntegrationTest`. Assert `$.heartRateAvgBpm` is NOT present on `GET /api/sessions/{id}` today; flip to "is present" once C5 lands. Provides a forcing function for the exposure decision.
+- **C4: `newPr` re-read assertion.** `SessionSetsIntegrationTest`. Assert `$.sets[*].newPr` is null on detail re-read after a PR-setting POST. Documents the create-response-only contract.
+
+### contract-finalization bucket
+
+- **CF1: Add `clientSetId` UUID to `AddSetRequest` + DB column + UNIQUE index. Server returns 200 on retry of the same key with the persisted row.** Touches `AddSetRequest.java` (new optional `UUID clientSetId`), `SessionSet.java` (new field + getter/setter), `SessionSetsService.add` (lookup-by-key fast path before insert), new `V26__session_sets_client_id.sql` (column + unique index `(session_id, client_set_id)` where `client_set_id IS NOT NULL`). Coverage: extend C1 to expect 200 + same id when `clientSetId` is repeated. **Closes 4a PARTIAL.**
+  - Rationale: 4a's verdict is that 409 conflates "already saved" with "set_number collision." The IndexedDB drainer cannot disambiguate, which means a genuine numbering bug on the client side is silently swallowed as "already synced." A client-supplied UUID is the standard idempotency-key shape (RFC 9606 candidate semantics) and the smallest change that lets the drainer treat 200 as authoritative success.
+- **CF2: Document and enforce explicit `setNumber` for offline-drained POSTs.** Either remove the auto-numbering fallback at `SessionSetsService.java:46-48` (returns 400 if `setNumber` omitted) or keep it but add a Phase 19 doc note ("auto-numbering is unsafe for offline drain; clients MUST send `setNumber` explicitly when draining IndexedDB"). Coverage: C2 above. **Closes 4c FAIL.**
+  - Rationale: 4c shows the auto-numbering at `SessionSetsService.java:46-48` is order-sensitive. Drainers running on top of `(session, exercise, set_number)` UNIQUE corrupt order if any set arrives without an explicit number. Either reject the omission or accept it only for the live-online ad-hoc add. Pick one verdict; plan 15-02+ should land the test (C2) first to lock current behavior, then choose.
+- **CF3: Typed error code on 409 bodies.** Add an optional `code` string to `ApiError` (or sub-type `ConflictException`) so the drainer branches on `SET_NUMBER_DUPLICATE` vs `SESSION_FINISHED` vs (post-CF1) `IDEMPOTENT_RETRY_OK`. Coverage: extend C1 + a new SESSION_FINISHED test. **Closes 4b PARTIAL.**
+  - Rationale: 4b's verdict is that 409 alone is undecidable on the client. CF3 is independent of CF1; it is also broader than `sessions/` because `ApiError` is shared. If scope budget is tight, defer CF3 to Phase 19 (api-contract-docs) where the OpenAPI surface is already being touched.
+
+### feature-gap bucket
+
+- **FG1: Expose `heartRateAvgBpm` on `SessionDto` and `SessionSummaryDto`.** Read-only field; no client write path because the Garmin importer is the only writer. Touches: `SessionDto.java` (add component), `SessionSummaryDto.java` (add component), `SessionsMapper.toDto` and `toSummary`. Test: extend C3. Phase 15 ownership (exposure decision); Phase 17 owns the data source.
+- **FG2: Persist `is_pr` on `session_sets` so re-reads carry the flag.** Phase 16 territory per ROADMAP. Listed here so the boundary is explicit.
+
+### defer bucket
+
+- **D1: PR detection rework / `is_pr` durability.** Phase 16 (sessions-analytics) per `.planning/ROADMAP.md:60-62`. Plan 15-02+ MUST NOT touch `PrDetector.java` or the `newPr` field beyond the C4 documentation test.
+- **D2: Last-performance and progress endpoints.** Phase 16 owns; already implemented but locked from Phase 15 modification.
+- **D3: Day-level `order_index` for plan reorder.** Phase 14 audit FG1 marker; not relevant to sessions.
+- **D4: Body metrics endpoints.** Phase 17 (body-metrics).
+- **D5: 1RM (Epley) projections beyond `PrDetector`.** Phase 16 / Phase 31 (charts-stats).
+
+### Plan-count recommendation
+
+Three plans for Phase 15 hardening:
+
+- **Plan 15-02 (contract-finalization, idempotency key):** CF1 + C1 + C2. Single bug-shape (offline-sync contract). The `clientSetId` field, migration, server fast-path, and two integration tests fit one ~50%-context budget. Phase 14 precedent (one root cause per plan) supports keeping CF1 isolated from CF2's auto-numbering decision.
+- **Plan 15-03 (heart-rate exposure):** FG1 + C3. DTO and mapper additions; one test. Independent of plan 15-02 because the field is read-only and the Garmin write path is upstream. Small plan; could fold into 15-02 if scope budget allows, but the cleaner boundary is one feature per plan.
+- **Plan 15-04 (auto-numbering verdict + typed error codes):** CF2 + CF3 + C4. Both depend on the choice made in 15-02 about how the drainer reads error responses. Defer to last so the contract direction is settled.
+
+Empty buckets: bug-fix is empty (no broken behavior); D1-D5 are explicitly out of Phase 15 scope.
