@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.4 Backend Feature Completion (active)
-Phase: 15 of 20 (sessions-core) - in progress (1 of 4 plans shipped; audit complete)
-Plan: 15-01 complete (audit)
-Status: Phase 15 in progress; ready to plan 15-02 (contract-finalization, clientSetId idempotency key)
-Last activity: 2026-05-04 - Completed 15-01-PLAN.md (sessions-core audit; 3 plans recommended for hardening)
+Phase: 15 of 20 (sessions-core) - in progress (2 of 4 plans shipped)
+Plan: 15-02 complete (clientSetId idempotency key)
+Status: Phase 15 in progress; ready for plan 15-03 (heart-rate exposure) or 15-04 (auto-numbering + typed 409 codes)
+Last activity: 2026-05-04 - Completed 15-02-PLAN.md (V26 migration, service fast-path, 200/201 controller mapping, 4 integration tests)
 
-Progress: v0.4 ####________________ 25% (2/8 phases complete; Phase 15 in progress)
+Progress: v0.4 ####________________ 25% (2/8 phases complete; Phase 15 in progress, 2/4 plans done)
           v0.5 (planned) - Phases 21-30
           v0.6 (planned) - Phases 31-37
           v1.0 (planned) - Phases 38-44
@@ -22,8 +22,9 @@ Progress: v0.4 ####________________ 25% (2/8 phases complete; Phase 15 in progre
 - See: `.planning/phases/13-workouts-audit/13-01-AUDIT.md` for the workouts audit deliverable.
 - See: `.planning/phases/14-workouts-hardening/14-01-SUMMARY.md` for the i-1 cascade-id fix.
 - See: `.planning/phases/15-sessions-core/15-01-AUDIT.md` for the sessions audit deliverable (251 lines, 6 sections).
+- See: `.planning/phases/15-sessions-core/15-02-SUMMARY.md` for the clientSetId idempotency key plan deliverable.
 
-**Current focus:** Plan 15-02 (contract-finalization: clientSetId idempotency key). Phase 15 audit shipped; offline-first sync contract verdict is must-harden (4a/4b PARTIAL, 4c FAIL). Three hardening plans recommended: 15-02 (clientSetId), 15-03 (heart-rate exposure), 15-04 (auto-numbering verdict + typed 409 codes).
+**Current focus:** Plan 15-03 (heart-rate field exposure on session DTOs) or 15-04 (auto-numbering verdict + typed 409 codes) — both can proceed independently. Plan 15-02 shipped: audit Section 4a PARTIAL verdict closed; Sections 4b PARTIAL and 4c FAIL remain open for plan 15-04.
 
 ## Accumulated Context
 
@@ -71,11 +72,12 @@ Full decision log lives in `.planning/milestones/v0.3-ROADMAP.md` "Key Decisions
 - 2026-05-04: Phase 14 plan 01 shipped. WorkoutDaysService cascade-id fix lands the explicit child-repo saveAndFlush from audit Section 5; 6 disabled WorkoutDaysIntegrationTest cases re-enabled and a regression assertion added to the green test. CI verification pending.
 - 2026-05-04: Phase 14 (workouts-hardening) shipped (2 plans: 14-01 cascade-id fix, 14-02 export round-trip test fix). Closed i-1 and i-2.
 - 2026-05-04: Phase 15 plan 01 (sessions-core audit) shipped. Audit deliverable at `.planning/phases/15-sessions-core/15-01-AUDIT.md`. Phase 15 plan-count revised from TBD to 4 plans (1 audit + 3 hardening). Plan 15-02+ scope finalized: 4 coverage tests, 3 contract-finalization items, 2 feature-gap, 5 defer. No new ISSUES.md entries (contract gaps belong to 15-02+ scope, not deferred-issues queue).
+- 2026-05-04: Phase 15 plan 02 (clientSetId idempotency key) shipped. V26 migration + entity field + migration test, service fast-path, 200/201 controller mapping, 4 integration tests. Audit Section 4a PARTIAL verdict closed; Sections 4b PARTIAL (typed 409 codes) and 4c FAIL (auto-numbering) remain open for plan 15-04.
 
 ## Session Continuity
 
-Last session: 2026-05-04 - Phase 15 plan 01 complete
-Stopped at: Phase 15 in progress (1 of 4 plans). Next action: `/gsd:plan-phase 15` (plan 15-02: clientSetId idempotency key) or `/gsd:execute-plan` once plan 15-02 is drafted.
+Last session: 2026-05-04 - Phase 15 plan 02 complete
+Stopped at: Phase 15 in progress (2 of 4 plans). Next action: `/gsd:execute-plan` with plan 15-03 (heart-rate exposure) or 15-04 (auto-numbering + typed 409 codes).
 Resume file: None.
 
 ## Reference Documents
