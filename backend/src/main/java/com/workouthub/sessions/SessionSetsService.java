@@ -1,6 +1,7 @@
 package com.workouthub.sessions;
 
 import com.workouthub.achievements.AchievementEvaluator;
+import com.workouthub.analytics.PrDetector;
 import com.workouthub.common.web.ConflictException;
 import com.workouthub.common.web.NotFoundException;
 import com.workouthub.exercises.domain.Exercise;

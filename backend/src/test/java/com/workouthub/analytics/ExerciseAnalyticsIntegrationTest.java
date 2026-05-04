@@ -1,4 +1,4 @@
-package com.workouthub.sessions;
+package com.workouthub.analytics;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

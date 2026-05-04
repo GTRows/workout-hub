@@ -1,8 +1,8 @@
-package com.workouthub.sessions;
+package com.workouthub.analytics;
 
+import com.workouthub.analytics.dto.LastPerformanceDto;
+import com.workouthub.analytics.dto.ProgressPointDto;
 import com.workouthub.common.security.AppUserPrincipal;
-import com.workouthub.sessions.dto.LastPerformanceDto;
-import com.workouthub.sessions.dto.ProgressPointDto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;

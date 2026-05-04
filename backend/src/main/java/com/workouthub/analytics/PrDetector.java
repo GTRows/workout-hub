@@ -1,4 +1,4 @@
-package com.workouthub.sessions;
+package com.workouthub.analytics;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

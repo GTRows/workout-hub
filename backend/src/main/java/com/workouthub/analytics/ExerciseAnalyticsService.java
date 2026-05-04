@@ -1,12 +1,13 @@
-package com.workouthub.sessions;
+package com.workouthub.analytics;
 
+import com.workouthub.analytics.dto.LastPerformanceDto;
+import com.workouthub.analytics.dto.ProgressPointDto;
 import com.workouthub.common.web.NotFoundException;
 import com.workouthub.exercises.domain.ExerciseRepository;
+import com.workouthub.sessions.SessionsMapper;
 import com.workouthub.sessions.domain.SessionSet;
 import com.workouthub.sessions.domain.SessionSetRepository;
 import com.workouthub.sessions.domain.WorkoutSession;
-import com.workouthub.sessions.dto.LastPerformanceDto;
-import com.workouthub.sessions.dto.ProgressPointDto;
 import com.workouthub.sessions.dto.SessionSetDto;
 import java.math.BigDecimal;
 import java.util.ArrayList;

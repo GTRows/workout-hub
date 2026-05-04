@@ -1,5 +1,6 @@
-package com.workouthub.sessions.dto;
+package com.workouthub.analytics.dto;
 
+import com.workouthub.sessions.dto.SessionSetDto;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

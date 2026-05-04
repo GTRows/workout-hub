@@ -1,4 +1,4 @@
-package com.workouthub.sessions;
+package com.workouthub.analytics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

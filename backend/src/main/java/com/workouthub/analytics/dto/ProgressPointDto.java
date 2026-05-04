@@ -1,4 +1,4 @@
-package com.workouthub.sessions.dto;
+package com.workouthub.analytics.dto;
 
 import java.math.BigDecimal;
 import java.time.Instant;

@@ -1,4 +1,4 @@
-package com.workouthub.sessions;
+package com.workouthub.analytics;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
