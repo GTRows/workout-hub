@@ -42,6 +42,7 @@ public class MetricsService {
         entity.setChestCm(req.chestCm());
         entity.setArmCm(req.armCm());
         entity.setThighCm(req.thighCm());
+        entity.setPhotoUrl(req.photoUrl());
         entity.setNotes(req.notes());
         return toDto(repo.save(entity));
     }

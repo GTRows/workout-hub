@@ -15,4 +15,5 @@ public record UpsertBodyMetricRequest(
         @DecimalMin("20.0") @DecimalMax("300.0") BigDecimal chestCm,
         @DecimalMin("10.0") @DecimalMax("100.0") BigDecimal armCm,
         @DecimalMin("20.0") @DecimalMax("200.0") BigDecimal thighCm,
-        @Size(max = 2000) String notes) {}
+        @Size(max = 2000) String notes,
+        @Size(max = 500) String photoUrl) {}
