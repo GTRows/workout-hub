@@ -16,6 +16,9 @@ public interface BodyMetricRepository extends JpaRepository<BodyMetric, UUID> {
 
     Optional<BodyMetric> findByIdAndUserId(UUID id, UUID userId);
 
+    List<BodyMetric> findByUserIdAndRecordedDateBetweenOrderByRecordedDateDesc(
+            UUID userId, LocalDate from, LocalDate to);
+
     @Query("""
             SELECT u.id FROM User u
             WHERE NOT EXISTS (

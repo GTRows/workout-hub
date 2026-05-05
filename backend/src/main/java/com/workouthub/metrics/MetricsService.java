@@ -5,10 +5,13 @@ import com.workouthub.metrics.domain.BodyMetric;
 import com.workouthub.metrics.domain.BodyMetricRepository;
 import com.workouthub.metrics.dto.BodyMetricDto;
 import com.workouthub.metrics.dto.UpsertBodyMetricRequest;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -21,10 +24,21 @@ public class MetricsService {
     }
 
     @Transactional(readOnly = true)
-    public List<BodyMetricDto> list(UUID userId) {
-        return repo.findByUserIdOrderByRecordedDateDesc(userId).stream()
-                .map(MetricsService::toDto)
-                .toList();
+    public List<BodyMetricDto> list(UUID userId, LocalDate from, LocalDate to) {
+        boolean fromSet = from != null;
+        boolean toSet = to != null;
+        if (fromSet ^ toSet) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "from and to must be provided together");
+        }
+        if (fromSet && from.isAfter(to)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "from must not be after to");
+        }
+        List<BodyMetric> rows = fromSet
+                ? repo.findByUserIdAndRecordedDateBetweenOrderByRecordedDateDesc(userId, from, to)
+                : repo.findByUserIdOrderByRecordedDateDesc(userId);
+        return rows.stream().map(MetricsService::toDto).toList();
     }
 
     public BodyMetricDto upsert(UUID userId, UpsertBodyMetricRequest req) {
