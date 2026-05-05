@@ -148,4 +148,77 @@ class MetricsIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].photoUrl").value("https://example.test/photos/abc.jpg"));
     }
+
+    @Test
+    void rangeFilterReturnsOnlyMatchingRows() throws Exception {
+        SeededUser user = helpers.seed(
+                "range-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        seedMetric(auth, "2026-03-01", 78.0);
+        seedMetric(auth, "2026-03-15", 78.5);
+        seedMetric(auth, "2026-03-31", 79.0);
+
+        mvc.perform(get("/api/metrics?from=2026-03-10&to=2026-03-20")
+                        .header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].recordedDate").value("2026-03-15"));
+    }
+
+    @Test
+    void rangeFilterIsInclusiveOnBothBounds() throws Exception {
+        SeededUser user = helpers.seed(
+                "incl-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        seedMetric(auth, "2026-04-01", 80.0);
+        seedMetric(auth, "2026-04-30", 79.5);
+
+        mvc.perform(get("/api/metrics?from=2026-04-01&to=2026-04-30")
+                        .header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void rangeWithNoMatchingRowsReturnsEmptyArray() throws Exception {
+        SeededUser user = helpers.seed(
+                "empty-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        seedMetric(auth, "2026-05-01", 78.0);
+
+        mvc.perform(get("/api/metrics?from=2026-06-01&to=2026-06-30")
+                        .header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void rangeMixedOrInvertedReturns400() throws Exception {
+        SeededUser user = helpers.seed(
+                "mix-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        mvc.perform(get("/api/metrics?from=2026-03-01")
+                        .header("Authorization", auth))
+                .andExpect(status().isBadRequest());
+
+        mvc.perform(get("/api/metrics?to=2026-03-31")
+                        .header("Authorization", auth))
+                .andExpect(status().isBadRequest());
+
+        mvc.perform(get("/api/metrics?from=2026-03-31&to=2026-03-01")
+                        .header("Authorization", auth))
+                .andExpect(status().isBadRequest());
+    }
+
+    private void seedMetric(String auth, String recordedDate, double weightKg) throws Exception {
+        mvc.perform(post("/api/metrics")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"recordedDate\":\"" + recordedDate + "\",\"weightKg\":" + weightKg + "}"))
+                .andExpect(status().isCreated());
+    }
 }
