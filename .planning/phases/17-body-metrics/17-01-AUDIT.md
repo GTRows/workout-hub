@@ -234,3 +234,92 @@ Current contract: NO `PUT /api/metrics/{id}` and NO `GET /api/metrics/{id}`. To 
 `FullImportService.replaceMetrics` at `FullImportService.java:155-178` is wholesale-replace; `ImportValidator.validate` (called at `FullImportService.java:75-80`) handles payload shape but not field bounds.
 
 Section 5 Part A catalogues each writer; Section 6 settles the validator-extraction direction.
+
+## Section 5 - Cross-Package Coupling Map and Time-Series Endpoint Shape
+
+### Part A - Cross-package writers/readers of `BodyMetric` (bypass `MetricsService`)
+
+One row per call site outside `metrics/` that touches `BodyMetricRepository` or `BodyMetric` directly.
+
+| Caller (file:line) | Operation | Validation surface | Idempotency strategy | Adopt `MetricsService.upsert`? |
+| --- | --- | --- | --- | --- |
+| `webhooks/ScaleWebhookController.ingest` (`ScaleWebhookController.java:35-60`) | write | payload-level `payload.weightKg() == null` only (`:43-45`); NO `@Valid` on `ScalePayload`; NO weight-range check | first-write-wins by `(userId, recordedDate)` via `findByUserIdAndRecordedDate.isPresent()` short-circuit at `:49-51` (returns 200 without overwrite) | Maybe - gains weight-range validation, but loses passive-sensor "first-write-wins" semantic (upsert overwrites the existing row's weight). Recommend keep direct; share the bounds check via a thin static helper. |
+| `health/HealthImportService.apply` (`HealthImportService.java:73-117`, body-mass loop at `:80-91`) | write (per record) | NONE - parser-level only | skip-on-conflict by `(userId, recordedDate)` via `findByUserIdAndRecordedDate.isPresent()` (`:81`); skipped rows count toward `bmSkipped` | No - skip semantics is intentional (avoid clobbering manual edits with imported data). Same bounds-check helper recommendation. |
+| `exports/FullExportService.buildMetrics` (`FullExportService.java:101-105,169-181`) | read | N/A | N/A | No, intentional - read-side projection via `findByUserIdOrderByRecordedDateDesc` (`:102`); `MetricRow` builder at `:169-181` carries `photoUrl` (`:179`). |
+| `exports/FullImportService.replaceMetrics` (`FullImportService.java:155-178`) | delete-all + insert-all | NONE for field bounds; `ImportValidator` (`FullImportService.java:75-80`) is payload-shape only | wholesale replace | No - import is "delete existing then insert from dump"; per-row upsert would be O(n) round-trips and break the `ImportResultDto.metricsInserted` count semantic. |
+| `notifications/ReminderJob.runWeightNudgeAt` (`ReminderJob.java:77-89`) | read | N/A | N/A | No, intentional - pure read for cron logic via `findUserIdsWithoutMetricsSince(since)` (`:79`, query at `BodyMetricRepository.java:19-26`). |
+
+**Verdict.** Five direct call sites; only `ScaleWebhookController` and `HealthImportService` are write paths that bypass `UpsertBodyMetricRequest`'s weight + measurement bounds. Each writer has different conflict semantics (idempotent-by-date for the scale, skip-on-conflict for health import, wholesale-replace for full import), so adopting `MetricsService.upsert` would conflate semantics. The right shape is a thin `BodyMetricValidator` static helper (no Spring bean) covering weight + measurement bounds, called from `MetricsService.upsert`, `ScaleWebhookController.ingest`, and `HealthImportService.apply`. Recommend **defer the validator extraction unless Section 6 plan-count opens a slot**; otherwise mark it as a Phase 31 (charts-stats) deferred concern. Each writer's conflict semantic stays intact; only the shared field-bounds check is consolidated.
+
+### Part B - Time-series endpoint shape
+
+ROADMAP `:78` requires "time-series read endpoints for the metrics UI." ProjectBrief `:361` requires "Kilo grafigi (haftalik/aylik/tum zamanlar)." Three options:
+
+#### Option 1: extend `GET /api/metrics` with `from` and `to` query parameters
+
+- Both optional `LocalDate`. When omitted, returns full history (back-compat with the existing test `postStoresAndGetReturnsTheEntry`).
+- When set, returns only rows with `recordedDate BETWEEN from AND to` via a new repo method `findByUserIdAndRecordedDateBetweenOrderByRecordedDateDesc(UUID, LocalDate, LocalDate)`.
+- Pros: zero new endpoints, single read path for both list and chart UIs, idiomatic, reuses the existing `idx_body_metrics_user_date` (`V6:27-28`) which is `(user_id, recorded_date DESC)` and index-friendly for both `from` and `to` filters.
+- Cons: response payload still carries all 12 fields per row even when the chart only needs `(date, weightKg)`.
+
+#### Option 2: add `GET /api/metrics/series?from=&to=&field=weightKg`
+
+- Returns `List<{recordedDate: LocalDate, value: BigDecimal}>` projection via a new DTO.
+- Pros: lighter wire payload for chart UIs; matches ROADMAP wording literally.
+- Cons: new DTO, new controller method, another endpoint to document, field-projection overkill for v0.4 single-user load (estimated <1000 rows per user).
+
+#### Option 3: hybrid - both Option 1 query params and the lightweight chart endpoint
+
+- Pros: covers list + chart UIs perfectly.
+- Cons: 2x change cost, not justified by v0.4 budget.
+
+**Verdict: Option 1.** The `idx_body_metrics_user_date` index makes the range filter free; payload-size concern is hypothetical at v0.4 single-user scale; one endpoint matches the broader codebase convention (`GET /api/sessions/history` is paginated but does not split into a chart endpoint). Defer Option 2 to Phase 28 (frontend metrics-ui) or Phase 31 (charts-stats) if a payload-size finding surfaces during chart wiring.
+
+## Section 6 - Recommended Phase 17 plan-02+ Scope
+
+### photo-url-exposure bucket
+
+- **Add `photoUrl` to `UpsertBodyMetricRequest`.**
+  - Targets: append optional `String photoUrl` as the 9th record component on `UpsertBodyMetricRequest.java` with `@Size(max = 500)` mirroring V6's `VARCHAR(500)`. Thread `req.photoUrl()` into `MetricsService.upsert` (one `entity.setPhotoUrl(req.photoUrl())` line between current setters at `:39-45`). Extend `MetricsIntegrationTest` with a `postWithPhotoUrlIsRoundTripped` test asserting POST -> GET carries the value.
+  - File touches: `dto/UpsertBodyMetricRequest.java` (1 component append), `MetricsService.java` (1 setter line), `MetricsIntegrationTest.java` (1 new test).
+  - Rationale: Section 3 Part A row `photo_url` shows the only column-level GAP across the five sources (ProjectBrief / V6 / entity / response DTO / upsert request). Closes ROADMAP Phase 17 deliverable "optional progress photo URL" on the API surface. No migration needed (V6 already defines the column).
+
+### time-series-range bucket
+
+- **Add `from` and `to` `LocalDate` query parameters to `GET /api/metrics`.**
+  - Targets: append `@RequestParam(required = false) LocalDate from` and `to` to `MetricsController.list` (`:30-33`); add `findByUserIdAndRecordedDateBetweenOrderByRecordedDateDesc(UUID, LocalDate, LocalDate)` to `BodyMetricRepository.java`; branch in `MetricsService.list` on parameter presence (full history when both null; range when both set; pick a 400-on-mixed-or-inverted policy or accept partial range). Extend `MetricsIntegrationTest` with 2 tests: `rangeFilterReturnsOnlyMatchingRows`, `rangeWithEmptyMatchReturnsEmptyArray`.
+  - File touches: `MetricsController.java` (signature change), `MetricsService.java` (branch in `list`), `domain/BodyMetricRepository.java` (1 query method), `MetricsIntegrationTest.java` (2 new tests).
+  - Rationale: Section 5 Part B Option 1 verdict. Closes ROADMAP "time-series read endpoints" and the partial verdict on ProjectBrief "Kilo grafigi (haftalik/aylik/tum zamanlar)". Reuses `idx_body_metrics_user_date` (`V6:27-28`); zero schema impact.
+
+### status-code-split bucket
+
+- **Return 200 on update vs 201 on create from `POST /api/metrics`.**
+  - Targets: `MetricsService.upsert` returns a wrapper (`(BodyMetricDto dto, boolean wasCreated)` as a record or `Map.Entry`-shaped pair). Controller (`MetricsController.java:35-41`) maps `wasCreated ? 201 : 200`. Existing test `repeatedPostForSameDateUpdatesInsteadOfInserting` at `MetricsIntegrationTest.java:74` flips the second POST assertion from `isCreated()` to `isOk()`. Add 1 test `firstPostReturns201SecondPostReturns200` asserting the create-then-update status pair on the same date.
+  - File touches: `MetricsService.java` (signature change), `MetricsController.java` (map), `MetricsIntegrationTest.java` (1 flip + 1 new test).
+  - Rationale: Section 4 Part A Direction A verdict. Phase 15-02's `clientSetId` 200/201 precedent applies; the V6 UNIQUE-by-`(user, date)` constraint validates the upsert-by-date contract.
+
+### validation-extraction bucket (deferred unless slot opens)
+
+- **Extract `BodyMetricValidator` static helper covering weight + measurement bounds.**
+  - Targets: new file `metrics/BodyMetricValidator.java` (~30 lines, no Spring bean, static methods matching `UpsertBodyMetricRequest`'s ranges); call sites at `MetricsService.upsert` (no behavior change because `@Valid` already runs), `ScaleWebhookController.ingest` (`:53-57`, replaces the `payload.weightKg() == null` early-return with bounds check), `HealthImportService.apply` (`:80-91`, replaces the unconditional save with a bounds-check + skip-or-error path).
+  - File touches: 1 new file (~30 lines), `webhooks/ScaleWebhookController.java` (~3 lines), `health/HealthImportService.java` (~3 lines), `MetricsService.java` (optional cleanup - keep `@Valid` for the request path).
+  - Rationale: Section 5 Part A verdict. Cross-package coverage; defer unless plan-count budget allows. Each writer's conflict semantic stays intact; only the shared field-bounds rule consolidates. If deferred, mark as a Phase 17-04 absorb-if-slot or Phase 31 deferred concern.
+
+### defer bucket (explicit non-goals for v0.4)
+
+- **PUT-by-id endpoint.** Section 4 Part B verdict; not requested by ProjectBrief; V6 UNIQUE-by-date encodes the date-keyed contract. Defer indefinitely.
+- **Photo upload mechanics.** Multipart vs MinIO vs URL string. Phase 5 frontend concern (ProjectBrief `:363` "opsiyonel"); this audit only opens the URL field on the upsert request. Storage strategy belongs to Phase 28 (metrics-ui) or a dedicated upload-pipeline plan.
+- **Chart-projection endpoint (`/api/metrics/series`).** Section 5 Part B Option 2; revisit at Phase 28 or Phase 31 if a chart-payload-size finding surfaces.
+- **`MetricsMapper` extraction.** `MetricsService.toDto` is a private static at `:55-69`; extract only if test count grows past 12 or a second feature consumes the mapping. Phase 31 candidate.
+- **`GET /api/metrics/{id}`.** No client driver in ProjectBrief; the date-keyed list + range read covers the chart UI.
+
+### Plan-count recommendation
+
+**Four plans for Phase 17** (this audit + three hardening plans). The validation-extraction bucket is deferred; it does not earn its own plan slot at v0.4 budget.
+
+- **Plan 17-01 (this audit) - shipped via this deliverable.**
+- **Plan 17-02: photo-url-exposure.** Smallest change; closes the lone column-level GAP. ~3 file touches (1 DTO append, 1 service line, 1 test). Independent of 17-03 and 17-04. Land first to remove the spec-vs-code mismatch.
+- **Plan 17-03: time-series-range.** Adds the chart-friendly read; new repo method + new query params + 2 new tests. ~4 file touches. Depends on 17-02 only for sequencing (no shared lines).
+- **Plan 17-04: status-code-split.** Semantic fix for upsert; tightens the contract; ~3 file touches + 1 test flip + 1 new test. May absorb the validation-extraction bucket if scope budget allows; otherwise the validator stays deferred.
+
+Bucket totals: 1 photo-url entry, 1 time-series-range entry, 1 status-code-split entry, 1 deferred validation-extraction entry, 5 defer markers. No migrations (V6 already carries every column; V27 is the last applied per Phase 16-04).
