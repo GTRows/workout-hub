@@ -28,4 +28,14 @@ public interface SessionSetRepository extends JpaRepository<SessionSet, UUID> {
     List<SessionSet> findHistoricalByUserAndExercise(
             @Param("userId") UUID userId,
             @Param("exerciseId") UUID exerciseId);
+
+    @Query("""
+            SELECT s FROM SessionSet s
+            WHERE s.session.userId = :userId
+              AND s.exercise.id   = :exerciseId
+            ORDER BY s.session.startedAt DESC, s.setNumber ASC
+            """)
+    List<SessionSet> findAllByUserAndExercise(
+            @Param("userId") UUID userId,
+            @Param("exerciseId") UUID exerciseId);
 }

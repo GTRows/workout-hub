@@ -13,7 +13,9 @@ import com.workouthub.sessions.dto.AddSetRequest;
 import com.workouthub.sessions.dto.SessionSetDto;
 import com.workouthub.sessions.dto.UpdateSetRequest;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,7 +129,35 @@ public class SessionSetsService {
         if (req.rpe() != null) set.setRpe(req.rpe());
         if (req.completed() != null) set.setCompleted(req.completed());
         if (req.notes() != null) set.setNotes(req.notes());
+        recomputePrForExerciseHistory(userId, set.getExercise().getId());
         return SessionsMapper.toSetDto(set);
+    }
+
+    /**
+     * Demotes-and-re-elects the durable PR row for a (user, exercise) pair.
+     *
+     * <p>Scans every set the user has performed for the exercise (including
+     * sets in active sessions, because PRs span finished and in-progress data),
+     * picks the completed set with the highest Epley one-rep-max, and writes
+     * {@code is_pr=true} on that single row while clearing every other row.
+     * O(n) where n is bounded by single-user history; PUT /sets/:setId is rare.
+     *
+     * <p>The {@code Comparator.nullsFirst} guard ensures unweighted sets (null
+     * Epley) never outrank weighted sets via {@code max}. If every set has a
+     * null Epley, no row is promoted and all rows are cleared.
+     */
+    private void recomputePrForExerciseHistory(UUID userId, UUID exerciseId) {
+        List<SessionSet> history = sets.findAllByUserAndExercise(userId, exerciseId);
+        Optional<SessionSet> winner = history.stream()
+                .filter(SessionSet::isCompleted)
+                .filter(s -> PrDetector.epleyOneRm(s.getWeightKg(), s.getRepsDone()) != null)
+                .max(Comparator.comparing(
+                        s -> PrDetector.epleyOneRm(s.getWeightKg(), s.getRepsDone()),
+                        Comparator.nullsFirst(Comparator.naturalOrder())));
+        UUID winnerId = winner.map(SessionSet::getId).orElse(null);
+        for (SessionSet s : history) {
+            s.setPr(winnerId != null && s.getId().equals(winnerId));
+        }
     }
 
     public void delete(UUID userId, UUID sessionId, UUID setId) {

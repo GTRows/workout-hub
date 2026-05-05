@@ -2,6 +2,7 @@ package com.workouthub.analytics;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -104,6 +105,81 @@ class PrDetectionIntegrationTest extends AbstractIntegrationTest {
         mvc.perform(get("/api/sessions/" + s2).header("Authorization", auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sets[0].newPr").value(true));
+    }
+
+    @Test
+    void prSurvivesUpdateThatStillBeatsPrior() throws Exception {
+        SeededUser u = helpers.seed(
+                "pr4-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + u.accessToken();
+        UUID exerciseId = seedExercise();
+
+        UUID s1 = startSession(auth);
+        addSet(auth, s1, exerciseId, 1, 5, 100);
+        finish(auth, s1);
+
+        UUID s2 = startSession(auth);
+        UUID s2SetId = addSet(auth, s2, exerciseId, 1, 5, 110);
+
+        // Patch the active s2 set to 6 reps @ 110kg.
+        // Epley(110,6)=132 still beats Epley(100,5)=116.667 -> PR retained.
+        mvc.perform(put("/api/sessions/" + s2 + "/sets/" + s2SetId)
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"repsDone\":6}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.newPr").value(true));
+
+        mvc.perform(get("/api/sessions/" + s2).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets[0].newPr").value(true));
+    }
+
+    @Test
+    void prClearedWhenUpdatedBelowPriorAndPromotesNextBest() throws Exception {
+        SeededUser u = helpers.seed(
+                "pr5-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + u.accessToken();
+        UUID exerciseId = seedExercise();
+
+        UUID s1 = startSession(auth);
+        addSet(auth, s1, exerciseId, 1, 5, 100);
+        finish(auth, s1);
+
+        UUID s2 = startSession(auth);
+        UUID s2SetId = addSet(auth, s2, exerciseId, 1, 5, 110);
+
+        // Patch the active s2 set to 1 rep @ 50kg.
+        // Epley(50,1)=50 below Epley(100,5)=116.667 -> s2 demoted, s1 re-elected.
+        mvc.perform(put("/api/sessions/" + s2 + "/sets/" + s2SetId)
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"repsDone\":1,\"weightKg\":50}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.newPr").doesNotExist());
+
+        mvc.perform(get("/api/sessions/" + s1).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets[0].newPr").value(true));
+
+        mvc.perform(get("/api/sessions/" + s2).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets[0].newPr").doesNotExist());
+    }
+
+    private UUID addSet(String auth, UUID sessionId, UUID exerciseId,
+                        int setNumber, int reps, double weight) throws Exception {
+        MvcResult r = mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"exerciseId\":\"" + exerciseId + "\","
+                                + "\"setNumber\":" + setNumber
+                                + ",\"repsDone\":" + reps
+                                + ",\"weightKg\":" + weight + "}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return UUID.fromString(objectMapper.readTree(
+                r.getResponse().getContentAsString()).get("id").asText());
     }
 
     private UUID seedExercise() {
