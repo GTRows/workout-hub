@@ -84,12 +84,20 @@ public class ExerciseAnalyticsService {
                 .mapToInt(SessionSet::getRepsDone)
                 .max()
                 .orElse(0);
+        // Per-top-set Epley: max(epleyOneRm(weight, reps)) across each set, not epleyOneRm(maxWeight, topReps),
+        // because maxWeight and topReps may belong to different sets and would yield a non-physical 1RM.
+        BigDecimal estimatedOneRm = setsInSession.stream()
+                .map(s -> PrDetector.epleyOneRm(s.getWeightKg(), s.getRepsDone()))
+                .filter(Objects::nonNull)
+                .max(Comparator.naturalOrder())
+                .orElse(null);
         return new ProgressPointDto(
                 session.getId(),
                 session.getStartedAt(),
                 setsInSession.size(),
                 totalVolume,
                 maxWeight,
-                topReps);
+                topReps,
+                estimatedOneRm);
     }
 }

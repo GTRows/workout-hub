@@ -10,4 +10,5 @@ public record ProgressPointDto(
         int setCount,
         BigDecimal totalVolumeKg,
         BigDecimal maxWeightKg,
-        short topRepsDone) {}
+        short topRepsDone,
+        BigDecimal estimatedOneRmKg) {}
