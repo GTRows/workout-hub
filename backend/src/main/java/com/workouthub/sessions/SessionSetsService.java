@@ -91,11 +91,12 @@ public class SessionSetsService {
         set.setCompleted(req.completed() == null ? Boolean.TRUE : req.completed());
         set.setNotes(req.notes());
         set.setClientSetId(req.clientSetId());
+        set.setPr(isPr);
         session.addSet(set);
         try {
             SessionSet saved = sets.saveAndFlush(set);
             achievements.onSetSaved(userId, isPr);
-            return new AddSetResult(SessionsMapper.toSetDto(saved, isPr ? Boolean.TRUE : null), false);
+            return new AddSetResult(SessionsMapper.toSetDto(saved), false);
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new ConflictException(
                     CODE_SET_NUMBER_DUPLICATE,

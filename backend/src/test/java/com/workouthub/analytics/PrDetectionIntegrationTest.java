@@ -1,5 +1,6 @@
 package com.workouthub.analytics;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -99,6 +100,10 @@ class PrDetectionIntegrationTest extends AbstractIntegrationTest {
                                 + "\"setNumber\":1,\"repsDone\":5,\"weightKg\":105}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.newPr").value(true));
+
+        mvc.perform(get("/api/sessions/" + s2).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets[0].newPr").value(true));
     }
 
     private UUID seedExercise() {

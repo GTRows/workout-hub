@@ -45,11 +45,11 @@ public final class SessionsMapper {
     }
 
     public static SessionSetDto toSetDto(SessionSet set) {
-        return toSetDto(set, null);
-    }
-
-    public static SessionSetDto toSetDto(SessionSet set, Boolean newPr) {
         var exercise = set.getExercise();
+        // Wire field stays Boolean (not boolean) so JacksonConfig NON_NULL strips
+        // it for non-PR sets, preserving the existing $.newPr.doesNotExist()
+        // assertion contract used by callers.
+        Boolean newPr = set.isPr() ? Boolean.TRUE : null;
         return new SessionSetDto(
                 set.getId(),
                 exercise == null ? null : exercise.getId(),

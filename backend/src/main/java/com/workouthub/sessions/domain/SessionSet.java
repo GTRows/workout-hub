@@ -52,6 +52,9 @@ public class SessionSet {
     @Column(name = "client_set_id")
     private UUID clientSetId;
 
+    @Column(name = "is_pr", nullable = false)
+    private boolean isPr = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -99,6 +102,9 @@ public class SessionSet {
 
     public UUID getClientSetId() { return clientSetId; }
     public void setClientSetId(UUID clientSetId) { this.clientSetId = clientSetId; }
+
+    public boolean isPr() { return isPr; }
+    public void setPr(boolean isPr) { this.isPr = isPr; }
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
