@@ -127,4 +127,25 @@ class MetricsIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
+
+    @Test
+    void postWithPhotoUrlIsRoundTripped() throws Exception {
+        SeededUser user = helpers.seed(
+                "photo-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        mvc.perform(post("/api/metrics")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"recordedDate":"2026-04-25","weightKg":78.0,"photoUrl":"https://example.test/photos/abc.jpg"}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.photoUrl").value("https://example.test/photos/abc.jpg"));
+
+        mvc.perform(get("/api/metrics").header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].photoUrl").value("https://example.test/photos/abc.jpg"));
+    }
 }
