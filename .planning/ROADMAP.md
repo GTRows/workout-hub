@@ -77,10 +77,13 @@ Plans:
 **Goal:** Complete the `metrics/` package: weight, body measurements, optional progress photo URL, and time-series read endpoints for the metrics UI.
 **Depends on:** Phase 16
 **Research:** Unlikely (internal patterns)
-**Plans:** TBD
+**Plans:** 4 (in progress; plan 01 audit shipped 2026-05-05)
 
 Plans:
-- [ ] 17-01: TBD
+- [x] 17-01: body-metrics audit
+- [ ] 17-02: photo-url-exposure
+- [ ] 17-03: time-series-range
+- [ ] 17-04: status-code-split
 
 #### Phase 18: export-refinement
 
@@ -167,7 +170,7 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | 14. workouts-hardening      | v0.4      | 2/2   | Complete    | 2026-05-04 |
 | 15. sessions-core           | v0.4      | 4/4   | Complete    | 2026-05-04 |
 | 16. sessions-analytics      | v0.4      | 4/4   | Complete    | 2026-05-05 |
-| 17. body-metrics            | v0.4      | 0/?   | Not started | -          |
+| 17. body-metrics            | v0.4      | 1/4   | In progress | -          |
 | 18. export-refinement       | v0.4      | 0/?   | Not started | -          |
 | 19. api-contract-docs       | v0.4      | 0/?   | Not started | -          |
 | 20. release-v0-4            | v0.4      | 0/?   | Not started | -          |
