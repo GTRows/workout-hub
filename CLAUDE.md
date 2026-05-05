@@ -37,25 +37,31 @@ Before doing any coding work, check for `.claude/.setup-complete`.
 - `/gtr:set-language [lang]` — set or change the conversation language (writes `## Communication` in `CLAUDE.md`).
 - `/gtr:onboard` — interactive runbook to merge the template into an existing project.
 - `/gtr:update` — pull template updates from upstream and merge them non-destructively.
-- `/task <subcommand>` — manage persistent TODO.md tasks. `/task` with no args prints usage.
 - `/gtr:doctor` — read-only health check (also reports template version drift and manifest drift).
+- `/gtr:orchestrate [scope]` — run phases end-to-end via planner/executor/verifier subagents. Default scope: roadmap-wide with milestone-end checkpoints. See `.claude/docs/orchestration.md`.
 - `/gtr:release <version>` — prepare a release (bump, rotate CHANGELOG, commit, tag). Never pushes.
 - Plugin commands: `/commit`, `/commit-push-pr`, `/review-pr`, `/revise-claude-md`, `/create-skill`.
 
-## Planning workflow
+## Planning workflow (GSD)
 
-Two layers — do not conflate them:
+This template delegates planning and execution to **GSD** (Get Shit Done) — a plugin that produces durable, disk-backed phase plans and runs each plan in an isolated subagent. This is the token-efficient default.
 
-1. **TODO.md (persistent)** — durable tasks across sessions. Managed via `/task`. Each entry has an id (`t-N`), a title, and an Acceptance line. Sections: Active / Blocked / Done.
-2. **Built-in TaskCreate (ephemeral)** — this session's subtask breakdown of whatever TODO task is in flight. Use it to plan and track step-by-step work within the conversation. Do not mirror TODO.md into it.
+Two layers:
+
+1. **GSD planning artifacts (persistent)** — `.planning/PROJECT.md` (vision), `.planning/ROADMAP.md` (phases), `.planning/STATE.md` (memory), `.planning/phases/<N>-<name>/<N>-<P>-PLAN.md`. Survives sessions.
+2. **Built-in TaskCreate (ephemeral)** — current-session subtask breakdown of the in-flight plan. Do not mirror plan content into it.
 
 When starting work:
-- Run `/task next` (or pick a task manually) — this moves it to the top of Active.
-- Break it into `TaskCreate` subtasks.
-- Step through subtasks one at a time. Mark each completed as soon as done, not in a batch.
-- When the TODO task's acceptance is met AND tests pass AND a commit exists referencing its id, call `/task done <id>`. The verification gate in `/task` enforces this.
+- New project: `/gsd:new-project` then `/gsd:create-roadmap`.
+- Existing codebase: `/gsd:map-codebase` first, then `/gsd:new-project`.
+- Plan a phase: `/gsd:plan-phase <N>`.
+- Execute a plan: `/gsd:execute-plan <path>`. Runs in a subagent — main context stays light.
+- Resume after a break: `/gsd:resume-work` or `/gsd:progress`.
+- Insert urgent work: `/gsd:insert-phase <after-N> "<description>"`.
 
-Do not leave a task half-implemented to start another. Finish or explicitly block (`/task block <id> <reason>`).
+Always finish the in-flight plan before starting another. Use `/gsd:pause-work` to capture context if you must stop mid-plan.
+
+`/gtr:menu` surfaces these as numbered options if you do not want to remember command names.
 
 ## Project Overview
 
@@ -216,7 +222,7 @@ Keep the `PROTECTED_EXACT` set in `.claude/hooks/pre_guard_release_files.py` in 
   - Example: `feat(api): add rate limiting to /users endpoint`
 - Keep commit messages in English, concise, imperative mood.
 - One logical change per commit. Do not bundle unrelated changes.
-- Reference the TODO.md task id in the commit subject when applicable: `feat(api): add rate limit (t-42)`.
+- Reference the GSD plan or phase in the commit subject when applicable: `feat(api-01-01): add rate limit` or `feat(api): add rate limit (phase 3)`.
 - Commits are authored by the user via local git config. Do NOT add `Co-Authored-By: Claude` trailers to commit messages.
 
 ## Branch Strategy
@@ -226,16 +232,16 @@ This is the primary repo. Use feature branches for non-trivial work (`feature/<n
 ## What NOT to Do
 
 - Do not add `console.log` / `print()` for debugging. Use proper logging.
-- Do not add TODO comments. Track work in TODO.md, DEFERRED.md, or the issue tracker.
+- Do not add TODO comments. Track work in `.planning/` (via GSD) or the issue tracker.
 - Do not write defensive code against impossible states.
 - Do not add polyfills unless the minimum supported version requires them.
 - Do not add external dependencies without discussing first.
 
 ## Deferred Work
 
-Work that is intentionally postponed goes in `DEFERRED.md` at the repo root.
+Work that is intentionally postponed goes in GSD's `.planning/ISSUES.md`.
 Each entry must have: what, why deferred, concrete trigger that unblocks it, owner.
-See `.claude/TIPS.md` for the format. Do not leave TODO comments in code instead.
+Surface deferred items with `/gsd:consider-issues`. Do not leave TODO comments in code.
 
 ## Release
 
