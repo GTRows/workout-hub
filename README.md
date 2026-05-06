@@ -157,7 +157,7 @@ Updates flow through the operator's deployment repository (Renovate PR -> human 
 ## Reference
 
 - [`docs/SELF_HOSTED_CONTRACT.md`](docs/SELF_HOSTED_CONTRACT.md) — binding contract this repo follows (ports, volumes, healthchecks, logging, metrics, auth modes, release flow).
-- [`docs/API.md`](docs/API.md) — REST API reference.
+- [`docs/API.md`](docs/API.md) — navigational entry point to the runtime OpenAPI document and per-section API contracts.
 - [`docs/DATA_SCHEMA.md`](docs/DATA_SCHEMA.md) — database schema and entity relationships.
 - [`docs/EXPORT_FORMAT.md`](docs/EXPORT_FORMAT.md) — JSON export format for the AI coach summary endpoint.
 - [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) — health endpoints, structured logs, Prometheus metrics.
