@@ -16,6 +16,7 @@ import com.workouthub.workouts.dto.UpdateDayExerciseRequest;
 import com.workouthub.workouts.dto.UpdateWorkoutDayRequest;
 import com.workouthub.workouts.dto.WorkoutDayDto;
 import com.workouthub.workouts.dto.WorkoutDayExerciseDto;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -129,6 +130,7 @@ public class WorkoutDaysService {
         for (WorkoutDayExercise remaining : day.getExercises()) {
             remaining.setOrderIndex(idx++);
         }
+        day.getExercises().sort(Comparator.comparingInt(WorkoutDayExercise::getOrderIndex));
     }
 
     public WorkoutDayDto reorderItems(
@@ -163,6 +165,7 @@ public class WorkoutDaysService {
         }
         plans.saveAndFlush(plan);
 
+        day.getExercises().sort(Comparator.comparingInt(WorkoutDayExercise::getOrderIndex));
         return WorkoutPlanMapper.toDayDto(day);
     }
 
