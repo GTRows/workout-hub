@@ -6,43 +6,65 @@ import java.util.List;
 
 /**
  * Compact last-N-days summary shaped for pasting into Claude. Mirrors the
- * schema in ProjectBrief's "AI Koç" section, with body_metrics and
- * consistency.missed_reasons left empty until PHASE 5's metrics surface
- * lands.
+ * schema in ProjectBrief's "AI Koc" section: profile snapshot, period window,
+ * aggregate totals, per-session detail, in-window personal records, weight
+ * trend, and consistency metrics.
  */
 public record ClaudeSummaryDto(
         UserSummary user,
         Period period,
         Totals summary,
-        List<WorkoutEntry> workouts) {
+        List<WorkoutEntry> workouts,
+        List<PrEntry> prs,
+        List<BodyMetricSummary> bodyMetrics,
+        Consistency consistency) {
 
     public record UserSummary(
             String displayName,
-            String email,
+            Integer age,
             Integer heightCm,
             BigDecimal weightKg,
             String healthNotes,
-            String goals) {}
+            List<String> goals) {}
 
     public record Period(LocalDate from, LocalDate to, int days) {}
 
     public record Totals(
             int totalWorkouts,
+            Integer plannedWorkouts,
+            Integer adherencePercent,
             BigDecimal totalVolumeKg,
-            Long avgSessionDurationMin) {}
+            Long avgSessionDurationMin,
+            BigDecimal weightChangeKg) {}
 
     public record WorkoutEntry(
             LocalDate date,
+            String type,
             Long durationMin,
             List<ExerciseEntry> exercises,
             String userNotes,
             Short mood,
-            Short energyLevel) {}
+            Short energy) {}
 
     public record ExerciseEntry(
             String nameTr,
             String nameEn,
             List<SetEntry> sets) {}
 
-    public record SetEntry(short repsDone, BigDecimal weightKg) {}
+    public record SetEntry(BigDecimal weight, short reps) {}
+
+    public record PrEntry(
+            String exercise,
+            BigDecimal weight,
+            short reps,
+            LocalDate date) {}
+
+    public record BodyMetricSummary(
+            LocalDate date,
+            BigDecimal weightKg) {}
+
+    public record Consistency(
+            int currentStreakDays,
+            List<LocalDate> missedDays,
+            List<String> missedReasons) {}
 }
