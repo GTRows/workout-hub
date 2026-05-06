@@ -383,3 +383,101 @@ Fix: add `ImportValidator.validateSessionDayIds(plans, sessions, errors)` that c
 #### Summary
 
 Five round-trip behaviors cataloged: 3 acceptable (exportedAt drift, BodyMetric/Supplement id non-preservation, timing strict-reject documented), 2 production gaps (is_pr drop -> i-10, session.workoutDayId validator gap). Both gaps fold into Plan 18-04.
+
+## Section 5 - Cross-Package Coupling Map and Source-of-Truth Verdicts
+
+### Part A - PRs source-of-truth
+
+Three options walked in Section 3 Part E.
+
+- **Option 1: per-set Epley scan via `analytics/PrDetector.epleyOneRm` in window.** Pros: pure derivation; matches the brief's in-window-only filter exactly (the brief example shows a PR set INSIDE the period). Cons: O(N) per export call. At ~300 sets per 30-day power-user window, single export latency stays under 50ms (Java in-memory comparator).
+- **Option 2: query `SessionSet.isPr=true` rows in window.** Pros: persisted from Phase 16-04. Cons: `is_pr` is global (across all history), not per-window. "PRs in this window" requires extra logic to filter "PR row whose `created_at` falls in the window AND was beaten by a row outside the window" - non-trivial. Reject.
+- **Option 3: reuse `AnalyticsService.personalRecords(userId)` (`AnalyticsService.java:165-200`).** Returns all-time top-1-per-exercise as `List<PrDto>` (which carries `exerciseId`, `nameTr`, `nameEn`, `estimatedOneRmKg`, `weightKg`, `repsDone`, `recordedDate`). Same window-filter problem as Option 2. Reject.
+
+**Verdict: Option 1.** Add `ExportService.computePrsInWindow(List<WorkoutSession> recent)` private static helper that walks the same `Map<UUID, ExerciseGroup>` already built in `toEntry`-style logic and tracks the highest-Epley set per exercise WITHIN the window; emit `(exercise nameEn, weight_kg, reps_done, date)` for each. Cross-package: import `analytics/PrDetector.epleyOneRm` (cheap; PrDetector is in `com.workouthub.analytics` post Phase 16-02 extraction).
+
+### Part B - Body metrics source-of-truth
+
+Single option: `MetricsService.list(userId, period.from, period.to)` from Phase 17-03 returns `List<BodyMetricDto>`. Project to `(date: recordedDate, weight_kg: weightKg)`. Do NOT expose `bodyFatPercent`, measurement fields, or `photoUrl` in claude-summary - the brief shows only `weight_kg` (LLM coach asks for weight trend; full data is reachable via `/api/export/full`).
+
+**Verdict: Option 1 only.** Cross-package: depend on `metrics/MetricsService` directly. New method or reuse existing `list(UUID, LocalDate, LocalDate)` which Phase 17-03 already provides.
+
+### Part C - Consistency source-of-truth
+
+Three sub-fields:
+
+- **`current_streak_days`.** Re-derive locally from the in-window sessions list. The existing `analytics/StreakCalculator.compute` semantic is "all-time current streak from ALL session dates" not "in-window current streak"; window scope mismatch. Re-derive at `ExportService` is cheap (already iterating sessions). Avoids coupling on a method whose semantic does not match.
+- **`missed_days`.** Derive from active plan's `dayOfWeek` set within `[period.from, period.to]` minus actual session dates. Cross-package: `WorkoutPlanRepository.findByUserIdAndActiveTrue` (already used by `IcsExportService`). Empty list if no active plan.
+- **`missed_reasons`.** NO source today.
+  - **Option C-1**: emit `[]` always. Reduces brief example to illustrative-not-canonical for this field. Document in `docs/EXPORT_FORMAT.md` claude-summary section.
+  - **Option C-2**: introduce V28 `missed_workouts(user_id, date, reason TEXT, PRIMARY KEY(user_id, date))` table + per-day "I skipped because..." UI affordance + endpoint. Phase-level scope; out of v0.4 budget.
+  - **Option C-3**: drop `missed_reasons` from the claude-summary DTO entirely. Shrinks the brief example match.
+
+**Verdict: Option C-1** (emit `[]`). Document in `docs/EXPORT_FORMAT.md`. Open Option C-2 as **NEW ISSUE i-11** "missed_workouts table for skip reasons" with trigger Phase 31 (charts-stats) or v0.6.
+
+### Part D - Round-trip preservation gaps (extends Section 4 Part F)
+
+Five gaps cataloged:
+
+| Gap | Disposition |
+| --- | --- |
+| `is_pr` round-trip drop | NEW ISSUE i-10 candidate. Plan 18-04 owns. Add `Boolean isPr` as 9th `SetRow` component AND/OR call `recomputePrForExerciseHistory` per touched `(user, exercise)` at end of import transaction. |
+| `BodyMetric.id` / `Supplement.id` not preserved on import | Acceptable for v0.4. Document in `docs/EXPORT_FORMAT.md` "import semantics" section. |
+| `exportedAt` timestamp drift | Acceptable (metadata, not data). Document. |
+| `ImportValidator` does NOT pre-validate `session.workoutDayId` against payload `plans.days[].id` | NEW validator rule in Plan 18-04 (alongside i-10 fix). 1 method, 1 call line, 1 new 422 test. |
+| `Supplement.timing` enum: validator warns / importer 422-rejects on unknown | Asymmetric but each side is correct. Document the asymmetry in `docs/EXPORT_FORMAT.md`. |
+
+### Part E - JsonConfig stance
+
+Current `JacksonConfig.java:11-19` configures `JavaTimeModule`, `WRITE_DATES_AS_TIMESTAMPS=false`, `serializationInclusion=NON_NULL`. Does NOT set `PropertyNamingStrategies.SNAKE_CASE`. Cross-search `rg "@JsonNaming" backend/src` returns ZERO matches in the codebase. **This audit declares the precedent for Phase 18.** Direction C lands per-record `@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)` on `ClaudeSummaryDto` + its 6 nested records (7 annotations). No global config change needed.
+
+## Section 6 - Recommended Phase 18 plan-02+ Scope
+
+### claude-summary-fields bucket
+
+- **Extend `ClaudeSummaryDto` to match brief subkeys + add the 3 missing top-level keys.**
+  - Top-level: append `prs: List<PrEntry>`, `bodyMetrics: List<BodyMetricSummary>`, `consistency: Consistency` (3 new components on `ClaudeSummaryDto`; current 4 -> 7).
+  - `UserSummary`: append `Integer age` and change `goals: String` -> `goals: List<String>`. Drop `email` from claude-summary (brief example does not have it; the email is reachable via `/api/users/me`).
+  - `Totals`: append `Integer plannedWorkouts`, `Integer adherencePercent`, `BigDecimal weightChangeKg` (current 3 -> 6).
+  - `WorkoutEntry`: append `String type` (current 6 -> 7). Rename `energyLevel` to `energy` to match brief.
+  - `ExerciseEntry`: status quo (TR + EN both kept; brief uses single `name` but additive double-name is acceptable - frontend UI may benefit from both, and the brief is illustrative on this single field).
+  - `SetEntry`: rename `repsDone` -> `reps`, `weightKg` -> `weight` (key drift fix per brief). Order: weight first, reps second (matches brief literal order).
+  - New nested records: `PrEntry(String exercise, BigDecimal weight, short reps, LocalDate date)`, `BodyMetricSummary(LocalDate date, BigDecimal weightKg)` (`weight_kg` after Direction C snake_case), `Consistency(int currentStreakDays, List<LocalDate> missedDays, List<String> missedReasons)`.
+  - Targets: `dto/ClaudeSummaryDto.java` (record growth + 3 new nested records), `ExportService.java` (`computePrsInWindow`, `computeBodyMetrics`, `computeConsistency`, `computePlannedWorkouts`, `computeWeightChange`, `computeUserAge`, `computeWorkoutType` helpers; thread `WorkoutPlanRepository` + `MetricsService` + `WorkoutDayRepository` constructor injections), `ExportIntegrationTest.java` (new assertions: `$.prs.length()`, `$.body_metrics.length()`, `$.consistency.current_streak_days`, `$.user.age`, `$.summary.planned_workouts`, `$.summary.adherence_percent`, `$.summary.weight_change_kg`, `$.workouts[0].type`, `$.workouts[0].exercises[0].sets[0].weight`, `$.workouts[0].exercises[0].sets[0].reps`).
+  - Rationale: closes Section 3 Part A 3 MISSING top-level keys, Part B `age` + `goals`, Part C all 3 summary subkeys, Part D `type` + `energy` + set key rename. Wires Section 5 Part A (Option 1 PrDetector), Part B (MetricsService.list), Part C (local re-derive consistency, C-1 missed_reasons:[]).
+
+### naming-convention bucket
+
+- **Apply Direction C: snake_case on claude-summary only.**
+  - Targets: `dto/ClaudeSummaryDto.java` - apply `@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)` on the top-level record AND each of the 6+3 nested records (`UserSummary`, `Period`, `Totals`, `WorkoutEntry`, `ExerciseEntry`, `SetEntry`, `PrEntry`, `BodyMetricSummary`, `Consistency`). 9 annotations after the new nested records land. Test path-flips: `ExportIntegrationTest` 4 jsonPath assertions flip from `$.summary.totalWorkouts` to `$.summary.total_workouts` etc. `FullExportDto`, `ImportResultDto`, `CsvImportResultDto` UNCHANGED.
+  - Rationale: Section 4 Part A Direction C verdict. LLM consumer matches the brief example; full-export round-trip and per-slice imports unaffected. No frontend code reads claude-summary fields by key (it is a download-only JSON).
+
+### roundtrip-stability bucket (Plan 18-04 - closes NEW ISSUE i-10)
+
+- **Close `is_pr` round-trip drop.**
+  - Add `Boolean isPr` as the 9th component on `FullExportDto.SetRow` (`:64-72` grows 8 -> 9). Preserve on `FullExportService.toSessionSection:148` (add `set.isPr()` to the `new SetRow(...)` call). Preserve on `FullImportService.insertSessions:286-300` (add `if (r.isPr() != null) set.setPr(r.isPr())`). At end of `importDump:71-109`, after `insertSessions`, iterate distinct `(userId, exerciseId)` pairs touched and call `SessionSetsService.recomputePrForExerciseHistory(userId, exerciseId)` as a safety net for payloads from older schema versions where `isPr` was absent.
+- **Close `session.workoutDayId` validator gap.**
+  - Add `ImportValidator.validateSessionDayIds(plans, sessions, errors)` rule that collects `Set<UUID> declaredDayIds` from `plans[].days[].id` and asserts every session's `workoutDayId` is null OR in `declaredDayIds`. 1 method, 1 call line in `validate(...)`.
+- Targets: `dto/FullExportDto.java` (SetRow 8 -> 9), `FullExportService.java` (1 line), `FullImportService.java` (1 line in insertSessions + recompute call + transaction-end hook), `ImportValidator.java` (1 new rule + 1 call), `FullExportImportIntegrationTest.java` (2 new tests: `prSurvivesFullExportImportRoundTrip`, `importRejectsSessionWithUnknownWorkoutDayId`), `dto/ImportResultDto.java` (no change), `docs/EXPORT_FORMAT.md` (document `isPr` field on `SetRow`; document `BodyMetric.id`/`Supplement.id` non-preservation; document `exportedAt` re-export drift; document timing validator-vs-importer asymmetry), `docs/examples/full-export-example.json` (no change since the example has no sessions).
+- Rationale: Section 4 Part F Gaps 1 and 2; Section 5 Part D rows 1 and 4. Closes NEW ISSUE i-10. Schema impact: NONE - V27 already provides `is_pr BOOLEAN NOT NULL DEFAULT false`. The DTO addition is additive on the wire (old payloads omitting `isPr` deserialize as null, the recompute pass restores correctness as a safety net).
+
+### defer bucket (explicit non-goals for v0.4)
+
+- **`missed_workouts` table.** Section 5 Part C Option C-2. **NEW ISSUE i-11 candidate** "missed_workouts table for skip reasons; today consistency.missed_reasons emits []." Trigger Phase 31 (charts-stats) or v0.6.
+- **Direction A wholesale snake_case migration of `FullExportDto`.** Rejected; Direction C is sufficient. `docs/EXPORT_FORMAT.md` already declares camelCase as the backup wire format.
+- **`BodyMetric.id` / `Supplement.id` stable preservation on import.** Section 5 Part D acceptable; document only.
+- **`FullExportDto.schemaVersion` bump to 2.** No schema-breaking changes in plan 18-02..18-04: the `isPr` addition is additive, absent-on-old-payload defaults to null, the recompute pass restores correctness. Stay on `SCHEMA_VERSION = 1`.
+- **`ExportFormatExampleTest` payload extension to include sessions + plans + isPr.** Out of scope; the documented example is intentionally minimal (1 metric, 1 supplement). If Plan 18-04 wants regression coverage on `isPr` round-trip, the new test in `FullExportImportIntegrationTest` covers it directly without enlarging the documented example.
+- **`@JsonNaming` on `CsvImportResultDto`.** No client driver; the CSV path is operator-targeted, not LLM-paste-targeted.
+- **`GET /api/export/csv/sessions` snake_case CSV header.** CSV is a tabular format; column casing is independent of JSON naming convention. Out of scope.
+
+### Plan-count recommendation
+
+**Four plans for Phase 18** (this audit + three hardening plans).
+
+- **Plan 18-01 (this audit)** - shipped via this deliverable.
+- **Plan 18-02: claude-summary-fields.** Largest plan. Closes 3 missing top-level keys + 3 missing summary subkeys + user.age + user.goals array shape + workouts.type + set key rename + energy rename. ~3 file touches: `dto/ClaudeSummaryDto.java`, `ExportService.java`, `ExportIntegrationTest.java`. Cross-package reads from `analytics/`, `metrics/`, `workouts/`. Folds the snake_case-NOT-yet-applied claude-summary tests so subsequent Plan 18-03 only flips assertions. **Absorbs goals-array-shape** since the change is on the same DTO/service.
+- **Plan 18-03: naming-convention.** Smallest plan. Apply 9 `@JsonNaming` annotations on `ClaudeSummaryDto` + nested records. Flip ~4 (or more, after 18-02 lands) jsonPath assertions in `ExportIntegrationTest`. ~2 file touches.
+- **Plan 18-04: roundtrip-stability.** Closes NEW ISSUE i-10 + session.workoutDayId validator gap. Touches `FullExportDto`, `FullExportService`, `FullImportService`, `ImportValidator`, `FullExportImportIntegrationTest`, `docs/EXPORT_FORMAT.md`. ~6 file touches + 2 new tests. Medium-sized plan.
+
+Bucket totals: 1 claude-summary-fields entry, 1 naming-convention entry, 1 roundtrip-stability entry, 7 defer markers (1 of which is NEW ISSUE i-11 candidate). No migrations - V27 already has `is_pr`; V28 stays free for Phase 31 / v0.6 (when missed_workouts lands).
