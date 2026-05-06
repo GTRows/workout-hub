@@ -80,6 +80,14 @@ Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. C
 - **Owner**: aciro
 - **Status**: Open
 
+### i-13: Bump SpringDoc to >= 2.7 to remove the ControllerAdviceBean workaround
+
+- **What**: Phase 19-02 pinned SpringDoc to 2.6.0, which calls Spring 6.2's removed `new ControllerAdviceBean(Object)` constructor and crashes `GET /v3/api-docs` on Spring Boot 3.5.x. Phase 20 fix bundle (commit c1b95f7) worked around this by disabling SpringDoc's generic-response scan and registering ApiError schemas via OpenApiCustomizer.
+- **Why deferred**: A SpringDoc bump introduces a transitive dependency change shortly before release; safer to ship 0.4.0 with the targeted workaround and bump the dep in a follow-up patch (0.4.1 or 0.5.0).
+- **Trigger**: Plan a backend dependency review phase. Bump `springdoc.version` from 2.6.0 to 2.7+ (whatever is latest stable on Spring Boot 3.5.x), revert the OpenApiCustomizer workaround, and re-run the OpenApi integration tests.
+- **Owner**: aciro
+- **Status**: Open
+
 ## Closed
 
 ### i-1 — WorkoutDaysIntegrationTest helper NPE on response `id` (6 errors)
