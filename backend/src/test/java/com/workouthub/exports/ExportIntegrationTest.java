@@ -150,9 +150,9 @@ class ExportIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.user.goals[0]").value("Fit vucut"))
                 .andExpect(jsonPath("$.user.goals[1]").value("Karaciger iyilestirme"))
                 .andExpect(jsonPath("$.workouts[0].type").value("Ust Vucut Itme"))
-                .andExpect(jsonPath("$.workouts[0].energyLevel").doesNotExist())
-                .andExpect(jsonPath("$.summary.plannedWorkouts").isNumber())
-                .andExpect(jsonPath("$.summary.adherencePercent").isNumber());
+                .andExpect(jsonPath("$.workouts[0].energy_level").doesNotExist())
+                .andExpect(jsonPath("$.summary.planned_workouts").isNumber())
+                .andExpect(jsonPath("$.summary.adherence_percent").isNumber());
     }
 
     @Test
@@ -171,10 +171,10 @@ class ExportIntegrationTest extends AbstractIntegrationTest {
         mvc.perform(get("/api/export/claude-summary?days=30")
                         .header("Authorization", auth))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.bodyMetrics.length()").value(2))
-                .andExpect(jsonPath("$.bodyMetrics[0].weightKg").value(78.5))
-                .andExpect(jsonPath("$.bodyMetrics[1].weightKg").value(80.0))
-                .andExpect(jsonPath("$.summary.weightChangeKg").value(-1.50));
+                .andExpect(jsonPath("$.body_metrics.length()").value(2))
+                .andExpect(jsonPath("$.body_metrics[0].weight_kg").value(78.5))
+                .andExpect(jsonPath("$.body_metrics[1].weight_kg").value(80.0))
+                .andExpect(jsonPath("$.summary.weight_change_kg").value(-1.50));
     }
 
     private UUID seedExercise() {
