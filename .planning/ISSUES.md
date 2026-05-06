@@ -72,6 +72,14 @@ Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. C
 
 **Trigger to reopen:** Redesign the test to boot the full `WorkoutHubApplication` (probably with a Testcontainers postgres) so the prod logging system actually activates. Likely v0.4 testing-infra session.
 
+### i-12: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport returns 500
+
+- **What**: GET /api/export/full returns HTTP 500 when called for a freshly-seeded user with one day-less plan, no sessions, no metrics. Test asserts 200 at line 134 of FullExportImportIntegrationTest.java.
+- **Why deferred**: Static causal trace at commit 96d81b0 found no deterministic 500 path in FullExportService for this specific fixture (TestAuthHelpers.seed bypasses DefaultPlanSeeder, so user has zero plans before the test creates one day-less plan via POST /api/workout-plans). Phase 18-04's export-path changes (Boolean isPr in SetRow, recompute safety net, validateSessionDayIds) are orthogonal to this failure. Likely transient or a yet-undiagnosed export-side defect not visible in static analysis. Local mvn unavailable on dev host (local-maven-gap), CI is the authoritative gate.
+- **Trigger**: Push v0.4 commits and observe CI run. If FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport still fails, capture the Surefire stack trace and isolate the exception class + line.
+- **Owner**: aciro
+- **Status**: Open
+
 ## Closed
 
 ### i-1 — WorkoutDaysIntegrationTest helper NPE on response `id` (6 errors)
