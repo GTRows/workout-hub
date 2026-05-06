@@ -72,7 +72,13 @@ public class SessionSetsService {
         if (req.clientSetId() != null) {
             var existing = sets.findBySessionIdAndClientSetId(sessionId, req.clientSetId());
             if (existing.isPresent()) {
-                return new AddSetResult(SessionsMapper.toSetDto(existing.get()), true);
+                // Idempotent replay: PR detector is not re-fired, so suppress the
+                // newPr wire field even when the persisted row carries is_pr=true.
+                // Callers rely on $.newPr.doesNotExist() to distinguish a fresh
+                // create from a replay.
+                SessionSetDto dto = SessionsMapper.toSetDto(existing.get())
+                        .withNewPr(null);
+                return new AddSetResult(dto, true);
             }
         }
 

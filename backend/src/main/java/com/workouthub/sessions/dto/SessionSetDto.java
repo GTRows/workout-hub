@@ -14,4 +14,12 @@ public record SessionSetDto(
         Short rpe,
         boolean completed,
         String notes,
-        Boolean newPr) {}
+        Boolean newPr) {
+
+    public SessionSetDto withNewPr(Boolean overrideNewPr) {
+        return new SessionSetDto(
+                id, exerciseId, exerciseNameTr, exerciseNameEn,
+                setNumber, repsDone, weightKg, rpe,
+                completed, notes, overrideNewPr);
+    }
+}
