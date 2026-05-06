@@ -83,6 +83,13 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: method
   paths-to-match: /api/**
+  # SpringDoc 2.6.0's GenericResponseService scans @RestControllerAdvice via
+  # ControllerAdviceBean(Object), a constructor that Spring 6.2+ removed.
+  # Disabling override-with-generic-response skips that path so /v3/api-docs
+  # builds without crashing. ApiError schemas are still emitted via the
+  # @Schema annotations on the record itself, surfaced through the controller
+  # method return types.
+  override-with-generic-response: false
 
 logging:
   level:
