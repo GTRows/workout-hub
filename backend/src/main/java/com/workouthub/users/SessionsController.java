@@ -4,6 +4,7 @@ import com.workouthub.auth.domain.RefreshToken;
 import com.workouthub.auth.domain.RefreshTokenRepository;
 import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.common.web.NotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.List;
@@ -35,6 +36,7 @@ public class SessionsController {
     }
 
     @GetMapping
+    @Operation(operationId = "listUserRefreshSessions")
     public List<SessionDto> list(@AuthenticationPrincipal AppUserPrincipal principal) {
         return refreshTokens
                 .findByUserIdAndRevokedFalseOrderByCreatedAtDesc(principal.userId())
@@ -49,6 +51,7 @@ public class SessionsController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(operationId = "revokeUserRefreshSession")
     public ResponseEntity<Void> revoke(
             @AuthenticationPrincipal AppUserPrincipal principal,
             @PathVariable UUID id) {

@@ -5,6 +5,7 @@ import com.workouthub.sessions.dto.FinishSessionRequest;
 import com.workouthub.sessions.dto.SessionDto;
 import com.workouthub.sessions.dto.SessionSummaryDto;
 import com.workouthub.sessions.dto.StartSessionRequest;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -33,6 +34,7 @@ public class SessionsController {
     }
 
     @PostMapping("/start")
+    @Operation(operationId = "startWorkoutSession")
     public ResponseEntity<SessionDto> start(
             @AuthenticationPrincipal AppUserPrincipal principal,
             @RequestBody(required = false) StartSessionRequest req) {
@@ -41,6 +43,7 @@ public class SessionsController {
     }
 
     @GetMapping("/active")
+    @Operation(operationId = "getActiveWorkoutSession")
     public ResponseEntity<SessionDto> active(
             @AuthenticationPrincipal AppUserPrincipal principal) {
         return service.getActive(principal.userId())
@@ -49,6 +52,7 @@ public class SessionsController {
     }
 
     @PostMapping("/{id}/finish")
+    @Operation(operationId = "finishWorkoutSession")
     public SessionDto finish(
             @AuthenticationPrincipal AppUserPrincipal principal,
             @PathVariable UUID id,
@@ -57,6 +61,7 @@ public class SessionsController {
     }
 
     @GetMapping("/history")
+    @Operation(operationId = "listWorkoutSessionHistory")
     public Page<SessionSummaryDto> history(
             @AuthenticationPrincipal AppUserPrincipal principal,
             @PageableDefault(size = 20) Pageable pageable) {
@@ -64,6 +69,7 @@ public class SessionsController {
     }
 
     @GetMapping("/{id}")
+    @Operation(operationId = "getWorkoutSession")
     public SessionDto detail(
             @AuthenticationPrincipal AppUserPrincipal principal,
             @PathVariable UUID id) {
