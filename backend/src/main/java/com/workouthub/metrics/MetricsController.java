@@ -1,6 +1,7 @@
 package com.workouthub.metrics;
 
 import com.workouthub.common.security.AppUserPrincipal;
+import com.workouthub.metrics.MetricsService.UpsertResult;
 import com.workouthub.metrics.dto.BodyMetricDto;
 import com.workouthub.metrics.dto.UpsertBodyMetricRequest;
 import jakarta.validation.Valid;
@@ -41,8 +42,9 @@ public class MetricsController {
     public ResponseEntity<BodyMetricDto> upsert(
             @AuthenticationPrincipal AppUserPrincipal principal,
             @Valid @RequestBody UpsertBodyMetricRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.upsert(principal.userId(), req));
+        UpsertResult result = service.upsert(principal.userId(), req);
+        HttpStatus status = result.wasCreated() ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(result.dto());
     }
 
     @DeleteMapping("/{id}")

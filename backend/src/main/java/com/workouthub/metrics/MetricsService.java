@@ -7,6 +7,7 @@ import com.workouthub.metrics.dto.BodyMetricDto;
 import com.workouthub.metrics.dto.UpsertBodyMetricRequest;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,15 +42,15 @@ public class MetricsService {
         return rows.stream().map(MetricsService::toDto).toList();
     }
 
-    public BodyMetricDto upsert(UUID userId, UpsertBodyMetricRequest req) {
-        BodyMetric entity = repo
-                .findByUserIdAndRecordedDate(userId, req.recordedDate())
-                .orElseGet(() -> {
-                    BodyMetric fresh = new BodyMetric();
-                    fresh.setUserId(userId);
-                    fresh.setRecordedDate(req.recordedDate());
-                    return fresh;
-                });
+    public UpsertResult upsert(UUID userId, UpsertBodyMetricRequest req) {
+        Optional<BodyMetric> existing = repo.findByUserIdAndRecordedDate(userId, req.recordedDate());
+        boolean wasCreated = existing.isEmpty();
+        BodyMetric entity = existing.orElseGet(() -> {
+            BodyMetric fresh = new BodyMetric();
+            fresh.setUserId(userId);
+            fresh.setRecordedDate(req.recordedDate());
+            return fresh;
+        });
         entity.setWeightKg(req.weightKg());
         entity.setBodyFatPercent(req.bodyFatPercent());
         entity.setWaistCm(req.waistCm());
@@ -58,7 +59,7 @@ public class MetricsService {
         entity.setThighCm(req.thighCm());
         entity.setPhotoUrl(req.photoUrl());
         entity.setNotes(req.notes());
-        return toDto(repo.save(entity));
+        return new UpsertResult(toDto(repo.save(entity)), wasCreated);
     }
 
     public void delete(UUID userId, UUID id) {
@@ -82,4 +83,6 @@ public class MetricsService {
                 m.getCreatedAt(),
                 m.getUpdatedAt());
     }
+
+    public static record UpsertResult(BodyMetricDto dto, boolean wasCreated) {}
 }
