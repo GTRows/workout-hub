@@ -25,9 +25,11 @@ import com.workouthub.workouts.domain.WorkoutPlanRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -96,9 +98,11 @@ public class FullImportService {
         // first so plans can be cascade-dropped without violating FKs, then
         // re-insert plans before sessions.
         int sessionsDeleted = wipeSessions(userId);
-        int plansInserted = replacePlans(userId, dump.plans());
+        Map<UUID, UUID> dayIdRewrite = new HashMap<>();
+        int plansInserted = replacePlans(userId, dump.plans(), dayIdRewrite);
         Set<UUID> touchedExerciseIds = new LinkedHashSet<>();
-        int sessionsInserted = insertSessions(userId, dump.sessions(), touchedExerciseIds);
+        int sessionsInserted = insertSessions(
+                userId, dump.sessions(), touchedExerciseIds, dayIdRewrite);
         for (UUID exerciseId : touchedExerciseIds) {
             sessionSets.recomputePrForExerciseHistory(userId, exerciseId);
         }
@@ -136,13 +140,13 @@ public class FullImportService {
         // violate the FK, then rebuild plans. Sessions keep their history
         // but become "ad-hoc" until the user reattaches them to a new day.
         sessions.detachSessionsFromDays(userId);
-        return replacePlans(userId, rows);
+        return replacePlans(userId, rows, new HashMap<>());
     }
 
     public int replaceSessionsSection(UUID userId, List<FullExportDto.SessionSection> rows) {
         wipeSessions(userId);
         Set<UUID> touchedExerciseIds = new LinkedHashSet<>();
-        int inserted = insertSessions(userId, rows, touchedExerciseIds);
+        int inserted = insertSessions(userId, rows, touchedExerciseIds, Map.of());
         for (UUID exerciseId : touchedExerciseIds) {
             sessionSets.recomputePrForExerciseHistory(userId, exerciseId);
         }
@@ -224,7 +228,10 @@ public class FullImportService {
         return deleted;
     }
 
-    private int replacePlans(UUID userId, List<FullExportDto.PlanSection> rows) {
+    private int replacePlans(
+            UUID userId,
+            List<FullExportDto.PlanSection> rows,
+            Map<UUID, UUID> dayIdRewriteOut) {
         List<WorkoutPlan> existing = plans.findByUserIdOrderByCreatedAtAsc(userId);
         plans.deleteAll(existing);
         plans.flush();
@@ -243,8 +250,15 @@ public class FullImportService {
 
         int count = 0;
         for (FullExportDto.PlanSection section : rows) {
+            // Do NOT preserve the export's plan/day/exercise UUIDs. With
+            // @UuidGenerator and no @Version, Hibernate cannot reliably
+            // distinguish a brand-new entity-with-assigned-id from a detached
+            // one in the same persistence context that just deleted that row,
+            // and routes the save through merge -> UPDATE -> StaleObjectState.
+            // Sessions reference plan-day ids; we maintain dayIdRewriteOut so
+            // the session insert pass can rewrite session.workoutDayId from
+            // payload UUIDs to the freshly-generated DB UUIDs.
             WorkoutPlan plan = new WorkoutPlan();
-            if (section.id() != null) plan.setId(section.id());
             plan.setUserId(userId);
             plan.setName(section.name());
             plan.setActive(section.active());
@@ -252,7 +266,6 @@ public class FullImportService {
             if (section.days() != null) {
                 for (FullExportDto.DayRow dr : section.days()) {
                     WorkoutDay day = new WorkoutDay();
-                    if (dr.id() != null) day.setId(dr.id());
                     day.setDayOfWeek(dr.dayOfWeek());
                     day.setName(dr.name());
                     day.setFocus(parseFocus(dr.focus()));
@@ -262,7 +275,6 @@ public class FullImportService {
                         for (FullExportDto.DayExerciseRow er : dr.exercises()) {
                             if (er.exerciseId() == null) continue;
                             WorkoutDayExercise item = new WorkoutDayExercise();
-                            if (er.id() != null) item.setId(er.id());
                             item.setExercise(em.getReference(Exercise.class, er.exerciseId()));
                             item.setOrderIndex(er.orderIndex());
                             item.setTargetSets(er.targetSets());
@@ -275,9 +287,30 @@ public class FullImportService {
                         }
                     }
                     plan.addDay(day);
+                    // After persist (below) day.getId() is non-null; flush the
+                    // plan first so cascade fires and we can read the new ids.
+                    if (dr.id() != null) {
+                        dayIdRewriteOut.put(dr.id(), null);
+                        // sentinel: real value patched after flush below
+                    }
                 }
             }
             plans.save(plan);
+            // Flush so cascade-generated UUIDs on the WorkoutDay rows are
+            // available; then resolve the payload-id -> DB-id mapping by
+            // walking the just-persisted day list in declaration order.
+            plans.flush();
+            if (section.days() != null) {
+                List<WorkoutDay> persistedDays = plan.getDays();
+                List<FullExportDto.DayRow> payloadDays = section.days();
+                int pairs = Math.min(persistedDays.size(), payloadDays.size());
+                for (int i = 0; i < pairs; i++) {
+                    UUID payloadId = payloadDays.get(i).id();
+                    if (payloadId != null) {
+                        dayIdRewriteOut.put(payloadId, persistedDays.get(i).getId());
+                    }
+                }
+            }
             count++;
         }
         return count;
@@ -286,15 +319,22 @@ public class FullImportService {
     private int insertSessions(
             UUID userId,
             List<FullExportDto.SessionSection> rows,
-            Set<UUID> touchedExerciseIds) {
+            Set<UUID> touchedExerciseIds,
+            Map<UUID, UUID> dayIdRewrite) {
         if (rows == null || rows.isEmpty()) return 0;
 
         int count = 0;
         for (FullExportDto.SessionSection section : rows) {
+            // Same rationale as replacePlans: do not preserve export UUIDs.
+            // Rewrite session.workoutDayId from the payload's plan-day id to
+            // the freshly-generated DB id so the FK still points at a real row.
             WorkoutSession s = new WorkoutSession();
-            if (section.id() != null) s.setId(section.id());
             s.setUserId(userId);
-            s.setWorkoutDayId(section.workoutDayId());
+            UUID payloadDayId = section.workoutDayId();
+            UUID rewrittenDayId = payloadDayId == null
+                    ? null
+                    : dayIdRewrite.getOrDefault(payloadDayId, payloadDayId);
+            s.setWorkoutDayId(rewrittenDayId);
             s.setStartedAt(section.startedAt());
             s.setEndedAt(section.endedAt());
             s.setNotes(section.notes());
@@ -306,7 +346,6 @@ public class FullImportService {
                     if (r.exerciseId() == null) continue;
                     touchedExerciseIds.add(r.exerciseId());
                     SessionSet set = new SessionSet();
-                    if (r.id() != null) set.setId(r.id());
                     set.setExercise(em.getReference(Exercise.class, r.exerciseId()));
                     set.setSetNumber(r.setNumber());
                     set.setRepsDone(r.repsDone());
