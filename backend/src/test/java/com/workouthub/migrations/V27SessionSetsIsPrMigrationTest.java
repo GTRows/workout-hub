@@ -67,11 +67,17 @@ class V27SessionSetsIsPrMigrationTest extends AbstractIntegrationTest {
         Instant now = Instant.now();
 
         jdbc.update(
-                "INSERT INTO workout_sessions (id, user_id, ended_at) VALUES (?, ?, ?)",
-                s1, userId, java.sql.Timestamp.from(now.minusSeconds(60)));
+                "INSERT INTO workout_sessions (id, user_id, started_at, ended_at) "
+                        + "VALUES (?, ?, ?, ?)",
+                s1, userId,
+                java.sql.Timestamp.from(now.minusSeconds(120)),
+                java.sql.Timestamp.from(now.minusSeconds(60)));
         jdbc.update(
-                "INSERT INTO workout_sessions (id, user_id, ended_at) VALUES (?, ?, ?)",
-                s2, userId, java.sql.Timestamp.from(now));
+                "INSERT INTO workout_sessions (id, user_id, started_at, ended_at) "
+                        + "VALUES (?, ?, ?, ?)",
+                s2, userId,
+                java.sql.Timestamp.from(now.minusSeconds(60)),
+                java.sql.Timestamp.from(now));
         // s1: 100kg x 5 -> Epley 116.667 (the winner)
         jdbc.update(
                 "INSERT INTO session_sets "
