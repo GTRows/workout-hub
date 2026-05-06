@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Fail-soft validation pass over a full-export payload before it hits
@@ -57,6 +58,7 @@ public final class ImportValidator {
         validatePlans(dump.plans(), errors, warnings);
         validateSessions(dump.sessions(), warnings, suggestions);
         validateSupplements(dump.supplements(), warnings);
+        validateSessionDayIds(dump.plans(), dump.sessions(), errors);
 
         return new ValidationReport(errors, warnings, suggestions);
     }
@@ -152,6 +154,30 @@ public final class ImportValidator {
             if (s.timing() != null && !isValidTiming(s.timing())) {
                 warnings.add("supplement '" + s.name() + "' has unknown timing '"
                         + s.timing() + "' - will default to 'other'");
+            }
+        }
+    }
+
+    private static void validateSessionDayIds(
+            List<PlanSection> plans,
+            List<SessionSection> sessions,
+            List<String> errors) {
+        if (sessions == null || sessions.isEmpty()) return;
+        Set<UUID> declaredDayIds = new HashSet<>();
+        if (plans != null) {
+            for (PlanSection p : plans) {
+                if (p.days() == null) continue;
+                for (DayRow d : p.days()) {
+                    if (d.id() != null) declaredDayIds.add(d.id());
+                }
+            }
+        }
+        for (SessionSection s : sessions) {
+            if (s.workoutDayId() == null) continue;
+            if (!declaredDayIds.contains(s.workoutDayId())) {
+                errors.add("session " + s.id()
+                        + " references workoutDayId=" + s.workoutDayId()
+                        + " which is not present in plans[].days[].id");
             }
         }
     }

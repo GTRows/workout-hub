@@ -252,6 +252,44 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.sets[0].newPr").value(true));
     }
 
+    @Test
+    void importRejectsSessionWithUnknownWorkoutDayId() throws Exception {
+        SeededUser u = helpers.seed(
+                "fe-staleday-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+
+        // Hand-crafted payload: plans is empty, but a session references a
+        // non-existent workoutDayId. Validator must surface this as 422,
+        // not let it crash insertSessions with an FK violation (500-class).
+        String stalePayload = """
+                {
+                  "schemaVersion": 1,
+                  "exportedAt": "2026-04-23T00:00:00Z",
+                  "user": null,
+                  "plans": [],
+                  "sessions": [
+                    {
+                      "id": "11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                      "workoutDayId": "22222222-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+                      "startedAt": "2026-04-23T09:00:00Z",
+                      "endedAt": "2026-04-23T10:00:00Z",
+                      "notes": null,
+                      "mood": null,
+                      "energyLevel": null,
+                      "sets": []
+                    }
+                  ],
+                  "bodyMetrics": [],
+                  "supplements": []
+                }
+                """;
+
+        mvc.perform(post("/api/export/import")
+                        .header("Authorization", "Bearer " + u.accessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(stalePayload))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
     private UUID seedExercise() {
         String tag = "fe-pr-" + System.nanoTime();
         Exercise e = new Exercise();
