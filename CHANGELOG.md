@@ -121,6 +121,22 @@ migrations (V26 clientSetId, V27 is_pr) auto-apply on backend start.
 - Add the missing 9th `isPr` argument to `SetRow` constructors in
   `ImportValidatorTest` so the suite compiles after the Phase 18-04
   record widening.
+- Seed `started_at` in `V27SessionSetsIsPrMigrationTest` so the
+  `workout_sessions_ended_after_started` check constraint is satisfied
+  during the migration backfill test (commit `2b2a2e1`).
+- Strip the `newPr` JSON field from idempotent `clientSetId` replay
+  responses; the field is a fresh-write signal and was leaking on
+  retry, breaking `SessionSetsIntegrationTest.sameClientSetIdRetryReturns200WithSameId`
+  (commit `ddc4785`).
+- Drop ID preservation during full-export import to avoid the Hibernate
+  detached-entity trap when re-inserting plans/days with assigned
+  UUIDs; rewrite `session.workoutDayId` references via a payload-to-DB
+  UUID map to keep round-trip referential integrity (commit `d3d83d8`).
+- Work around the SpringDoc 2.6.0 vs Spring Boot 3.5.x
+  `ControllerAdviceBean(Object)` constructor break by disabling the
+  override-with-generic-response scan and registering `ApiError`
+  schemas via `OpenApiCustomizer`; restores `GET /v3/api-docs` (commit
+  `c1b95f7`).
 
 ### Security
 
