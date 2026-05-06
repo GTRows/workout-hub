@@ -71,7 +71,7 @@ class MetricsIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"recordedDate\":\"2026-04-21\",\"weightKg\":77.5}"))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weightKg").value(77.5));
 
         mvc.perform(get("/api/metrics").header("Authorization", auth))
@@ -212,6 +212,30 @@ class MetricsIntegrationTest extends AbstractIntegrationTest {
         mvc.perform(get("/api/metrics?from=2026-03-31&to=2026-03-01")
                         .header("Authorization", auth))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void firstPostReturns201SecondPostReturns200() throws Exception {
+        SeededUser user = helpers.seed(
+                "status-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + user.accessToken();
+
+        MvcResult firstResult = mvc.perform(post("/api/metrics")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"recordedDate\":\"2026-04-26\",\"weightKg\":80.0}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID firstId = UUID.fromString(objectMapper.readTree(
+                firstResult.getResponse().getContentAsString()).get("id").asText());
+
+        mvc.perform(post("/api/metrics")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"recordedDate\":\"2026-04-26\",\"weightKg\":81.0}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(firstId.toString()))
+                .andExpect(jsonPath("$.weightKg").value(81.0));
     }
 
     private void seedMetric(String auth, String recordedDate, double weightKg) throws Exception {
