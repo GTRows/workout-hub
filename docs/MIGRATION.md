@@ -154,6 +154,114 @@ The bind-mount cluster directory survives a rollback because v0.2.x can mount th
 
 ---
 
+## v0.4.0
+
+Backend feature completion release. Closes the workout-plan editing,
+live-session execution, body-metrics, full-export refinement, and API
+contract documentation deliverables from `ProjectBrief.md` Phases 3-5.
+Operator-visible surface changes are limited to two new auto-applied
+Flyway migrations (V26 clientSetId on `session_sets`, V27 `is_pr` on
+`session_sets`), one new operator-reachable runtime surface (the
+SpringDoc OpenAPI document and Swagger UI), and a refined
+`/api/export/import` failure mode (curated 422 instead of 500-class
+FK violation on unknown `workoutDayId`). No env var changes; no
+compose-topology changes; no one-shot operator commands; rollback is
+the standard `git revert` of the merge that bumped to v0.4.0.
+
+### Required env var changes
+
+No new env vars. No removed env vars. No env-default changes. The
+v0.3.0 contract-aligned env surface (`BIND_ADDR`, `BACKEND_PORT`,
+`FRONTEND_PORT`, `POSTGRES_PORT`, `APP_AUTH_*`, `APP_PUSH_VAPID_*`,
+`APP_REMINDERS_*_CRON`, `ENABLE_PG_DUMP`, `PG_DUMP_*`) carries forward
+unchanged.
+
+### Schema and data migration
+
+Two new Flyway migrations apply automatically on backend start:
+
+- **V26** -- adds `client_set_id UUID` (nullable, unique-per-session)
+  to `session_sets` for offline-queue idempotent replay (Phase 15-02).
+- **V27** -- adds `is_pr BOOLEAN NOT NULL DEFAULT false` to
+  `session_sets` plus a `ROW_NUMBER() OVER (PARTITION BY user_id,
+  exercise_id ORDER BY weight*(1 + reps/30) DESC, created_at ASC)`
+  backfill that marks the highest-Epley completed set per
+  `(user_id, exercise_id)` (Phase 16-04).
+
+Both migrations are forward-only and idempotent on first apply. The
+backfill in V27 is bounded by existing `session_sets` rows; on a
+fresh install it is a no-op.
+
+`spring.jpa.hibernate.ddl-auto: validate` continues to gate schema
+drift. If V26 or V27 fails to apply against an existing database (for
+example, an operator with a manually-edited schema), the backend
+container fails fast at boot with the offending migration in the
+logs.
+
+### Compose / runtime changes
+
+- **OpenAPI document and Swagger UI now reachable on the backend
+  listener.** SpringDoc 2.6.0 (introduced in Phase 19-02) serves
+  `GET /v3/api-docs` (JSON), `GET /v3/api-docs.yaml` (YAML), and
+  `GET /swagger-ui.html` (interactive UI). Both surfaces are reachable
+  without authentication by design; the application's public-network
+  exposure is bounded by `BIND_ADDR=127.0.0.1` (compose default) and
+  the operator's reverse proxy. See `docs/API.md` "Discoverability"
+  for the trust-boundary stance.
+- **Operator-facing endpoints excluded from the OpenAPI document.**
+  `/livez`, `/healthz`, `/metrics`, `/actuator/health`,
+  `/actuator/info`, `/actuator/prometheus` are NOT in `/v3/api-docs`
+  per `springdoc.paths-to-match=/api/**`. They stay documented in
+  `docs/OBSERVABILITY.md`.
+- **No compose-topology change.** No new service. The `pg_dump`
+  sidecar profile from v0.3.0 stays opt-in.
+- **No image registry change.** Multi-arch publish to
+  `ghcr.io/gtrows/workouthub-{backend,frontend}:0.4.0` (amd64 +
+  arm64) per the v0.3.2 release-workflow flow.
+
+### One-shot commands
+
+No one-shot commands required. Operators upgrade with the standard
+two-step:
+
+```bash
+# 1. Pull the new image tags.
+docker compose pull
+
+# 2. Restart the stack. V26 + V27 apply at backend boot.
+docker compose up -d
+```
+
+If the optional pg_dump sidecar is enabled (`COMPOSE_PROFILES=backup`),
+the second step also restarts the sidecar against the same schema. No
+data conversion is required for V26 (new nullable column) or V27 (new
+column with default-and-backfill).
+
+### Rollback
+
+```bash
+# 1. In your operator deployment repo, revert the merge that bumped to v0.4.0.
+git revert <merge-sha>
+
+# 2. The orchestrator (Komodo / Watchtower-replacement / manual `compose pull`)
+#    redeploys the previously pinned tag (v0.3.2). Confirm the stack is back.
+
+# 3. V26 + V27 columns survive the downgrade. v0.3.2 does not read
+#    `client_set_id` or `is_pr`; the columns sit unused but cause no
+#    harm. They re-activate automatically on the next forward upgrade
+#    to v0.4.x or later.
+
+# 4. Optional: take a fresh pg_dump after the rollback completes:
+docker compose exec db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+    --format=custom > ./data/backups/post-rollback-v0.3.2.dump
+```
+
+The bind-mount cluster directory at `./data/postgres/` is unchanged by
+v0.4.0. No data conversion landed in v0.4.0; the rollback to v0.3.2 is
+schema-additive-only and reversible without data loss.
+
+---
+
 ## vNext
 
 `No migration steps.` (or replace with the structure above when the next release lands.)

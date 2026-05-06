@@ -13,7 +13,7 @@
 
     <groupId>com.workouthub</groupId>
     <artifactId>workouthub</artifactId>
-    <version>0.3.2</version>
+    <version>0.4.0</version>
     <name>workouthub</name>
     <description>WorkoutHub backend (Spring Boot + Java 21)</description>
 

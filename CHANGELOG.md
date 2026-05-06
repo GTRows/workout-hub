@@ -17,6 +17,136 @@ and uses it as the GitHub release notes. Do not change the heading format.
 ### Fixed
 ### Security
 
+## [0.4.0] - 2026-05-07
+
+Backend feature completion release. Closes the workout-plan editing,
+live-session execution, body-metrics, full-export refinement, and API
+contract documentation deliverables from `ProjectBrief.md` Phases 3-5.
+Adds 14 new endpoints across sessions analytics and body-metrics
+slices, persists PR durability via a new `is_pr` column on
+`session_sets`, exposes the runtime OpenAPI document at
+`GET /v3/api-docs` and Swagger UI at `GET /swagger-ui.html`, and
+hardens the Claude-summary export wire shape with snake_case naming
+and import-time validation. Closes 2 deferred test issues (i-1, i-2)
+and 1 export round-trip drop (i-10). Operators upgrade with a normal
+`docker compose pull && docker compose up -d`; two new Flyway
+migrations (V26 clientSetId, V27 is_pr) auto-apply on backend start.
+
+### Added
+
+- `POST /api/sessions/{id}/sets` accepts a `clientSetId` UUID for
+  idempotent offline-queue replay; 200 returns the existing record on
+  replay, 201 returns the newly created record (Phase 15-02; new V26
+  migration).
+- `Short heartRateAvgBpm` field exposed on `SessionDto` and
+  `SessionSummaryDto` (read-only; populated by the existing Garmin
+  .fit importer; Phase 15-03).
+- Typed `code` field on the `ApiError` envelope for the four sessions-
+  surface 409 conflicts: `SESSION_ALREADY_ACTIVE`,
+  `SESSION_ALREADY_FINISHED`, `SESSION_FINISHED`,
+  `SET_NUMBER_DUPLICATE` (Phase 15-04). The field is null on legacy
+  conflict paths and stripped from the wire by Jackson `NON_NULL`.
+- `GET /api/exercises/{id}/last-performance` and `GET /api/exercises/
+  {id}/progress` formalised under the new `com.workouthub.analytics`
+  package (Phase 16-02; the in-package leak from v0.3.x is now a
+  proper feature slice).
+- `estimatedOneRmKg` field on `ProgressPointDto` (Epley projection;
+  per-top-set semantics; null for unweighted sets; Phase 16-03).
+- Persistent `is_pr` column on `session_sets` with window-function
+  backfill on V27 migration; the PR flag now survives a session
+  detail-reread, a session update, and a full-export round-trip
+  (Phase 16-04 + Phase 18-04).
+- `photoUrl` field on `UpsertBodyMetricRequest` (round-trips with the
+  V6 `photo_url` column; Phase 17-02).
+- Optional `from` and `to` `LocalDate` query params on
+  `GET /api/metrics` for time-series range filtering; mixed-pair and
+  inverted-range yield 400 (Phase 17-03).
+- 201/200 status-code split on `POST /api/metrics`: 201 on first
+  insert per date, 200 on idempotent overwrite of the same date
+  (Phase 17-04).
+- snake_case naming convention on `ClaudeSummaryDto` aligning the
+  LLM-paste surface with the ProjectBrief example (Phase 18-03).
+- Import-time validation on `POST /api/export/import`: unknown
+  `session.workoutDayId` references yield a curated 422 instead of a
+  500-class FK violation (Phase 18-04).
+- SpringDoc 2.6.0 OpenAPI document at `GET /v3/api-docs` (JSON;
+  `/v3/api-docs.yaml` for YAML) and Swagger UI at
+  `GET /swagger-ui.html`. Document declares two security schemes
+  (`bearerAuth` http/bearer/JWT default; `forwardAuth` apiKey/header
+  `X-Forwarded-Email` opt-in), 28 hand-curated tag groupings, and the
+  `ApiError` envelope with `code` enum (Phases 19-02, 19-03, 19-04).
+- `OpenApiSurfaceIntegrationTest` (5 tests) CI-asserts the runtime
+  OpenAPI contract on every push (Phase 19-04).
+- `docs/API.md` rewritten as a navigational entry point to the runtime
+  OpenAPI surface (Phase 19-05).
+
+### Changed
+
+- `WorkoutDaysService.createDay` and `addItem` use explicit child-repo
+  `saveAndFlush` to populate `@UuidGenerator` ids before the mapper
+  reads them; closes the helper-NPE on 6 disabled
+  `WorkoutDaysIntegrationTest` cases (Phase 14-01; closes i-1).
+- `FullExportImportIntegrationTest.importRoundTripPreservesPlansFrom
+  Export` now seeds a plan via `POST /api/workout-plans` before the
+  export GET; the production export/import round-trip was correct all
+  along (Phase 14-02; closes i-2).
+- `FullExportDto.SetRow` grows from 8 to 9 components; `Boolean isPr`
+  appended in the 9th position. Legacy schemaVersion-1 dumps
+  deserialize without error; the import path treats null as `false`
+  and runs a recompute pass after `insertSessions` returns as a
+  safety net (Phase 18-04).
+- `FullExportService.toSessionSection` populates the new `isPr`
+  component from `SessionSet.isPr()`; `FullImportService` reads
+  null-safely; `SessionSetsService.recomputePrForExerciseHistory` is
+  invoked once per distinct touched `(userId, exerciseId)` pair after
+  the insert loop (Phase 18-04).
+- `docs/EXPORT_FORMAT.md` documents the new `isPr` field on `SetRow`,
+  the BodyMetric.id / Supplement.id non-preservation stance, and the
+  acceptable-round-trip-drift catalog (Phase 18-04).
+
+### Fixed
+
+- `i-1` `WorkoutDaysIntegrationTest` 6 helper-NPE cases re-enabled and
+  passing (Phase 14-01).
+- `i-2` `FullExportImportIntegrationTest.importRoundTripPreservesPlans
+  FromExport` re-enabled and passing (Phase 14-02).
+- `i-10` `is_pr` round-trip drop on full-export import path closed
+  (Phase 18-04).
+- Dual `SessionsController` operationId collision in the OpenAPI
+  document resolved via per-method `@Operation(operationId = ...)`
+  hand-disambiguation (Phase 19-03).
+
+### Security
+
+- Backend dependency baseline carried from v0.3.2: Spring Boot 3.5.14,
+  bouncycastle 1.84, jjwt 0.13.0, jose4j 0.9.6, async-http-client 2.12.4
+  all unchanged. SpringDoc 2.6.0 introduced in Phase 19-02 is the only
+  new backend runtime dependency in v0.4.0;
+  springdoc-openapi-starter-webmvc-ui 2.6.0 is published to Maven Central
+  with no open CVEs at release time. Trivy fs + Trivy image CI jobs
+  (Phase 10-01) re-validate the image at every push to main. Dependabot
+  continues to surface new advisories; force-pinned versions for
+  transitive dependencies (async-http-client 2.12.4 via
+  dependencyManagement, jose4j 0.9.6 via dependencyManagement) stay in
+  place. `.trivyignore` carries CVE-2026-33671 (picomatch ReDoS, vendored
+  copy in next/dist/compiled/picomatch; deferred to v0.5 per ISSUES.md
+  i-6); no other ignores added.
+
+### Known Issues (carried forward)
+
+Tracked in `.planning/ISSUES.md`:
+- i-3: documentation note on `.gitignore` `data/` glob-form correction
+  during Plan 01-01 (resolved at execution time; carried for audit).
+- i-4: Frontend per-request HTTP histogram deferred to v0.6.
+- i-5: next-intl 3 -> 4 major bump deferred (open-redirect mitigated
+  via reverse-proxy header rewrite).
+- i-6: Next 15 -> 16 major bump deferred to v0.5.
+- i-7: testcontainers 1.x -> 2.x major bump deferred to next test-infra
+  session (likely v1.0 Phase 39).
+- i-8: Spring Boot 3.5 -> 4.0 major bump deferred to v0.6 / v1.0.
+- i-9: `StructuredLoggingTest` test-config gap; real-runtime ECS output
+  unaffected. Deferred to v0.6 Phase 37.
+
 ## [0.3.2] - 2026-05-03
 
 Patch release fixing the v0.3.1 release-workflow failure. The image-tag
