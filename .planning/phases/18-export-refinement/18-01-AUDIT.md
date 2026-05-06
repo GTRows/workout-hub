@@ -166,3 +166,220 @@ Total: 9 record types, 66 components. **`SetRow` has 8 components, none is `isPr
 | 11 | `ExportFormatExampleTest` | `documentedExampleImportsAndBecomesTheCurrentExportState` | `:41` | Reads `docs/examples/full-export-example.json`; POSTs to import; asserts `metricsInserted=1`, `supplementsInserted=1`; reads back via `/api/metrics` and `/api/supplements`. Locks docs/example/code triangle. |
 
 Eleven tests total across the three classes.
+
+## Section 3 - ProjectBrief Claude-Summary Example vs Current `ClaudeSummaryDto` Gap Matrix
+
+The canonical example lives at `ProjectBrief.md:510-573`. This section walks the example top-down against `ClaudeSummaryDto.java:13-48`.
+
+### Part A - Top-level keys
+
+| Brief key | Brief line | Current DTO component | DTO line | Status |
+| --- | ---: | --- | ---: | --- |
+| `user` | `:514-521` | `user: UserSummary` | `:14` | Subkey-drift (Part B) |
+| `period` | `:522-526` | `period: Period` | `:15` | OK at the top level (subkey shape matches: `from`, `to`, `days`) |
+| `summary` | `:527-534` | `summary: Totals` | `:16` | Subkey-drift (Part C) |
+| `workouts` | `:535-554` | `workouts: List<WorkoutEntry>` | `:17` | Subkey-drift (Part D) |
+| `prs` | `:555-562` | - | - | **MISSING** |
+| `body_metrics` | `:563-566` | - | - | **MISSING** |
+| `consistency` | `:567-571` | - | - | **MISSING** |
+
+Three top-level keys missing entirely; four present with subkey drift.
+
+### Part B - `user` subkey drift (`ProjectBrief.md:514-521` vs `UserSummary` at `ClaudeSummaryDto.java:19-25`)
+
+| Brief key | Brief value (illustrative) | Current component | Drift |
+| --- | --- | --- | --- |
+| `name` | `"Fatih"` | `displayName` (`:20`) | Key rename only |
+| `age` | `26` | - | **MISSING** (computed from `UserProfile.birthDate` and `LocalDate.now(ZoneOffset.UTC)`; full-export already exposes `birthDate` at `FullExportDto.UserSection:24` so the source-of-truth is reachable) |
+| `height_cm` | `178` | `heightCm` (`:22`) | Case (snake vs camel) |
+| `current_weight_kg` | `78` | `weightKg` (`:23`) | Key rename + case |
+| `health_notes` | string | `healthNotes` (`:24`) | Case |
+| `goals` | `["Fit vücut", "Karaciğer iyileştirme"]` | `goals: String` (`:25`) | **SHAPE drift**: Brief has array, current is single TEXT string (matches `UserProfile.goals` SQL column TEXT per V1 / `FullExportDto.UserSection:27`). Plus `email` at `:21` of UserSummary is NOT in the brief example - drift in the other direction (an extra field). |
+
+The most surgical concern is `goals` shape (string vs array). Three options walked in Section 4 Part D.
+
+### Part C - `summary` subkey drift (`ProjectBrief.md:527-533` vs `Totals` at `ClaudeSummaryDto.java:29-32`)
+
+| Brief key | Brief value | Current component | Status |
+| --- | --- | --- | --- |
+| `total_workouts` | `18` | `totalWorkouts` (`:30`) | Case |
+| `planned_workouts` | `20` | - | **MISSING** (source: count active plan's `WorkoutDay`s whose `dayOfWeek` falls inside `[period.from, period.to]`, excluding `focus = REST`) |
+| `adherence_percent` | `90` | - | **MISSING** (derived: `Math.round(totalWorkouts * 100.0 / plannedWorkouts)` with zero-divide guard) |
+| `total_volume_kg` | `45200` | `totalVolumeKg` (`:31`) | Case |
+| `avg_session_duration_min` | `47` | `avgSessionDurationMin` (`:32`) | Case |
+| `weight_change_kg` | `-1.2` | - | **MISSING** (source: latest `BodyMetric.weightKg` minus earliest in window via `BodyMetricRepository.findByUserIdAndRecordedDateBetweenOrderByRecordedDateDesc` from Phase 17-03) |
+
+### Part D - `workouts[]` subkey drift (`ProjectBrief.md:535-553` vs `WorkoutEntry`/`ExerciseEntry`/`SetEntry`)
+
+`workouts[i]`:
+
+| Brief key | Brief value | Current component | Status |
+| --- | --- | --- | --- |
+| `date` | `"2026-04-20"` | `date` (`:35`) | OK |
+| `type` | `"Üst Vücut İtme"` | - | **MISSING** (source: `WorkoutSession.workoutDayId` -> `WorkoutDay.name`; null when session is ad-hoc) |
+| `duration_min` | `48` | `durationMin` (`:36`) | Case |
+| `exercises` | array | `exercises` (`:37`) | OK at the level |
+| `user_notes` | text | `userNotes` (`:38`) | Case |
+| `mood` | `4` | `mood` (`:39`) | OK |
+| `energy` | `4` | `energyLevel` (`:40`) | Key rename (`energy` vs `energyLevel`) |
+
+`workouts[i].exercises[j]`:
+
+| Brief key | Brief value | Current component | Status |
+| --- | --- | --- | --- |
+| `name` | `"Dumbbell Shoulder Press"` (English single key) | `nameTr` + `nameEn` (`:43-44`) | **Sub-key drift**: brief uses single `name` (English); current splits TR + EN. Direction Part D in Section 4 picks (additive: keep both) vs collapse. |
+| `sets` | array | `sets` (`:45`) | OK at the level |
+
+`workouts[i].exercises[j].sets[k]` (Brief: `{"weight": 7, "reps": 10}` at `:544`; current `SetEntry(short repsDone, BigDecimal weightKg)` at `:47`):
+
+| Brief key | Current key | Drift |
+| --- | --- | --- |
+| `weight` | `weightKg` | Key drift (brief drops the `_kg` suffix; loses unit context but matches the brief example literally) |
+| `reps` | `repsDone` | Key drift (`reps` vs `repsDone`) |
+
+Note: record component declaration order differs (brief weight-first vs current reps-first), but Jackson default emits properties in declaration order — Jackson does NOT respect brief order under default settings. The order drift is a JSON aesthetic concern; the key drift is the meaningful one.
+
+### Part E - Missing top-level keys (sources-of-truth deferred to Section 5)
+
+#### `prs[]` (`ProjectBrief.md:555-562`)
+
+Each entry: `{"exercise": "Goblet Squat", "weight": 15, "reps": 12, "date": "2026-04-15"}`.
+
+Source candidates:
+- (1) per-set Epley scan via `analytics/PrDetector.epleyOneRm(weightKg, repsDone)` at `PrDetector.java:12-18`, applied to the in-window sessions.
+- (2) `SessionSet.isPr=true` rows in window joined to exercise (Phase 16-04 persisted `is_pr` via V27).
+- (3) `AnalyticsService.personalRecords(userId)` at `AnalyticsService.java:165-200` (returns all-time top-1-per-exercise as `List<PrDto>`), filtered by date.
+
+Verdict deferred to Section 5 Part A.
+
+#### `body_metrics[]` (`ProjectBrief.md:563-566`)
+
+Each entry: `{"date": "2026-04-01", "weight_kg": 79.2}`. Two fields per row.
+
+Source: `MetricsService.list(userId, period.from, period.to)` from Phase 17-03 returns `List<BodyMetricDto>` (12 components per row). Project to `(date, weightKg)`. Verdict deferred to Section 5 Part B.
+
+#### `consistency` (`ProjectBrief.md:567-571`)
+
+`{"current_streak_days": 5, "missed_days": [...], "missed_reasons": [...]}`.
+
+Source candidates:
+- `current_streak_days`: `analytics/StreakCalculator.compute(rawSessionDates, today)` at `StreakCalculator.java:16-19` returns `Result(current, longest)`; the in-window-current is derivable. Or re-derive locally from the in-window sessions list.
+- `missed_days`: derive from active plan's `dayOfWeek` set within `[from, to]` minus actual session dates.
+- `missed_reasons`: NO data source today. No `missed_workouts` table. V27 is the last applied migration; V28 is the next free Flyway slot.
+
+Verdict deferred to Section 5 Part C.
+
+## Section 4 - Behavioral Analysis
+
+### Part A - JSON property naming convention
+
+`JacksonConfig.java:11-19` configures `JavaTimeModule`, `WRITE_DATES_AS_TIMESTAMPS=false`, `serializationInclusion=NON_NULL`. Does NOT set `PropertyNamingStrategies.SNAKE_CASE`. Grep confirms zero pre-existing `@JsonNaming` usage in `backend/src` (this audit declares the precedent).
+
+#### Direction A - migrate ALL export DTOs to snake_case
+
+Target: class-level `@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)` on `ClaudeSummaryDto`, `FullExportDto`, `ImportResultDto`, `CsvImportResultDto`.
+
+- Touches: 4 DTO files (1 annotation each), `docs/EXPORT_FORMAT.md` (every camelCase example flips), `docs/examples/full-export-example.json` (every key flips), `ExportIntegrationTest.java` (4 jsonPath assertions flip), `FullExportImportIntegrationTest.java` (~8 assertions flip), `ExportFormatExampleTest.java` (1 assertion flip), frontend export client + tests (all `bodyMetrics`, `supplements`, `schemaVersion` references).
+- Pros: matches the brief example literally on the LLM-paste workflow; one consistent wire convention across the package.
+- Cons: BREAKING change on `FullExportDto` round-trip - every prior backup file becomes unimportable unless the example also flips and the operator re-runs export. The `ExportFormatExampleTest` would fail until the example JSON is rewritten in lockstep.
+
+#### Direction B - keep camelCase everywhere, document the deviation
+
+Target: extend `docs/EXPORT_FORMAT.md` with a "claude-summary wire format" section that says "WorkoutHub emits camelCase; the ProjectBrief example is illustrative."
+
+- Touches: `docs/EXPORT_FORMAT.md` (add a section, ~20 lines).
+- Pros: smallest possible change; no DTO touches; backups remain importable; client unaffected.
+- Cons: the wire format diverges from the brief on the canonical LLM-paste workflow; users who paste the spec example into Claude get one shape but the actual export emits a different shape.
+
+#### Direction C - split per consumer
+
+Target: class-level `@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)` on `ClaudeSummaryDto` ONLY. `FullExportDto`, `ImportResultDto`, `CsvImportResultDto` stay camelCase.
+
+- Touches: `dto/ClaudeSummaryDto.java` (1 class annotation; recursive across nested records via record-level inheritance? Jackson's `SnakeCaseStrategy` applies to all fields of the annotated class but NOT to nested record types unless they are also annotated - **must apply the annotation on every nested record explicitly**: `UserSummary`, `Period`, `Totals`, `WorkoutEntry`, `ExerciseEntry`, `SetEntry` -> 7 annotations total). Or apply via `Jackson2ObjectMapperBuilderCustomizer` scoped at write time - more invasive. Recommend the per-record annotation. `ExportIntegrationTest.java` flips ~4 jsonPath assertions to snake_case.
+- Pros: LLM consumer matches the brief; backup/restore is unaffected; no doc/example/frontend churn.
+- Cons: two conventions in one package (mild cognitive load); 7 annotations needed (one per claude-summary record).
+
+#### Recommendation
+
+**Direction C.** The full-export contract is a backup-and-restore wire format — LLM ergonomics are not the driver there, and `docs/EXPORT_FORMAT.md` already declares it as the source of truth. The claude-summary contract IS LLM-paste-driven and the brief example is the spec; matching the brief directly improves the paste-workflow without disrupting backup users. Per-record `@JsonNaming` is the surgical landing site.
+
+If during plan 18-03 it surfaces that `frontend/(app)/export/` reads claude-summary fields in code (currently it does NOT — `ExportClient` only triggers downloads), the verdict is unchanged: the JSON is server-rendered for paste, not consumed by frontend code.
+
+### Part B - Cost of adding each missing top-level key
+
+| Missing key | If added to `ClaudeSummaryDto` | If left out |
+| --- | --- | --- |
+| `prs` | +1 record component on top-level, +1 nested `PrEntry` record (4 fields), +1 mapper helper on `ExportService` (computePrsInWindow scan), +1 cross-package import (`analytics/PrDetector`) | ROADMAP "prs" deliverable not closed; brief example divergent |
+| `body_metrics` | +1 record component, +1 nested `BodyMetricSummary` record (2 fields), +1 cross-package call (`metrics/MetricsService.list`) | ROADMAP not literally listing `body_metrics` but brief lists it as authoritative; LLM coach loses weight-trend signal |
+| `consistency` | +1 record component, +1 nested `Consistency` record (3 fields), +2 cross-package reads (`analytics/StreakCalculator` or local re-derive; `workouts/WorkoutPlanRepository.findByUserIdAndActiveTrue` for `missed_days`) | ROADMAP "consistency" deliverable not closed |
+
+**Recommendation: ADD all three.** ROADMAP `:90` literally lists `prs` and `consistency` as Phase 18 deliverables. `body_metrics` is brief-mandated. Section 6 buckets them together under `claude-summary-fields` since the touch site is the same DTO + service.
+
+### Part C - `summary` subkey gaps
+
+`planned_workouts`:
+- Source: count `WorkoutDay`s on the user's active plan whose `dayOfWeek` (1-7 ISO) maps to a calendar day in `[period.from, period.to]`. `period` covers `windowDays` consecutive days, so `plannedWorkouts = sum over each WorkoutDay d of: count of calendar days in window where DayOfWeek(day) == d.dayOfWeek and d.focus != REST`. One repo call: `WorkoutPlanRepository.findByUserIdAndActiveTrue` (already used by `IcsExportService` at `:38`).
+- Cost: cheap; no new SQL.
+- Edge case: no active plan -> emit `null` (Jackson NON_NULL strips); `adherence_percent` becomes meaningless and must also emit null.
+
+`adherence_percent`:
+- Pure derivation from `totalWorkouts` and `plannedWorkouts`. Zero-divide guard: emit null when `plannedWorkouts == null || plannedWorkouts == 0`. Round to nearest integer per brief (`90` not `90.0`).
+
+`weight_change_kg`:
+- Source: `MetricsService.list(userId, period.from, period.to)` returns `List<BodyMetricDto>` ordered by `recordedDate DESC`. Latest minus earliest with non-null `weightKg`. Emit null when fewer than 2 non-null weights in window.
+- Cost: 1 cross-package read (already needed for `body_metrics[]`); reuse the same fetch.
+
+All three gaps fold into the same plan as the snake_case migration if Direction C is chosen; one plan covers `summary` subkeys + the snake_case verdict.
+
+### Part D - `user.age` and `user.goals` array shape
+
+`age`:
+- Derived from `UserProfile.birthDate` (already on the entity per Phase 17-01 audit Section 1; `FullExportDto.UserSection.birthDate` at `:24` exposes it). Compute `Period.between(birthDate, LocalDate.now(ZoneOffset.UTC)).getYears()` at export time. If `birthDate` null, emit null.
+- Cost: trivial.
+
+`goals` array:
+- Today: `UserProfile.goals` is SQL TEXT; `FullExportDto.UserSection.goals` is `String` matching the column.
+- Three options:
+  - (1) Split client-side at claude-summary export time on a delimiter (newline OR `;`). Document the delimiter in `docs/EXPORT_FORMAT.md` claude-summary section. Full-export round-trip unaffected.
+  - (2) Add a parallel SQL column `user_profile.goals_array TEXT[]` keeping the original `goals` for back-compat. Two-source-of-truth issue.
+  - (3) Migrate `user_profile.goals` to `text[]` in V28; entity `String` -> `List<String>`; profile form rewrites to a chip-input or multiline textarea with split-on-save. BREAKING for the existing profile UI.
+
+**Recommendation: option (1).** v0.4 budget; no migration; the brief example shape lifts to OK without disrupting the existing profile form. Trade-off: the full-export shape stays single-string (operator sees `"goals": "Fit vücut\nKaraciğer iyileştirme"` in the backup file); the claude-summary shape shows the array view.
+
+### Part E - `workouts[i].type` derivation
+
+`WorkoutSession.workoutDayId` is nullable (sessions can be ad-hoc; `FullImportService.replacePlansSection:128` calls `sessions.detachSessionsFromDays(userId)` which UPDATEs `workout_day_id = NULL`). When non-null, fetch `WorkoutDay.name` (e.g. `"Üst Vücut İtme"`); when null, emit null and let Jackson NON_NULL strip the key.
+
+Cost: one repo lookup per distinct non-null `workoutDayId` in the recent-sessions list. Cache via `Map<UUID, String>` populated by a single `findAllById(distinctIds)` call to keep complexity O(1) per session.
+
+Implementation site: `ExportService.toEntry` already iterates `session.getSets()`; thread the prepopulated map through as a second argument. Or batch-load before the `recent.stream().map(...)` chain.
+
+### Part F - Round-trip stability re-check (post-Plan-14-02 i-2 closure)
+
+Pipeline: `GET /api/export/full` -> `POST /api/export/import` -> `GET /api/export/full` -> diff.
+
+#### Acceptable drift
+
+- `exportedAt` is `Instant.now()` per `FullExportService.build:64`. NEVER byte-identical across exports. Acceptable (metadata, not data). Document re-export comparison strategy that ignores `exportedAt`.
+- `BodyMetric.id` and `Supplement.id` not preserved on import: `replaceMetrics:155-178` and `replaceSupplements:180-198` instantiate fresh entities WITHOUT `m.setId(r.id())`. After round-trip, these ids change. Acceptable for v0.4: no downstream FK depends on them; round-trip is "data-equal" not "byte-equal". Document.
+- `Supplement.timing` enum tolerance: `parseTiming` at `FullImportService.java:318-327` throws 422 on unknown values (NOT silent downgrade as the plan's context paragraph stated; the plan misread the source). The `ImportValidator.validateSupplements:148-157` warns but `parseTiming` itself is strict (`valueOf` -> 422). Behavior is correct. Document the tolerance asymmetry between validator (warns) and importer (rejects).
+
+#### Production gaps
+
+**Gap 1: `is_pr` round-trip drop.** `FullExportDto.SetRow` (`:64-72`) has 8 components, none is `isPr`. After Phase 16-04 persisted `SessionSet.isPr` via V27, the export silently drops the column at `FullExportService.toSessionSection:148-156`. After re-import, every set's `is_pr` flips to `false` (V27 `DEFAULT false`) regardless of what the source database had. **Subsequent `/api/sessions/{id}` reads return `newPr: null` for every set.** Until a PR-recompute pass runs, no PRs are visible.
+
+This is a NEW production gap surfaced by Phase 16-04. Plan 14-02 closed i-2 (test-side seed); it predates the V27 column. Fix: add `Boolean isPr` as the 9th `SetRow` component; preserve on `insertSessions:286-300`; OR call `SessionSetsService.recomputePrForExerciseHistory(userId, exerciseId)` for each touched `(user, exerciseId)` pair at the END of the import transaction.
+
+**Raise as NEW ISSUE i-10 candidate.** Plan 18-04 candidate.
+
+**Gap 2: session `workoutDayId` not validated against the payload's plan.day.id set.** `FullImportService.importDump` (`:71-109`) sequence: wipeSessions -> replacePlans -> insertSessions. If the payload's `sessions[i].workoutDayId` references a `workout_day.id` that does NOT exist in the same payload's `plans[].days[].id` set, the FK violation fires at `sessions.save(s)` (`:301`) and rolls back the entire transaction. The error surfaces as a 500-class status, not a curated 422. `ImportValidator` does NOT pre-validate this referential integrity (`validateSessions:116-146` only checks set-level shape).
+
+Fix: add `ImportValidator.validateSessionDayIds(plans, sessions, errors)` that collects `Set<UUID> declaredDayIds` from `plans[].days[].id` and asserts `every session's workoutDayId is null OR in declaredDayIds`. Adds 1 method, 1 call line in `validate(...)`, 1 new test. Fold into Plan 18-04 alongside Gap 1.
+
+**Gap 3: `SetRow.completed` write back-trip semantics.** `SetRow.completed` (`:71`) is `boolean` primitive (not nullable). `SessionSet.isCompleted()` returns `boolean`. The export carries it. Import preserves it via `set.setCompleted(r.completed())` at `:296`. No drift. Acceptable; mention only to confirm `completed` round-trips correctly (contrast with `is_pr` which silently drops).
+
+**Gap 4: `goals` round-trip stability.** `FullExportDto.UserSection.goals` is `String` matching `UserProfile.goals` SQL TEXT. Round-trip is stable. Direction Part D option (1) "split at claude-summary export time" does NOT affect the full-export shape; it only affects the brief LLM-paste view. Confirmed acceptable.
+
+#### Summary
+
+Five round-trip behaviors cataloged: 3 acceptable (exportedAt drift, BodyMetric/Supplement id non-preservation, timing strict-reject documented), 2 production gaps (is_pr drop -> i-10, session.workoutDayId validator gap). Both gaps fold into Plan 18-04.
