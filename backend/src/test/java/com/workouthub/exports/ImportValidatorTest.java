@@ -94,7 +94,7 @@ class ImportValidatorTest {
     void setWithMissingExerciseIdIsAWarning() {
         SetRow set = new SetRow(
                 UUID.randomUUID(), null, (short) 1, (short) 10,
-                new BigDecimal("60"), null, true, null);
+                new BigDecimal("60"), null, true, null, null);
         SessionSection session = new SessionSection(
                 UUID.randomUUID(), null,
                 Instant.parse("2026-04-20T10:00:00Z"),
@@ -116,7 +116,7 @@ class ImportValidatorTest {
                 List.of(new SetRow(
                         UUID.randomUUID(), UUID.randomUUID(),
                         (short) 1, (short) 10, new BigDecimal("60"),
-                        null, true, null)))));
+                        null, true, null, null)))));
         FullExportDto dump = withSessions(many);
         ValidationReport r = ImportValidator.validate(dump);
         assertThat(r.suggestions()).anyMatch(s -> s.contains("1001 sessions"));
