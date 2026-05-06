@@ -63,11 +63,11 @@ class ExportIntegrationTest extends AbstractIntegrationTest {
                         org.hamcrest.Matchers.containsString("attachment")))
                 .andExpect(jsonPath("$.user.email").doesNotExist())
                 .andExpect(jsonPath("$.period.days").value(30))
-                .andExpect(jsonPath("$.summary.totalWorkouts").value(1))
-                .andExpect(jsonPath("$.summary.totalVolumeKg").value(1000.00))
-                .andExpect(jsonPath("$.summary.plannedWorkouts").doesNotExist())
-                .andExpect(jsonPath("$.summary.adherencePercent").doesNotExist())
-                .andExpect(jsonPath("$.summary.weightChangeKg").doesNotExist())
+                .andExpect(jsonPath("$.summary.total_workouts").value(1))
+                .andExpect(jsonPath("$.summary.total_volume_kg").value(1000.00))
+                .andExpect(jsonPath("$.summary.planned_workouts").doesNotExist())
+                .andExpect(jsonPath("$.summary.adherence_percent").doesNotExist())
+                .andExpect(jsonPath("$.summary.weight_change_kg").doesNotExist())
                 .andExpect(jsonPath("$.workouts.length()").value(1))
                 .andExpect(jsonPath("$.workouts[0].exercises[0].sets.length()").value(2))
                 .andExpect(jsonPath("$.workouts[0].exercises[0].sets[0].reps").value(10))
@@ -76,11 +76,11 @@ class ExportIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.prs.length()").value(1))
                 .andExpect(jsonPath("$.prs[0].weight").value(50.0))
                 .andExpect(jsonPath("$.prs[0].reps").value(10))
-                .andExpect(jsonPath("$.bodyMetrics").isArray())
-                .andExpect(jsonPath("$.bodyMetrics.length()").value(0))
-                .andExpect(jsonPath("$.consistency.currentStreakDays").value(1))
-                .andExpect(jsonPath("$.consistency.missedReasons").isArray())
-                .andExpect(jsonPath("$.consistency.missedReasons.length()").value(0));
+                .andExpect(jsonPath("$.body_metrics").isArray())
+                .andExpect(jsonPath("$.body_metrics.length()").value(0))
+                .andExpect(jsonPath("$.consistency.current_streak_days").value(1))
+                .andExpect(jsonPath("$.consistency.missed_reasons").isArray())
+                .andExpect(jsonPath("$.consistency.missed_reasons.length()").value(0));
     }
 
     @Test
@@ -98,7 +98,7 @@ class ExportIntegrationTest extends AbstractIntegrationTest {
         mvc.perform(get("/api/export/claude-summary")
                         .header("Authorization", "Bearer " + mine.accessToken()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.summary.totalWorkouts").value(0))
+                .andExpect(jsonPath("$.summary.total_workouts").value(0))
                 .andExpect(jsonPath("$.workouts.length()").value(0));
     }
 
