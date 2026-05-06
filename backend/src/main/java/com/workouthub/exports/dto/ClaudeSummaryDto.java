@@ -1,5 +1,7 @@
 package com.workouthub.exports.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.List;
  * aggregate totals, per-session detail, in-window personal records, weight
  * trend, and consistency metrics.
  */
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record ClaudeSummaryDto(
         UserSummary user,
         Period period,
@@ -19,6 +22,7 @@ public record ClaudeSummaryDto(
         List<BodyMetricSummary> bodyMetrics,
         Consistency consistency) {
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record UserSummary(
             String displayName,
             Integer age,
@@ -27,8 +31,10 @@ public record ClaudeSummaryDto(
             String healthNotes,
             List<String> goals) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record Period(LocalDate from, LocalDate to, int days) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record Totals(
             int totalWorkouts,
             Integer plannedWorkouts,
@@ -37,6 +43,7 @@ public record ClaudeSummaryDto(
             Long avgSessionDurationMin,
             BigDecimal weightChangeKg) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record WorkoutEntry(
             LocalDate date,
             String type,
@@ -46,23 +53,28 @@ public record ClaudeSummaryDto(
             Short mood,
             Short energy) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record ExerciseEntry(
             String nameTr,
             String nameEn,
             List<SetEntry> sets) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record SetEntry(BigDecimal weight, short reps) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record PrEntry(
             String exercise,
             BigDecimal weight,
             short reps,
             LocalDate date) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record BodyMetricSummary(
             LocalDate date,
             BigDecimal weightKg) {}
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record Consistency(
             int currentStreakDays,
             List<LocalDate> missedDays,
