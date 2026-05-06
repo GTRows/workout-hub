@@ -122,7 +122,8 @@ be `null` if an LLM should not touch profile data.
   "weightKg": 80.0,              // nullable (bodyweight movements)
   "rpe": 8,                      // 1-10 scale, nullable
   "completed": true,
-  "notes": "free text"           // nullable
+  "notes": "free text",          // nullable
+  "isPr": true                   // boolean, true when this set is a personal record; nullable on legacy payloads
 }
 ```
 
@@ -182,6 +183,25 @@ Importing via `POST /api/export/import` replaces each slice wholesale:
 `exerciseId` references must match rows already present in the
 `exercises` catalog. The catalog itself is not exported or imported —
 it is shared and administratively managed.
+
+## Acceptable round-trip drift
+
+A `GET /api/export/full -> POST /api/export/import -> GET /api/export/full`
+round-trip preserves every payload field that semantically belongs to user
+data, but the following metadata-level fields are intentionally not
+byte-stable across re-export. Tooling that diffs successive exports should
+ignore these fields:
+
+- `BodyMetric.id` and `Supplement.id` are not preserved on import.
+  The replace-then-reinsert path generates fresh ids for every body-metric
+  and supplement row. The data is "data-equal" but not "byte-equal".
+- `exportedAt` is set to `Instant.now()` at export time. Two successive
+  exports of the same database state differ in this field.
+- `Supplement.timing` enum tolerance is asymmetric. The validator surfaces
+  unknown timing values as warnings (informational), but the importer
+  rejects unknown timing values with HTTP 422 (binding gate). To round-trip
+  cleanly, every `timing` value on the wire must match the documented enum
+  vocabulary above.
 
 ## Minimal example
 

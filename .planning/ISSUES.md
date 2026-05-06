@@ -104,3 +104,22 @@ Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. C
 **Trigger to reopen:** Same as i-1 — needs local repro.
 
 *Closed by Phase 14 Plan 02: test now seeds a plan via POST /api/workout-plans before exporting; the production export/import round-trip was correct all along.*
+
+### i-10 — is_pr round-trip drop on full-export import path
+
+**Symptom:** After Phase 16-04 persisted `SessionSet.isPr` via V27, the
+full-export wire format silently dropped the column at
+`FullExportService.toSessionSection`. After re-import, every set's
+`is_pr` flipped to `false` (V27 `DEFAULT false`) regardless of what the
+source database had. Subsequent `GET /api/sessions/{id}` reads returned
+`newPr: null` for every set until a PR-recompute pass ran.
+
+**Trigger:** Surfaced post-Phase-16-04 by the 18-01 audit Section 4 Part F
+Gap 1.
+
+*Closed by Phase 18 Plan 04: appended `Boolean isPr` to
+`FullExportDto.SetRow` (9th component); `FullExportService.toSessionSection`
+populates from entity; `FullImportService.insertSessions` reads null-safely;
+`SessionSetsService.recomputePrForExerciseHistory` is invoked once per
+distinct touched (user, exerciseId) pair after the insert loop as a
+safety net for legacy payloads.*
