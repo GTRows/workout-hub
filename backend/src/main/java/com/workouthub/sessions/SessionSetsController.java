@@ -5,6 +5,7 @@ import com.workouthub.sessions.SessionSetsService.AddSetResult;
 import com.workouthub.sessions.dto.AddSetRequest;
 import com.workouthub.sessions.dto.SessionSetDto;
 import com.workouthub.sessions.dto.UpdateSetRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/sessions/{sessionId}/sets")
+@Tag(name = "Workout Sessions: Sets", description = "Per-set logging within an active workout session.")
 public class SessionSetsController {
 
     private final SessionSetsService service;

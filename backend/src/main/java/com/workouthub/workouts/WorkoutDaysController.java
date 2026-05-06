@@ -8,6 +8,7 @@ import com.workouthub.workouts.dto.UpdateDayExerciseRequest;
 import com.workouthub.workouts.dto.UpdateWorkoutDayRequest;
 import com.workouthub.workouts.dto.WorkoutDayDto;
 import com.workouthub.workouts.dto.WorkoutDayExerciseDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/workout-plans/{planId}")
+@Tag(name = "Workout Plans: Days", description = "Day CRUD nested under a parent workout plan.")
 public class WorkoutDaysController {
 
     private final WorkoutDaysService service;

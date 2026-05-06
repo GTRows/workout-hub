@@ -5,6 +5,7 @@ import com.workouthub.common.web.NotFoundException;
 import com.workouthub.webhooks.domain.WebhookToken;
 import com.workouthub.webhooks.domain.WebhookTokenRepository;
 import com.workouthub.webhooks.dto.WebhookTokenDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users/me/webhook-tokens")
+@Tag(name = "Webhook Tokens", description = "Per-user HMAC tokens for inbound webhook integrations.")
 @Transactional
 public class WebhookTokensController {
 

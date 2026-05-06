@@ -5,6 +5,7 @@ import com.workouthub.workouts.dto.CreateWorkoutPlanRequest;
 import com.workouthub.workouts.dto.UpdateWorkoutPlanRequest;
 import com.workouthub.workouts.dto.WorkoutPlanDto;
 import com.workouthub.workouts.dto.WorkoutPlanSummaryDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/workout-plans")
+@Tag(name = "Workout Plans", description = "Workout plan CRUD and activation for the current user.")
 public class WorkoutPlansController {
 
     private final WorkoutPlansService service;

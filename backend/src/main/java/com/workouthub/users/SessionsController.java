@@ -4,6 +4,7 @@ import com.workouthub.auth.domain.RefreshToken;
 import com.workouthub.auth.domain.RefreshTokenRepository;
 import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.common.web.NotFoundException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController("userSessionsController")
 @RequestMapping("/api/users/me/sessions")
+@Tag(name = "User Sessions (refresh tokens)", description = "Active refresh-token sessions for the current user with revocation.")
 public class SessionsController {
 
     public record SessionDto(

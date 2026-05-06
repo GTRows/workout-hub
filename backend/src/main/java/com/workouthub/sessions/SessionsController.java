@@ -5,6 +5,7 @@ import com.workouthub.sessions.dto.FinishSessionRequest;
 import com.workouthub.sessions.dto.SessionDto;
 import com.workouthub.sessions.dto.SessionSummaryDto;
 import com.workouthub.sessions.dto.StartSessionRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/sessions")
+@Tag(name = "Workout Sessions", description = "Live workout session lifecycle: start, active, finish, history.")
 public class SessionsController {
 
     private final SessionsService service;

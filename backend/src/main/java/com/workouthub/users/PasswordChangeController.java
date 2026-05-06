@@ -4,6 +4,7 @@ import com.workouthub.auth.domain.RefreshTokenRepository;
 import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.users.domain.User;
 import com.workouthub.users.domain.UserRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/users/me")
+@Tag(name = "Users: Password", description = "Authenticated password change for the current user.")
 public class PasswordChangeController {
 
     public record ChangePasswordRequest(

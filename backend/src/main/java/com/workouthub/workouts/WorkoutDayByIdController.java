@@ -4,6 +4,7 @@ import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.common.web.NotFoundException;
 import com.workouthub.workouts.domain.WorkoutDayRepository;
 import com.workouthub.workouts.dto.WorkoutDayDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/workout-days")
+@Tag(name = "Workout Days", description = "Direct workout-day lookup by id, used by the session execution screen.")
 public class WorkoutDayByIdController {
 
     private final WorkoutDayRepository days;

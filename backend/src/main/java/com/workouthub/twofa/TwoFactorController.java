@@ -4,6 +4,7 @@ import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.twofa.dto.SetupResponse;
 import com.workouthub.twofa.dto.StatusResponse;
 import com.workouthub.twofa.dto.VerifyRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users/me/2fa")
+@Tag(name = "2FA", description = "Two-factor authentication enrollment, verification, and disabling.")
 public class TwoFactorController {
 
     private final TwoFactorService service;
