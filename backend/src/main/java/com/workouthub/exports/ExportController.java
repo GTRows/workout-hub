@@ -10,6 +10,7 @@ import com.workouthub.exports.dto.FullExportDto.SessionSection;
 import com.workouthub.exports.dto.FullExportDto.SupplementRow;
 import com.workouthub.exports.dto.FullExportDto.UserSection;
 import com.workouthub.exports.dto.ImportResultDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/export")
+@Tag(name = "Export", description = "Full-data and Claude-summary JSON export and import endpoints.")
 @Validated
 public class ExportController {
 

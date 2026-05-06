@@ -4,6 +4,7 @@ import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.supplements.dto.CreateSupplementRequest;
 import com.workouthub.supplements.dto.SupplementDto;
 import com.workouthub.supplements.dto.UpdateSupplementRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/supplements")
+@Tag(name = "Supplements", description = "Supplement intake schedule and adherence tracking.")
 public class SupplementsController {
 
     private final SupplementsService service;

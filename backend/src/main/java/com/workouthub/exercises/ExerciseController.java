@@ -4,6 +4,7 @@ import com.workouthub.exercises.domain.Category;
 import com.workouthub.exercises.domain.Difficulty;
 import com.workouthub.exercises.domain.Equipment;
 import com.workouthub.exercises.dto.ExerciseDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/exercises")
+@Tag(name = "Exercises", description = "Public exercise catalog with search and filters.")
 @Validated
 public class ExerciseController {
 

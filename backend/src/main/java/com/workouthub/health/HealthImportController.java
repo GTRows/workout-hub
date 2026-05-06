@@ -2,6 +2,7 @@ package com.workouthub.health;
 
 import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.health.dto.HealthImportResultDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/health/import")
+@Tag(name = "Health Import", description = "Import from external health platforms (Apple Health, Google Fit).")
 public class HealthImportController {
 
     private final HealthImportService service;

@@ -6,6 +6,7 @@ import com.workouthub.achievements.domain.UserAchievement;
 import com.workouthub.achievements.domain.UserAchievementRepository;
 import com.workouthub.achievements.dto.AchievementDto;
 import com.workouthub.common.security.AppUserPrincipal;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/achievements")
+@Tag(name = "Achievements", description = "User-earned achievement badges and progression milestones.")
 public class AchievementsController {
 
     private final AchievementRepository achievements;

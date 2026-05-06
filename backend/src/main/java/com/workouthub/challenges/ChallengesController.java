@@ -5,6 +5,7 @@ import com.workouthub.challenges.domain.MonthlyChallengeRepository;
 import com.workouthub.challenges.dto.ChallengeProgressDto;
 import com.workouthub.challenges.dto.MonthlyChallengeDto;
 import com.workouthub.common.security.AppUserPrincipal;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/challenges")
+@Tag(name = "Challenges", description = "Active monthly challenges and the current user's enrollments.")
 public class ChallengesController {
 
     private final MonthlyChallengeRepository repo;

@@ -7,6 +7,7 @@ import com.workouthub.water.domain.WaterEntryRepository;
 import com.workouthub.water.dto.CreateWaterRequest;
 import com.workouthub.water.dto.WaterDayDto;
 import com.workouthub.water.dto.WaterEntryDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/water")
+@Tag(name = "Water", description = "Daily water intake logging.")
 @Transactional
 public class WaterController {
 

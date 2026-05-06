@@ -3,6 +3,7 @@ package com.workouthub.analytics;
 import com.workouthub.analytics.dto.LastPerformanceDto;
 import com.workouthub.analytics.dto.ProgressPointDto;
 import com.workouthub.common.security.AppUserPrincipal;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/exercises/{exerciseId}")
+@Tag(name = "Analytics: Exercise", description = "Per-exercise analytics: history, personal records, and progression.")
 @Validated
 public class ExerciseAnalyticsController {
 

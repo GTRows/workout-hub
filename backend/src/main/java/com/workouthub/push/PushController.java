@@ -3,6 +3,7 @@ package com.workouthub.push;
 import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.push.dto.SubscribeRequest;
 import com.workouthub.push.dto.SubscriptionDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/push")
+@Tag(name = "Push Notifications", description = "Web Push subscription registration and notification delivery.")
 public class PushController {
 
     private final PushService service;

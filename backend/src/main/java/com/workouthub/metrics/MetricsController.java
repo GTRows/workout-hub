@@ -4,6 +4,7 @@ import com.workouthub.common.security.AppUserPrincipal;
 import com.workouthub.metrics.MetricsService.UpsertResult;
 import com.workouthub.metrics.dto.BodyMetricDto;
 import com.workouthub.metrics.dto.UpsertBodyMetricRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/metrics")
+@Tag(name = "Body Metrics", description = "Body metrics: weight and circumference measurements with history.")
 public class MetricsController {
 
     private final MetricsService service;

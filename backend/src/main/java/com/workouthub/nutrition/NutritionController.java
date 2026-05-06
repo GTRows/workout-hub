@@ -5,6 +5,7 @@ import com.workouthub.nutrition.dto.CreateNutritionEntryRequest;
 import com.workouthub.nutrition.dto.FoodItemDto;
 import com.workouthub.nutrition.dto.NutritionEntryDto;
 import com.workouthub.nutrition.dto.UpdateNutritionEntryRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Nutrition", description = "Foods, meals, and daily nutrition tracking.")
 @Validated
 public class NutritionController {
 

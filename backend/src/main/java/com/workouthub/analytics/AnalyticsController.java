@@ -6,6 +6,7 @@ import com.workouthub.analytics.dto.PrDto;
 import com.workouthub.analytics.dto.StreakDto;
 import com.workouthub.analytics.dto.WeeklyVolumeDto;
 import com.workouthub.common.security.AppUserPrincipal;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/analytics")
+@Tag(name = "Analytics", description = "Cross-cutting workout analytics: volume, frequency, and trends.")
 @Validated
 public class AnalyticsController {
 
