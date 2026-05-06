@@ -177,3 +177,157 @@ populates the `code` field today; the other handlers leave it null (Jackson
 `NON_NULL` strips it from the wire).
 
 ---
+
+## Section 2 - Current Documentation State
+
+### 2A. docs/API.md
+
+Current content (verbatim, 3 lines):
+```
+# API
+
+Placeholder. The full REST surface is documented here starting in PHASE 1.
+```
+
+Phase 1 closed in v0.3 (sessions and JWT auth shipped). The placeholder text
+is stale by 2 milestones (v0.3 + v0.4 = 17 phases of REST surface added).
+ROADMAP Phase 19 owns the rewrite; plan 19-05 ships it.
+
+### 2B. docs/EXPORT_FORMAT.md
+
+Post-18-04 deliverable. Documents:
+- `FullExportDto` wire shape (camelCase per Direction C from 18-03).
+- `ClaudeSummaryDto` wire shape (snake_case per `@JsonNaming` -- confirmed at
+  `backend/src/main/java/com/workouthub/exports/dto/ClaudeSummaryDto.java:15`
+  with the strategy applied per-record AND on each nested record per 18-03
+  Direction C).
+- Round-trip drift section (Plan 18-04: `BodyMetric.id`, `Supplement.id`,
+  `exportedAt` non-preservation; timing validator-vs-importer asymmetry).
+- `FullExportDto.SetRow` 9 components incl. `isPr` (post-18-04).
+
+Phase 19 must NOT re-document the export wire shape in `docs/API.md`. Plan
+19-05 LINKS from `docs/API.md` to `docs/EXPORT_FORMAT.md` for export field
+references.
+
+### 2C. SELF_HOSTED_CONTRACT.md section 7 alignment
+
+Cite-and-walk:
+- **7.1 Built-in auth (`docs/SELF_HOSTED_CONTRACT.md:264-269`)**: "The app
+  handles login and (optionally) registration. Use a maintained library;
+  never hand-roll JWT validation." -- WorkoutHub uses JJWT 0.13.0
+  (`backend/pom.xml:22`). Compliant.
+- **7.2 Reverse-proxy forward-auth (`docs/SELF_HOSTED_CONTRACT.md:270-290`)**:
+  enumerates `AUTH_MODE`, `AUTH_HEADER_USER`, `AUTH_HEADER_EMAIL`,
+  `AUTH_HEADER_GROUPS`, `TRUSTED_PROXIES`. The trust gate is non-optional:
+  "The headers are trusted **only** when the request source IP matches
+  `TRUSTED_PROXIES`." Enforced at `ForwardAuthFilter.java:62-65`.
+- **7.3 Sessions (`docs/SELF_HOSTED_CONTRACT.md:292-296`)**: "Use Redis
+  (Postgres apps) or a dedicated SQLite file (SQLite apps)." NOTE:
+  WorkoutHub uses stateless JWT (no Redis). Per `SecurityConfig.java:35`,
+  `SessionCreationPolicy.STATELESS`. Audit declares this is acceptable per
+  the contract's intent (section 7.3 governs storage IF sessions exist;
+  stateless JWT replaces sessions in this app). NOT raised as an issue.
+- **0 (`docs/SELF_HOSTED_CONTRACT.md` "scope of this file"; pre-section 1)**:
+  "Pick an identity provider" is explicitly out-of-scope. SpringDoc is purely
+  a documentation generator -- adding it does NOT introduce an OIDC client
+  or OAuth flow. Compliant.
+
+Walk `backend/src/main/resources/application.yml:43-49` for env-var alignment:
+- `app.auth.mode` <- `APP_AUTH_MODE` (default `builtin`).
+- `app.auth.trusted-proxies` <- `APP_AUTH_TRUSTED_PROXIES` (default empty).
+- `app.auth.headers.user/email/groups` <- `APP_AUTH_HEADER_USER/EMAIL/GROUPS`
+  (defaults `X-Forwarded-User`, `X-Forwarded-Email`, `X-Forwarded-Groups` --
+  match contract verbatim).
+
+Cross-check: contract uses bare names (`AUTH_MODE`, `TRUSTED_PROXIES`); app
+reads `APP_*`-prefixed names. Same prefix convention as `APP_JWT_SECRET`,
+`APP_CORS_ALLOWED_ORIGINS`, etc. Documented in `.env.example`. Audit confirms
+no contract violation; the prefix is project-specific.
+
+---
+
+## Section 3 - SpringDoc 2.x Artifact + Version Verification
+
+### 3A. Candidate artifact selection
+
+| Option | Coordinates | Description | Verdict |
+|--------|-------------|-------------|---------|
+| A1 | `org.springdoc:springdoc-openapi-starter-webmvc-ui` | Boot 3.x compatible; bundles `springdoc-openapi-starter-webmvc-api` + Swagger UI assets. Default UI at `/swagger-ui.html`, JSON at `/v3/api-docs`. | **Recommended** subject to Section 4 Part 4D verdict (Swagger UI exposure stance). |
+| A2 | `org.springdoc:springdoc-openapi-starter-webmvc-api` | JSON-only, no Swagger UI. Half the dependency footprint of A1. | Fallback if Section 4 Part 4D lands on Direction D3 (no UI in image). |
+| A3 | `org.springdoc:springdoc-openapi-webmvc-core` | Manual configuration; bypasses Boot auto-config. | Rejected; not idiomatic. |
+
+Lean Option A1. Section 4 Part 4D confirms Direction D1 (UI bundled, BIND_ADDR
+is the trust boundary), so A1 is the verdict.
+
+### 3B. Version pin verification
+
+Plan 19-01 cannot run WebFetch in this executor's environment (audit-only;
+read-only on filesystem). Use the conservative-pin fallback per the plan's
+fallback clause:
+
+- **Conservative pin: `2.6.0`** -- released circa Spring Boot 3.4.x; per
+  SemVer guarantees + the SpringDoc 2.x compatibility statement, it is
+  compatible with Spring Boot 3.5.x. Plan 19-02 MUST verify against
+  `https://springdoc.org/` and `https://github.com/springdoc/springdoc-openapi/releases`
+  before merging the `pom.xml` edit. The conservative pin minimises risk on
+  first integration; bumping to `2.7.x` (or whatever Section 19-02 verifies as
+  current) is a one-line follow-up.
+- Alternative: pin via `<springdoc.version>` `<properties>` entry mirroring
+  the existing `<jjwt.version>` precedent at `backend/pom.xml:22`. Plan 19-02
+  recommend.
+
+Known-incompatibility watchlist (for plan 19-02 CI smoke test):
+- Jakarta EE 10 vs 11: Spring Boot 3.5 ships Jakarta EE 10; SpringDoc 2.x
+  starter-webmvc-ui 2.6+ supports Jakarta EE 10 transitively.
+- Hibernate Validator transitive version: SpringDoc declares no override; uses
+  Spring Boot's managed version (`hibernate-validator` 8.x for Boot 3.5).
+  No conflict expected.
+- swagger-core 2.x: SpringDoc 2.x ships swagger-core 2.2.x; no conflict with
+  WorkoutHub's other deps (no swagger-core elsewhere).
+
+Plan 19-02 risk: `local_maven_gap` memory means SpringDoc smoke testing
+runs only in CI on first push. Mitigation: include a smoke test
+(Section 5E) that hits `GET /v3/api-docs` and asserts the `paths` map is
+non-empty + contains at least one `/api/**` entry. Failure here surfaces a
+SpringDoc/Boot incompatibility immediately on the CI run.
+
+### 3C. Integration shape (zero-touch defaults)
+
+With `springdoc-openapi-starter-webmvc-ui` on the classpath, SpringDoc
+auto-configures:
+- `GET /v3/api-docs` (JSON; configurable via `springdoc.api-docs.path`).
+- `GET /v3/api-docs.yaml` (YAML).
+- `GET /swagger-ui.html` (UI; redirects to `/swagger-ui/index.html`).
+- `GET /swagger-ui/**` (UI assets).
+
+Default scan covers all `@RestController` beans across the application.
+Without further annotation:
+- Endpoints group by class simple name (tag = `SessionsController`, etc.).
+- Schema property names follow Jackson DTO record components +
+  `@JsonNaming` (verified: SpringDoc 2.x reads Jackson config; per-record
+  `@JsonNaming` on `ClaudeSummaryDto` produces `total_workouts` shape).
+- HTTP method, path, request body type, response body type auto-derive from
+  the controller method signature.
+- No security scheme declared by default (every endpoint shows as public).
+- Jackson `NON_NULL` global (`JacksonConfig.java:14-21`) is honoured
+  schema-side as `nullable: true` rather than `required: false`.
+
+Plan 19-02 must ADD an `OpenApiConfig` Java class declaring the two security
+schemes (Section 4A) AND must explicitly EXCLUDE actuator + `/livez` +
+`/healthz` + `/metrics` paths via `springdoc.paths-to-match` (Section 4B).
+
+### 3D. application.yml config keys (plan 19-02 reference)
+
+| Key | Default | Recommend | Rationale |
+|-----|---------|-----------|-----------|
+| `springdoc.api-docs.path` | `/v3/api-docs` | keep default | SpringDoc convention; tooling expects it. |
+| `springdoc.swagger-ui.path` | `/swagger-ui.html` | keep default | UI convention. |
+| `springdoc.paths-to-match` | (all) | `/api/**` | Excludes operator paths (Section 4B). |
+| `springdoc.swagger-ui.disable-swagger-default-url` | `false` | `true` | Suppress default petstore demo url. |
+| `springdoc.swagger-ui.tags-sorter` | (none) | `alpha` | Predictable navigation across 22 tags. |
+| `springdoc.swagger-ui.operations-sorter` | (none) | `method` | Group by HTTP verb within each tag. |
+
+These keys do NOT need to live in `application-prod.yml` unless the prod
+overrides differ. Plan 19-02 verdict: add to `application.yml` only.
+
+---
