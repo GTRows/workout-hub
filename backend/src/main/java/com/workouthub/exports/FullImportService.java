@@ -6,6 +6,7 @@ import com.workouthub.exports.dto.FullExportDto;
 import com.workouthub.exports.dto.ImportResultDto;
 import com.workouthub.metrics.domain.BodyMetric;
 import com.workouthub.metrics.domain.BodyMetricRepository;
+import com.workouthub.sessions.SessionSetsService;
 import com.workouthub.sessions.domain.SessionSet;
 import com.workouthub.sessions.domain.WorkoutSession;
 import com.workouthub.sessions.domain.WorkoutSessionRepository;
@@ -24,8 +25,10 @@ import com.workouthub.workouts.domain.WorkoutPlanRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -49,6 +52,7 @@ public class FullImportService {
     private final SupplementRepository supplements;
     private final WorkoutPlanRepository plans;
     private final WorkoutSessionRepository sessions;
+    private final SessionSetsService sessionSets;
 
     @PersistenceContext
     private EntityManager em;
@@ -59,13 +63,15 @@ public class FullImportService {
             BodyMetricRepository metrics,
             SupplementRepository supplements,
             WorkoutPlanRepository plans,
-            WorkoutSessionRepository sessions) {
+            WorkoutSessionRepository sessions,
+            SessionSetsService sessionSets) {
         this.users = users;
         this.profiles = profiles;
         this.metrics = metrics;
         this.supplements = supplements;
         this.plans = plans;
         this.sessions = sessions;
+        this.sessionSets = sessionSets;
     }
 
     public ImportResultDto importDump(UUID userId, FullExportDto dump) {
@@ -91,7 +97,11 @@ public class FullImportService {
         // re-insert plans before sessions.
         int sessionsDeleted = wipeSessions(userId);
         int plansInserted = replacePlans(userId, dump.plans());
-        int sessionsInserted = insertSessions(userId, dump.sessions());
+        Set<UUID> touchedExerciseIds = new LinkedHashSet<>();
+        int sessionsInserted = insertSessions(userId, dump.sessions(), touchedExerciseIds);
+        for (UUID exerciseId : touchedExerciseIds) {
+            sessionSets.recomputePrForExerciseHistory(userId, exerciseId);
+        }
 
         // sessionsDeleted is currently unused but kept so the logic-line is
         // explicit; suppress the unused-variable warning.
@@ -131,7 +141,12 @@ public class FullImportService {
 
     public int replaceSessionsSection(UUID userId, List<FullExportDto.SessionSection> rows) {
         wipeSessions(userId);
-        return insertSessions(userId, rows);
+        Set<UUID> touchedExerciseIds = new LinkedHashSet<>();
+        int inserted = insertSessions(userId, rows, touchedExerciseIds);
+        for (UUID exerciseId : touchedExerciseIds) {
+            sessionSets.recomputePrForExerciseHistory(userId, exerciseId);
+        }
+        return inserted;
     }
 
     private int doImportProfile(UUID userId, FullExportDto.UserSection section) {
@@ -268,7 +283,10 @@ public class FullImportService {
         return count;
     }
 
-    private int insertSessions(UUID userId, List<FullExportDto.SessionSection> rows) {
+    private int insertSessions(
+            UUID userId,
+            List<FullExportDto.SessionSection> rows,
+            Set<UUID> touchedExerciseIds) {
         if (rows == null || rows.isEmpty()) return 0;
 
         int count = 0;
@@ -286,6 +304,7 @@ public class FullImportService {
             if (section.sets() != null) {
                 for (FullExportDto.SetRow r : section.sets()) {
                     if (r.exerciseId() == null) continue;
+                    touchedExerciseIds.add(r.exerciseId());
                     SessionSet set = new SessionSet();
                     if (r.id() != null) set.setId(r.id());
                     set.setExercise(em.getReference(Exercise.class, r.exerciseId()));
@@ -294,6 +313,7 @@ public class FullImportService {
                     set.setWeightKg(r.weightKg());
                     set.setRpe(r.rpe());
                     set.setCompleted(r.completed());
+                    set.setPr(r.isPr() != null && r.isPr());
                     set.setNotes(r.notes());
                     s.addSet(set);
                 }

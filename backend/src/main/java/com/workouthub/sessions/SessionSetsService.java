@@ -146,7 +146,7 @@ public class SessionSetsService {
      * Epley) never outrank weighted sets via {@code max}. If every set has a
      * null Epley, no row is promoted and all rows are cleared.
      */
-    private void recomputePrForExerciseHistory(UUID userId, UUID exerciseId) {
+    public void recomputePrForExerciseHistory(UUID userId, UUID exerciseId) {
         List<SessionSet> history = sets.findAllByUserAndExercise(userId, exerciseId);
         Optional<SessionSet> winner = history.stream()
                 .filter(SessionSet::isCompleted)

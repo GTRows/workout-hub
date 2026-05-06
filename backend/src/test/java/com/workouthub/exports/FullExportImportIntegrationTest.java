@@ -6,10 +6,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.workouthub.exercises.domain.Category;
+import com.workouthub.exercises.domain.Difficulty;
+import com.workouthub.exercises.domain.Equipment;
+import com.workouthub.exercises.domain.Exercise;
+import com.workouthub.exercises.domain.ExerciseRepository;
 import com.workouthub.support.AbstractIntegrationTest;
 import com.workouthub.support.TestAuthHelpers;
 import com.workouthub.support.TestAuthHelpers.SeededUser;
 import com.workouthub.users.domain.Role;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,6 +31,7 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired TestAuthHelpers helpers;
     @Autowired ObjectMapper objectMapper;
+    @Autowired ExerciseRepository exerciseRepo;
 
     @Test
     void unauthenticatedFullExportReturns401() throws Exception {
@@ -186,5 +193,74 @@ class FullExportImportIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(0));
         mvc.perform(get("/api/metrics").header("Authorization", auth))
                 .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void prFlagSurvivesFullExportImportRoundTrip() throws Exception {
+        SeededUser u = helpers.seed(
+                "rt-pr-" + System.nanoTime() + "@test.local", SECRET, Role.USER);
+        String auth = "Bearer " + u.accessToken();
+        UUID exerciseId = seedExercise();
+
+        // Start a session, add a single PR set (first ever set always flags PR), finish it.
+        MvcResult start = mvc.perform(post("/api/sessions/start")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String sessionId = objectMapper.readTree(start.getResponse().getContentAsString())
+                .get("id").asText();
+
+        mvc.perform(post("/api/sessions/" + sessionId + "/sets")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"exerciseId\":\"" + exerciseId + "\","
+                                + "\"setNumber\":1,\"repsDone\":5,\"weightKg\":100}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.newPr").value(true));
+
+        mvc.perform(post("/api/sessions/" + sessionId + "/finish")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+
+        // Export.
+        MvcResult exp = mvc.perform(get("/api/export/full").header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andReturn();
+        String dump = exp.getResponse().getContentAsString();
+
+        // Re-import the same payload (wipes-then-reinserts).
+        mvc.perform(post("/api/export/import")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(dump))
+                .andExpect(status().isOk());
+
+        // Look up the (only) re-imported finished session via /api/sessions/history,
+        // then GET its detail to assert the PR flag survived the round-trip.
+        MvcResult list = mvc.perform(get("/api/sessions/history").header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andReturn();
+        String reimportedSessionId = objectMapper.readTree(list.getResponse().getContentAsString())
+                .get("content").get(0).get("id").asText();
+
+        mvc.perform(get("/api/sessions/" + reimportedSessionId).header("Authorization", auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets[0].newPr").value(true));
+    }
+
+    private UUID seedExercise() {
+        String tag = "fe-pr-" + System.nanoTime();
+        Exercise e = new Exercise();
+        e.setNameTr("TR " + tag);
+        e.setNameEn("EN " + tag);
+        e.setCategory(Category.PUSH);
+        e.setEquipment(Equipment.DUMBBELL);
+        e.setMusclePrimary("chest");
+        e.setDifficulty(Difficulty.INTERMEDIATE);
+        return exerciseRepo.save(e).getId();
     }
 }

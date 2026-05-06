@@ -153,7 +153,8 @@ public class FullExportService {
                         set.getWeightKg(),
                         set.getRpe(),
                         set.isCompleted(),
-                        set.getNotes()))
+                        set.getNotes(),
+                        set.isPr()))
                 .toList();
         return new SessionSection(
                 s.getId(),

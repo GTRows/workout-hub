@@ -69,7 +69,8 @@ public record FullExportDto(
             BigDecimal weightKg,
             Short rpe,
             boolean completed,
-            String notes) {}
+            String notes,
+            Boolean isPr) {}
 
     public record MetricRow(
             UUID id,
