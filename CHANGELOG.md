@@ -115,6 +115,9 @@ migrations (V26 clientSetId, V27 is_pr) auto-apply on backend start.
 - Dual `SessionsController` operationId collision in the OpenAPI
   document resolved via per-method `@Operation(operationId = ...)`
   hand-disambiguation (Phase 19-03).
+- Sort exercises by `orderIndex` in `WorkoutDaysService.reorderItems`
+  and `deleteItem` responses so the JSON reflects the freshly
+  assigned order rather than the in-memory insertion order.
 
 ### Security
 
