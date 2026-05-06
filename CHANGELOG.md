@@ -118,9 +118,15 @@ migrations (V26 clientSetId, V27 is_pr) auto-apply on backend start.
 - Sort exercises by `orderIndex` in `WorkoutDaysService.reorderItems`
   and `deleteItem` responses so the JSON reflects the freshly
   assigned order rather than the in-memory insertion order.
+- Add the missing 9th `isPr` argument to `SetRow` constructors in
+  `ImportValidatorTest` so the suite compiles after the Phase 18-04
+  record widening.
 
 ### Security
 
+- Override `org.postgresql:postgresql` to 42.7.11 (Spring Boot BOM
+  brings 42.7.10) to close CVE-2026-42198 (HIGH, client-side DoS in
+  pgjdbc).
 - Backend dependency baseline carried from v0.3.2: Spring Boot 3.5.14,
   bouncycastle 1.84, jjwt 0.13.0, jose4j 0.9.6, async-http-client 2.12.4
   all unchanged. SpringDoc 2.6.0 introduced in Phase 19-02 is the only
