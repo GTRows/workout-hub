@@ -3,6 +3,7 @@ package com.workouthub.admin;
 import com.workouthub.admin.dto.CreateExerciseRequest;
 import com.workouthub.admin.dto.UpdateExerciseRequest;
 import com.workouthub.exercises.dto.ExerciseDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/exercises")
+@Tag(name = "Admin: Exercises", description = "ADMIN-only exercise catalog CRUD.")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminExercisesController {
 

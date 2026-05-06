@@ -6,6 +6,7 @@ import com.workouthub.admin.dto.UpdateUserRequest;
 import com.workouthub.audit.AuditLogService;
 import com.workouthub.auth.PasswordResetService;
 import com.workouthub.common.security.AppUserPrincipal;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/users")
+@Tag(name = "Admin: Users", description = "ADMIN-only user management: list, create, update, delete.")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUsersController {
 

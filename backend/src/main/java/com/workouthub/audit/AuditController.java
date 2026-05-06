@@ -2,6 +2,7 @@ package com.workouthub.audit;
 
 import com.workouthub.audit.domain.AuditLog;
 import com.workouthub.audit.domain.AuditLogRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/audit")
+@Tag(name = "Admin: Audit", description = "ADMIN-only audit log read access for security review.")
 @PreAuthorize("hasRole('ADMIN')")
 public class AuditController {
 

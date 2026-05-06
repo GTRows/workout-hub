@@ -7,6 +7,7 @@ import com.workouthub.challenges.domain.MonthlyChallengeRepository;
 import com.workouthub.challenges.dto.MonthlyChallengeDto;
 import com.workouthub.challenges.dto.UpsertChallengeRequest;
 import com.workouthub.common.web.NotFoundException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/challenges")
+@Tag(name = "Admin: Challenges", description = "ADMIN-only monthly-challenge management and configuration.")
 @PreAuthorize("hasRole('ADMIN')")
 @Transactional
 public class AdminChallengesController {
