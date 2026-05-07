@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.5 Frontend Completion (active)
-Phase: 21 of 30 (frontend-audit) - not started
-Plan: Not started
-Status: v0.4 milestone shipped 2026-05-07. Ready to plan Phase 21 (frontend-audit).
+Phase: 22 of 30 (auth-pages) - complete; next is inserted Phase 22.5 (typed-apierror-helper)
+Plan: 22.5-01 typed-apierror-helper - not started
+Status: Phase 22 closed at bbd231e. Inserted Phase 22.5 (typed-apierror-helper) per 21-01-AUDIT Section 6. Next: 22.5-01 plan.
 Last activity: 2026-05-07 - v0.4 milestone archive complete; v0.4.0 tag at c8fab14
 
-Progress: v0.5 ____________________ 0% (0/10 phases)
+Progress: v0.5 ____________________ 20% (2/10 phases; 1 decimal phase inserted)
           v0.6 (planned) - Phases 31-37
           v1.0 (planned) - Phases 38-44
 

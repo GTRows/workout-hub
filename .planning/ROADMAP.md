@@ -44,6 +44,17 @@ Full archive: [milestones/v0.4-ROADMAP.md](milestones/v0.4-ROADMAP.md).
 Phase outline (full breakdown deferred to /gsd:new-milestone when v0.4 ships):
 - Phase 21: frontend-audit - inventory routes/components, classify stubs vs real surfaces.
 - Phase 22: auth-pages - login/register, client session, refresh token flow, error states.
+
+#### Phase 22.5: typed-apierror-helper (INSERTED)
+
+**Goal:** Surface the v0.4 backend `ApiError.code` typed enum (SESSION_ALREADY_ACTIVE, SESSION_ALREADY_FINISHED, SESSION_FINISHED, SET_NUMBER_DUPLICATE, plus future codes) on the frontend so Phase 25 session-execution can branch on typed codes instead of parsing error messages.
+**Depends on:** Phase 22
+**Research:** Unlikely (v0.4 ApiError shape is documented in docs/API.md)
+**Plans:** 1
+
+Plans:
+- [ ] 22.5-01: typed-apierror-helper
+
 - Phase 23: dashboard - today's workout card, weekly summary, last weight, quick actions.
 - Phase 24: plan-editor - weekly view, drag-drop reorder (days + exercises), exercise CRUD modal.
 - Phase 25: session-execution - set logging UI, rest timer, last-performance display, IndexedDB offline queue and sync.
@@ -89,5 +100,6 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | 1-12 (v0.3 scope)           | v0.3      | 14/14 | Complete    | 2026-05-03 |
 | 13-20 (v0.4 scope)          | v0.4      | 25/25 | Complete    | 2026-05-07 |
 | 21-30 (v0.5 scope)          | v0.5      | 0/?   | Active      | -          |
+| 22.5 typed-apierror-helper  | v0.5      | 0/1   | Not started | -          |
 | 31-37 (v0.6 scope)          | v0.6      | 0/?   | Planned     | -          |
 | 38-44 (v1.0 scope)          | v1.0      | 0/?   | Planned     | -          |
