@@ -492,3 +492,99 @@ Routes that exist but are NOT in any ProjectBrief Phase 4-6 surface (extras ship
 - `/achievements` - gamification (PB:475-477 bonus); shipped early.
 - Webhook tokens UI in profile - scale-webhook (pre-gsd backend), exposed via UI.
 - AI prepare/apply flow - separate from raw JSON download; not explicitly in PB but supports PB:504-573 "Claude data management".
+
+---
+
+## Section 6 - v0.5 Phase Re-scope Recommendation
+
+| Phase | Recommendation | Rationale (Section 5 evidence) | Sub-plans | Dependencies |
+|---|---|---|---|---|
+| 22 auth-pages | narrow | Login + refresh interceptor already done; only `Logout` action missing (S5 Auth row) and a non-existent `/register` was removed in t-51. Remaining work: add a logout button somewhere in the (app) shell (top nav + bottom nav profile menu) that calls `clearTokens` and clears query cache; surface session-expired toast when refresh fails (`client.ts:60` already clears tokens silently). | 1 | none |
+| 23 dashboard | narrow | Today's-workout card exists. Missing: weekly summary card (`fetchSessionHistory` aggregation); last-weight chip (`fetchMetrics` first row). Quick actions exist but minimal. (S5 Dashboard rows.) | 1 | 22 (logout link in nav drawer) |
+| 24 plan-editor | expand + split | Current plan editor only reorders exercises. Missing: plan create / activate / day add-remove-edit / exercise CRUD modal / drag-drop day reorder (S5 Plan editor rows; 9 missing wrappers in S4 4d). | 4 sub-plans recommended: 24-01 plan CRUD + activate; 24-02 day CRUD + day-reorder; 24-03 exercise CRUD modal; 24-04 day-level drag-and-drop polish. | 23 (dashboard surfaces a "Plan duzenle" CTA) |
+| 25 session-execution | expand + split | Set logging UI exists but `rpe` not captured; IndexedDB queue + drain unwired in production code (S5 "IndexedDB queue" Partial; "Drain on online event" Stub). `clientSetId` idempotency missing (S4 4d). Edit-existing-set wrapper missing. ApiError typed-codes (`SESSION_FINISHED`, `SET_NUMBER_DUPLICATE`) not branched (S4 4d). | 4 sub-plans recommended: 25-01 add `clientSetId` + Zod schema for `addSet`; 25-02 wire IndexedDB enqueue + online-drain inside `session-client.tsx`; 25-03 typed-error branching for the four ApiError codes; 25-04 RPE input + edit-existing-set. | 22 (auth refresh stable), 24 (plan day data shape stable) |
+| 26 exercise-catalog | keep-as-outlined OR narrow | Catalog list, filter, search, detail modal, detail page all `Implemented` (S5 Exercise catalog rows). Outline already overshipped. Recommend `narrow` to: empty-state polish, search-no-result UX, infinite scroll if pagination becomes painful. If nothing operationally needed, downgrade to `defer-v0.6`. | 0-1 | none |
+| 27 history-view | keep-as-outlined OR narrow | Calendar + per-session detail done (S5 History rows). Recommend `narrow` to: link from per-session detail back into a "duplicate this workout" flow, OR `defer-v0.6` if the calendar is sufficient. | 0-1 | 25 (session detail unchanged) |
+| 28 metrics-ui | narrow | Weight chart, weekly/monthly/all-time, measurement form, deletion all `Implemented` (S5 Metrics rows). Missing: chest/arm/thigh fields (`bodyMetricSchema` already supports them); 200/201 distinction in toast (S4 4d). Progress photo upload is `defer-v0.6`. | 1 | none |
+| 29 profile-settings | merge with 22 OR narrow | Profile, supplements, webhook tokens all `Implemented` (S5 Profile rows). Recommend `merge` into 22 auth-pages: a single "auth+profile" phase covering logout + session-expired UX. If merge unwanted, downgrade to `narrow` for polish only (a11y, error states). | 0 | 22 |
+| 30 export-import-ui | keep-as-outlined OR narrow | Full JSON download, restore, Claude summary, per-section, CSV, AI prepare, AI apply, Apple/Google/Garmin import all `Implemented` (S5 Export rows). Recommend `narrow` to: confirmation step before destructive import (current import overwrites without warning beyond text label), and a download-history list (last N exports cached locally). | 0-1 | none |
+
+**Open issues that touch v0.5 phases:**
+- i-5 (next-intl 3 -> 4) - stays deferred. v0.5 keeps next-intl 3.x. No phase blocked by it.
+- i-6 (Next 15 -> 16) - stays deferred. Phase 22-30 can ship on Next 15.x. The plan note `i-6` should be re-considered post-v0.5 once major-bump bandwidth opens (v1.0 Phase 40).
+
+**Net-new phases the outline missed (recommend insert):**
+- `phase-22.5-frontend-error-state-baseline` - typed `ApiError.code` branching utility shared by `/dashboard`, `/session/[id]`, `/metrics`. Today only `(auth)/login/page.tsx:38-44` reads `error.status`; no consumer reads `error.body.code`. A small shared `mapApiError(error)` helper unblocks 25-03 and prevents drift across phases. Section 4 4d evidence.
+- `phase-25.5-session-set-zod-schema` - replace inline `AddSetPayload` (`endpoints.ts:139-147`) and `ImportResult` (`endpoints.ts:342-351`) with Zod schemas in `schemas.ts` so the wire format is single-sourced. Section 4 4d evidence.
+- `phase-29.5-middleware-route-coverage` - middleware matcher (`middleware.ts:42-54`) lacks `/achievements/:path*`. Server fetches still require Bearer, but unauthenticated visitors hit a render before redirect. Section 3c evidence.
+
+**Phases to advance (potentially v0.6 / v1.0):**
+- 26 (exercise-catalog) and 27 (history-view) and 30 (export-import-ui) over-shipped. If `narrow` recommendations land in their sibling phases, these three could be `defer-v0.6` (polish-only milestone) instead.
+- 32 pwa-polish (v0.6 outline) - already partially met by `frontend/public/manifest.webmanifest` + `frontend/public/sw.js` (Section 3c). Recommend a thin v0.6 phase that adds install prompt + visual polish only.
+
+---
+
+## Section 7 - Frontend Test Gate Posture
+
+**`frontend/package.json` scripts (verbatim, lines 7-17):**
+```
+"dev": "next dev",
+"build": "next build",
+"start": "next start",
+"lint": "eslint .",
+"typecheck": "tsc --noEmit",
+"test": "vitest run",
+"test:coverage": "vitest run --coverage",
+"test:watch": "vitest",
+"test:e2e": "playwright test"
+```
+
+**`frontend/playwright.config.ts` projects (verbatim, lines 22-27):**
+```
+projects: [
+  {
+    name: "chromium",
+    use: { ...devices["Desktop Chrome"] },
+  },
+],
+```
+baseURL: `process.env.E2E_WEB_BASE_URL ?? "http://localhost:3000"`. testDir: `./e2e`. Workers: 1, retries: 2 in CI. Single Chromium project; responsive 360 spec overrides viewport per-test.
+
+**CI wiring (`.github/workflows/ci.yml`):**
+| Script | Wired into CI? | Job (line) |
+|---|---|---|
+| `pnpm lint` | yes | `frontend.Lint` (line 58) |
+| `pnpm typecheck` | yes | `frontend.Typecheck` (line 62) |
+| `pnpm test:coverage` | yes | `frontend.Unit tests with coverage` (line 66) |
+| `pnpm build` | no (CI does not run a frontend build; trivy_image builds via Docker) | n/a |
+| `pnpm test:e2e` (Playwright) | no | not in `ci.yml` - runs locally only |
+| `pnpm test:watch` | no | n/a (dev-only) |
+
+**Routes with `Implemented` status (S5) but no neighbor `*.test.tsx`:**
+- `/exercises/[id]` - `exercise-detail-client.tsx` has no test (Section 2 row 7).
+- `/profile` - top-level `profile-client.tsx` has a test, but `webhook-tokens-section.tsx` test count is 2 and the underlying token URL builder (`buildScaleUrl`) lacks a unit test for SSR path.
+- Most lib modules under `frontend/src/lib/` have no tests: `endpoints.ts` (591 lines, 40+ wrappers), `schemas.ts` (332 lines), `token-store.ts`, `subscribe.ts`, `rest-timer.ts`, `locale.ts`, `today.ts`. Only `client.ts` and `offline/session-set-queue.ts` are unit-tested.
+- `Nav` and `BottomNav` and `Heatmap` components have no test (Section 3a).
+
+**Recommended test additions per future v0.5 phase:**
+
+| Phase | Test type | Target | Blocker / fixture need |
+|---|---|---|---|
+| 22 auth-pages | vitest component | logout button in (app) layout drawer | needs `Providers` test wrapper with mocked QueryClient |
+| 22 auth-pages | Playwright e2e | session-expired -> auto-redirect-to-login flow | needs Playwright fixture that pre-seeds an expired refresh token |
+| 23 dashboard | vitest component | weekly-summary aggregator | needs MSW mock for `/api/sessions/history` |
+| 24 plan-editor (24-01..24-04) | vitest component | plan create / activate flows; day add/remove; exercise CRUD modal | needs MSW handlers per new wrapper |
+| 25 session-execution (25-01) | vitest unit | `addSet` Zod schema with `clientSetId` | none |
+| 25 session-execution (25-02) | vitest integration | `session-client` enqueue path during offline; drain on online event | needs `fake-indexeddb` (already a devDep) + jsdom `dispatchEvent("online")` |
+| 25 session-execution (25-03) | vitest component | typed ApiError code branching for 4 codes (`SESSION_ALREADY_ACTIVE`, `SESSION_ALREADY_FINISHED`, `SESSION_FINISHED`, `SET_NUMBER_DUPLICATE`) | needs `mapApiError` helper from net-new phase 22.5 |
+| 25 session-execution (25-04) | vitest component | RPE input renders + sends; edit-existing-set | needs MSW handler for `PUT /api/sessions/{id}/sets/{setId}` |
+| 26 exercise-catalog | vitest component | empty-state / no-result rendering | low blocker |
+| 27 history-view | Playwright e2e | calendar -> session detail -> back to history navigation | needs admin-seeded fixtures |
+| 28 metrics-ui | vitest component | chest/arm/thigh form fields persist + display | none |
+| 28 metrics-ui | vitest unit | `upsertMetric` 200 vs 201 toast differentiation | needs MSW two-status mock; wrapper change required first |
+| 29 profile-settings (or merge into 22) | vitest a11y | label/input pairing on `Field` helper | needs `@testing-library/jest-dom` toHaveAccessibleName |
+| 30 export-import-ui | vitest component | confirm dialog before destructive import | none |
+| 30 export-import-ui | Playwright e2e | full export round-trip: download JSON, re-import | needs admin fixture + file-system tmpdir for the download |
+| 22.5 (net-new) | vitest unit | `mapApiError` helper | none |
+| 25.5 (net-new) | vitest unit | Zod schemas for `AddSetPayload`, `ImportResult` | none |
+| 29.5 (net-new) | vitest unit | middleware matcher includes `/achievements/:path*` | needs Next middleware test scaffold (currently absent) |
