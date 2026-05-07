@@ -37,7 +37,19 @@
     "restDay": "Bugun dinlenme gunu",
     "noPlan": "Aktif plan yok. Once bir plan olusturup aktiflestir.",
     "quickAdd": "Kilo ekle",
-    "viewPlan": "Plani gor"
+    "viewPlan": "Plani gor",
+    "weeklySummaryTitle": "Bu hafta",
+    "weeklySummaryCount": "{completed}/{total} antrenman",
+    "weeklySummaryTarget": "{actual}/{target} hedef",
+    "weeklySummaryEmpty": "Bu hafta antrenman yok",
+    "lastWeightTitle": "Son kilo",
+    "lastWeightValue": "{kg} kg",
+    "lastWeightToday": "Bugun",
+    "lastWeightDaysAgo": "{days} gun once",
+    "lastWeightAbsolute": "{date}",
+    "lastWeightEmpty": "Henuz kilo kaydi yok",
+    "lastWeightAddCta": "Kilo ekle",
+    "viewHistory": "Gecmis"
   },
   "session": {
     "loading": "Yukleniyor...",

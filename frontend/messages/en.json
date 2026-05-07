@@ -37,7 +37,19 @@
     "restDay": "Rest day",
     "noPlan": "No active plan. Create one and activate it first.",
     "quickAdd": "Log weight",
-    "viewPlan": "View plan"
+    "viewPlan": "View plan",
+    "weeklySummaryTitle": "This week",
+    "weeklySummaryCount": "{completed}/{total} workouts",
+    "weeklySummaryTarget": "{actual}/{target} target",
+    "weeklySummaryEmpty": "No workouts this week",
+    "lastWeightTitle": "Last weight",
+    "lastWeightValue": "{kg} kg",
+    "lastWeightToday": "Today",
+    "lastWeightDaysAgo": "{days} days ago",
+    "lastWeightAbsolute": "{date}",
+    "lastWeightEmpty": "No weight recorded yet",
+    "lastWeightAddCta": "Log weight",
+    "viewHistory": "History"
   },
   "session": {
     "loading": "Loading...",

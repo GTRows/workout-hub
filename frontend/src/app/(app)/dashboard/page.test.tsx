@@ -32,6 +32,18 @@ const messages = {
     noPlan: "No active plan",
     quickAdd: "Log weight",
     viewPlan: "View plan",
+    weeklySummaryTitle: "This week",
+    weeklySummaryCount: "{completed}/{total} workouts",
+    weeklySummaryTarget: "{actual}/{target} target",
+    weeklySummaryEmpty: "No workouts this week",
+    lastWeightTitle: "Last weight",
+    lastWeightValue: "{kg} kg",
+    lastWeightToday: "Today",
+    lastWeightDaysAgo: "{days} days ago",
+    lastWeightAbsolute: "{date}",
+    lastWeightEmpty: "No weight recorded yet",
+    lastWeightAddCta: "Log weight",
+    viewHistory: "History",
   },
 };
 
@@ -98,11 +110,24 @@ function routeFetch(routes: Record<string, () => Response>) {
   return vi.fn(async (input: string | URL | Request) => {
     const url = typeof input === "string" ? input : input.toString();
     for (const [suffix, factory] of Object.entries(routes)) {
-      if (url.endsWith(suffix)) return factory();
+      if (url.includes(suffix)) return factory();
     }
     throw new Error("unexpected fetch: " + url);
   });
 }
+
+const emptyHistoryPage = {
+  content: [],
+  totalElements: 0,
+  totalPages: 0,
+  number: 0,
+  size: 50,
+};
+
+const dashboardSideRoutes = {
+  "/api/sessions/history": () => jsonResponse(200, emptyHistoryPage),
+  "/api/metrics": () => jsonResponse(200, []),
+};
 
 describe("DashboardPage", () => {
   beforeEach(() => {
@@ -129,6 +154,7 @@ describe("DashboardPage", () => {
             finished: false,
             sets: [],
           }),
+        ...dashboardSideRoutes,
       })
     );
 
@@ -142,6 +168,7 @@ describe("DashboardPage", () => {
       routeFetch({
         "/api/workout-plans/active": () => jsonResponse(200, activePlan),
         "/api/sessions/active": () => noContent(),
+        ...dashboardSideRoutes,
       })
     );
 
@@ -161,6 +188,7 @@ describe("DashboardPage", () => {
       routeFetch({
         "/api/workout-plans/active": () => jsonResponse(200, planNoToday),
         "/api/sessions/active": () => noContent(),
+        ...dashboardSideRoutes,
       })
     );
 
@@ -174,6 +202,7 @@ describe("DashboardPage", () => {
       routeFetch({
         "/api/workout-plans/active": () => noContent(),
         "/api/sessions/active": () => noContent(),
+        ...dashboardSideRoutes,
       })
     );
 
@@ -198,6 +227,7 @@ describe("DashboardPage", () => {
             finished: false,
             sets: [],
           }),
+        ...dashboardSideRoutes,
       })
     );
 
@@ -208,5 +238,77 @@ describe("DashboardPage", () => {
     await waitFor(() =>
       expect(pushMock).toHaveBeenCalledWith(`/session/${newSessionId}`)
     );
+  });
+
+  it("renders WeeklySummaryCard and LastWeightCard in the Start branch", async () => {
+    const recentDate = new Date();
+    recentDate.setHours(0, 0, 0, 0);
+    recentDate.setDate(recentDate.getDate() - 2);
+    const yyyy = recentDate.getFullYear();
+    const mm = String(recentDate.getMonth() + 1).padStart(2, "0");
+    const dd = String(recentDate.getDate()).padStart(2, "0");
+    const recentIso = `${yyyy}-${mm}-${dd}`;
+
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        "/api/workout-plans/active": () => jsonResponse(200, activePlan),
+        "/api/sessions/active": () => noContent(),
+        "/api/sessions/history": () =>
+          jsonResponse(200, {
+            content: [
+              {
+                id: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+                workoutDayId: null,
+                startedAt: new Date().toISOString(),
+                endedAt: null,
+                finished: true,
+                setCount: 0,
+              },
+            ],
+            totalElements: 1,
+            totalPages: 1,
+            number: 0,
+            size: 50,
+          }),
+        "/api/metrics": () =>
+          jsonResponse(200, [
+            {
+              id: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+              recordedDate: recentIso,
+              weightKg: 75.5,
+              bodyFatPercent: null,
+              waistCm: null,
+              chestCm: null,
+              armCm: null,
+              thighCm: null,
+              photoUrl: null,
+              notes: null,
+              createdAt: "2026-04-01T00:00:00Z",
+              updatedAt: "2026-04-01T00:00:00Z",
+            },
+          ]),
+      })
+    );
+
+    renderDashboard(<DashboardPage />);
+    expect(await screen.findByText("Mid-week Push")).toBeInTheDocument();
+    expect(await screen.findByText(/this week/i)).toBeInTheDocument();
+    expect(await screen.findByText("75.5 kg")).toBeInTheDocument();
+  });
+
+  it("includes a History link in QuickActions", async () => {
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        "/api/workout-plans/active": () => noContent(),
+        "/api/sessions/active": () => noContent(),
+        ...dashboardSideRoutes,
+      })
+    );
+
+    renderDashboard(<DashboardPage />);
+    const link = await screen.findByRole("link", { name: /history/i });
+    expect(link).toHaveAttribute("href", "/history");
   });
 });
