@@ -14,109 +14,30 @@ None - project is application code; planning draws from `docs/SELF_HOSTED_CONTRA
 
 - (Pre-GSD) **v0.1 / v0.2** - shipped pre-GSD (informal); see `.planning/HANDOFF.md` for state snapshot
 - (Shipped) [**v0.3 Self-Hosted Contract Alignment**](milestones/v0.3-ROADMAP.md) - Phases 1-12 (shipped 2026-05-03; v0.3.0/v0.3.1/v0.3.2)
-- (Active) **v0.4 Backend Feature Completion** - Phases 13-20 (in progress)
-- (Planned) **v0.5 Frontend Completion** - Phases 21-30
+- (Shipped) [**v0.4 Backend Feature Completion**](milestones/v0.4-ROADMAP.md) - Phases 13-20 (shipped 2026-05-07; v0.4.0)
+- (Active) **v0.5 Frontend Completion** - Phases 21-30
 - (Planned) **v0.6 Operational Maturity** - Phases 31-37
 - (Planned) **v1.0 Release Hardening** - Phases 38-44
 
 ## Phases
 
-### v0.4 Backend Feature Completion (In Progress)
+<details>
+<summary>v0.4 Backend Feature Completion (Phases 13-20) - SHIPPED 2026-05-07</summary>
 
-**Milestone Goal:** Complete the backend modules from `ProjectBrief.md` phases 3-5 - workout plan editing, live session execution, body metrics, full export refinement - and close the disabled-test debt carried from v0.3 (i-1, i-2).
+Full archive: [milestones/v0.4-ROADMAP.md](milestones/v0.4-ROADMAP.md).
 
-#### Phase 13: workouts-audit
+- [x] Phase 13: workouts-audit (1/1 plan) - completed 2026-05-04
+- [x] Phase 14: workouts-hardening (2/2 plans) - completed 2026-05-04
+- [x] Phase 15: sessions-core (4/4 plans) - completed 2026-05-04
+- [x] Phase 16: sessions-analytics (4/4 plans) - completed 2026-05-05
+- [x] Phase 17: body-metrics (4/4 plans) - completed 2026-05-05
+- [x] Phase 18: export-refinement (4/4 plans) - completed 2026-05-06
+- [x] Phase 19: api-contract-docs (5/5 plans) - completed 2026-05-07
+- [x] Phase 20: release-v0-4 (1/1 plan) - completed 2026-05-07
 
-**Goal:** Inventory the existing `workouts/` package state, list missing endpoints from ProjectBrief Phase 3, and review mapper/cascade behavior to scope hardening work.
-**Depends on:** v0.3 archive complete
-**Research:** Unlikely (internal patterns)
-**Plans:** 1
+</details>
 
-Plans:
-- [x] 13-01: workouts-audit
-
-#### Phase 14: workouts-hardening
-
-**Goal:** Fix i-1 (WorkoutDaysIntegrationTest helper NPE, 6 disabled tests) and i-2 (FullExportImportIntegrationTest plan round-trip drop). Address mapper/cascade root causes uncovered in Phase 13.
-**Depends on:** Phase 13
-**Research:** Unlikely (internal debugging)
-**Plans:** 2
-
-Plans:
-- [x] 14-01: workouts-hardening i-1 (cascade-id fix in WorkoutDaysService)
-- [x] 14-02: workouts-hardening i-2 (export round-trip plans drop)
-
-#### Phase 15: sessions-core
-
-**Goal:** Land `/sessions/start`, `/sessions/active`, `/sessions/:id/sets` (POST/PUT), `/sessions/:id/finish`, `/sessions/history`, `/sessions/:id` endpoints; finalize the offline-first sync contract that the IndexedDB queue drains against.
-**Depends on:** Phase 14
-**Research:** Unlikely (internal patterns)
-**Plans:** 4 (1 audit shipped + 3 hardening plans recommended)
-
-Plans:
-- [x] 15-01: sessions-core audit
-- [x] 15-02: contract-finalization (clientSetId idempotency key)
-- [x] 15-03: heart-rate field exposure on session DTOs
-- [x] 15-04: auto-numbering verdict and typed 409 error codes
-
-#### Phase 16: sessions-analytics
-
-**Goal:** Add `/exercises/:id/last-performance` and `/exercises/:id/progress` endpoints; introduce PR computation, volume aggregation, and 1RM (Epley) projections at the query layer.
-**Depends on:** Phase 15
-**Research:** Unlikely (internal patterns)
-**Plans:** 4
-
-Plans:
-- [x] 16-01: sessions-analytics audit
-- [x] 16-02: package-extraction (move analytics scaffold to com.workouthub.analytics)
-- [x] 16-03: epley-projection (add ProgressPointDto.estimatedOneRmKg)
-- [x] 16-04: pr-durability (V27 is_pr persist plus entity/mapper/service plus update path)
-
-#### Phase 17: body-metrics
-
-**Goal:** Complete the `metrics/` package: weight, body measurements, optional progress photo URL, and time-series read endpoints for the metrics UI.
-**Depends on:** Phase 16
-**Research:** Unlikely (internal patterns)
-**Plans:** 4 (in progress; plans 01-03 shipped 2026-05-05)
-
-Plans:
-- [x] 17-01: body-metrics audit
-- [x] 17-02: photo-url-exposure
-- [x] 17-03: time-series-range
-- [ ] 17-04: status-code-split
-
-#### Phase 18: export-refinement
-
-**Goal:** Align `/api/export/claude-summary` output with the ProjectBrief example (period, summary, prs, consistency sections); make the import endpoint round-trip-stable per the i-2 fix.
-**Depends on:** Phase 17
-**Research:** Unlikely (internal patterns)
-**Plans:** TBD
-
-Plans:
-- [ ] 18-01: TBD
-
-#### Phase 19: api-contract-docs
-
-**Goal:** Generate OpenAPI via SpringDoc, refresh `docs/API.md`, document JWT and forward-auth schemes, and verify the surface matches `docs/SELF_HOSTED_CONTRACT.md` section 7.
-**Depends on:** Phase 18
-**Research:** Likely (SpringDoc 2.x with Spring Boot 3.5 + Java 21, JWT bearer auth scheme, actuator exclusion)
-**Research topics:** SpringDoc 2.x configuration on Spring Boot 3.5.x, JWT bearer token security scheme definition, excluding actuator and management endpoints from public docs.
-**Plans:** TBD
-
-Plans:
-- [ ] 19-01: TBD
-
-#### Phase 20: release-v0-4
-
-**Goal:** Run a CVE patch sweep on backend dependencies, update `CHANGELOG.md`, `RELEASE.md`, and `docs/MIGRATION.md`, and cut `v0.4.0` to GHCR.
-**Depends on:** Phase 19
-**Research:** Unlikely (release runbook established in v0.3)
-**Plans:** TBD
-
-Plans:
-- [ ] 20-01: TBD
-
-### v0.5 Frontend Completion (Planned)
+### v0.5 Frontend Completion (Active)
 
 **Milestone Goal:** Ship the user-facing surfaces - auth pages, dashboard, plan editor, session-execution screen with the offline queue wired to the v0.4 sync contract, history, metrics UI, profile, export UI.
 
@@ -166,14 +87,7 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | Phase                       | Milestone | Plans | Status      | Completed  |
 | --------------------------- | --------- | ----- | ----------- | ---------- |
 | 1-12 (v0.3 scope)           | v0.3      | 14/14 | Complete    | 2026-05-03 |
-| 13. workouts-audit          | v0.4      | 1/1   | Complete    | 2026-05-04 |
-| 14. workouts-hardening      | v0.4      | 2/2   | Complete    | 2026-05-04 |
-| 15. sessions-core           | v0.4      | 4/4   | Complete    | 2026-05-04 |
-| 16. sessions-analytics      | v0.4      | 4/4   | Complete    | 2026-05-05 |
-| 17. body-metrics            | v0.4      | 3/4   | In progress | -          |
-| 18. export-refinement       | v0.4      | 0/?   | Not started | -          |
-| 19. api-contract-docs       | v0.4      | 0/?   | Not started | -          |
-| 20. release-v0-4            | v0.4      | 0/?   | Not started | -          |
-| 21-30 (v0.5 scope)          | v0.5      | 0/?   | Planned     | -          |
+| 13-20 (v0.4 scope)          | v0.4      | 25/25 | Complete    | 2026-05-07 |
+| 21-30 (v0.5 scope)          | v0.5      | 0/?   | Active      | -          |
 | 31-37 (v0.6 scope)          | v0.6      | 0/?   | Planned     | -          |
 | 38-44 (v1.0 scope)          | v1.0      | 0/?   | Planned     | -          |
