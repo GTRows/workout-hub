@@ -235,7 +235,25 @@
       "FULL_BODY": "Tam vucut",
       "REST": "Dinlenme"
     },
-    "dayOfWeekTaken": "Bu gun zaten dolu. Once mevcut gunu sil veya tasi."
+    "dayOfWeekTaken": "Bu gun zaten dolu. Once mevcut gunu sil veya tasi.",
+    "addExercise": "Egzersiz ekle",
+    "editExercise": "Duzenle",
+    "removeExercise": "Kaldir",
+    "removeExerciseConfirm": "Bu egzersizi gunden kaldir?",
+    "exerciseDialogAddTitle": "Egzersiz ekle",
+    "exerciseDialogEditTitle": "Egzersizi duzenle",
+    "exerciseLabel": "Egzersiz",
+    "exercisePlaceholder": "Egzersiz sec",
+    "targetSetsLabel": "Set",
+    "targetRepsMinLabel": "Min tekrar",
+    "targetRepsMaxLabel": "Max tekrar",
+    "targetWeightKgLabel": "Agirlik (kg)",
+    "restSecondsLabel": "Mola (sn)",
+    "notesLabel": "Not",
+    "exerciseRequired": "Egzersiz secmen gerek",
+    "targetSetsRequired": "Set sayisi en az 1 olmali",
+    "repsRangeInvalid": "Min tekrar max'tan kucuk olmali",
+    "loadingExercises": "Egzersizler yukleniyor..."
   },
   "export": {
     "title": "Disa Aktar",

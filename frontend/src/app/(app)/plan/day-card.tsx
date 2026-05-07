@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { DayEditDialog } from "./day-edit-dialog";
-import { DayExercises } from "./plan-client";
+import { DayExercisesSection } from "./day-exercises-section";
 
 export function DayCard({
   plan,
@@ -166,7 +166,7 @@ export function DayCard({
             <p className="text-xs text-destructive">{errorMessage}</p>
           )}
 
-          {day && expanded && <DayExercises plan={plan} day={day} />}
+          {day && expanded && <DayExercisesSection plan={plan} day={day} />}
         </>
       )}
     </Card>

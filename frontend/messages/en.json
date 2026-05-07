@@ -235,7 +235,25 @@
       "FULL_BODY": "Full body",
       "REST": "Rest"
     },
-    "dayOfWeekTaken": "That weekday is already taken. Delete or move the existing day first."
+    "dayOfWeekTaken": "That weekday is already taken. Delete or move the existing day first.",
+    "addExercise": "Add exercise",
+    "editExercise": "Edit",
+    "removeExercise": "Remove",
+    "removeExerciseConfirm": "Remove this exercise from the day?",
+    "exerciseDialogAddTitle": "Add exercise",
+    "exerciseDialogEditTitle": "Edit exercise",
+    "exerciseLabel": "Exercise",
+    "exercisePlaceholder": "Pick an exercise",
+    "targetSetsLabel": "Sets",
+    "targetRepsMinLabel": "Min reps",
+    "targetRepsMaxLabel": "Max reps",
+    "targetWeightKgLabel": "Weight (kg)",
+    "restSecondsLabel": "Rest (sec)",
+    "notesLabel": "Notes",
+    "exerciseRequired": "Pick an exercise",
+    "targetSetsRequired": "Sets must be at least 1",
+    "repsRangeInvalid": "Min reps must be less than or equal to max",
+    "loadingExercises": "Loading exercises..."
   },
   "export": {
     "title": "Export",
