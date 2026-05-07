@@ -18,7 +18,8 @@
     "email": "E-posta",
     "password": "Sifre",
     "submit": "Giris",
-    "invalidCredentials": "E-posta veya sifre hatali"
+    "invalidCredentials": "E-posta veya sifre hatali",
+    "sessionExpired": "Oturumun zaman asimina ugradi. Lutfen tekrar giris yap."
   },
   "dashboard": {
     "loading": "Yukleniyor...",
