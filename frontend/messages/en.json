@@ -71,7 +71,8 @@
     "dailyKcalGoal": "kcal/day",
     "dailyProteinGGoal": "Protein (g/day)",
     "dailyCarbsGGoal": "Carbs (g/day)",
-    "dailyFatGGoal": "Fat (g/day)"
+    "dailyFatGGoal": "Fat (g/day)",
+    "logoutHeading": "Account"
   },
   "nutrition": {
     "title": "Nutrition",

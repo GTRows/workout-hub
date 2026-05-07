@@ -71,7 +71,8 @@
     "dailyKcalGoal": "kcal/gun",
     "dailyProteinGGoal": "Protein (g/gun)",
     "dailyCarbsGGoal": "Karbonhidrat (g/gun)",
-    "dailyFatGGoal": "Yag (g/gun)"
+    "dailyFatGGoal": "Yag (g/gun)",
+    "logoutHeading": "Hesap"
   },
   "nutrition": {
     "title": "Beslenme",

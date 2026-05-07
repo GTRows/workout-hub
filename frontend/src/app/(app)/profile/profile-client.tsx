@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { fetchMe, updateMe, type UpdateProfilePayload } from "@/lib/api/endpoints";
 import type { UserMe } from "@/lib/api/schemas";
+import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -221,6 +222,13 @@ export function ProfileClient() {
 
       <SupplementsSection />
       <WebhookTokensSection />
+
+      <section className="mt-8 border-t border-border pt-6">
+        <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
+          {t("logoutHeading")}
+        </h2>
+        <LogoutButton variant="profile" />
+      </section>
     </div>
   );
 }
