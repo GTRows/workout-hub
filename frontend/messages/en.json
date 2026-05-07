@@ -215,7 +215,27 @@
     "dialogSave": "Save",
     "dialogCancel": "Cancel",
     "nameRequired": "Plan name is required",
-    "mutationError": "Operation failed. Try again."
+    "mutationError": "Operation failed. Try again.",
+    "addDay": "Add day",
+    "editDay": "Edit",
+    "deleteDay": "Delete day",
+    "deleteDayConfirm": "Delete this day?",
+    "dayDialogCreateTitle": "New day",
+    "dayDialogEditTitle": "Edit day",
+    "dayNameLabel": "Day name",
+    "dayOfWeekLabel": "Weekday",
+    "focusLabel": "Focus",
+    "estimatedDurationMinLabel": "Estimated duration (min)",
+    "focus": {
+      "PUSH": "Push",
+      "PULL": "Pull",
+      "LEGS": "Legs",
+      "CARDIO": "Cardio",
+      "CORE": "Core",
+      "FULL_BODY": "Full body",
+      "REST": "Rest"
+    },
+    "dayOfWeekTaken": "That weekday is already taken. Delete or move the existing day first."
   },
   "export": {
     "title": "Export",

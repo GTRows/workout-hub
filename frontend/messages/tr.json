@@ -215,7 +215,27 @@
     "dialogSave": "Kaydet",
     "dialogCancel": "Iptal",
     "nameRequired": "Plan adi bos olamaz",
-    "mutationError": "Islem basarisiz. Tekrar dene."
+    "mutationError": "Islem basarisiz. Tekrar dene.",
+    "addDay": "Gun ekle",
+    "editDay": "Duzenle",
+    "deleteDay": "Gunu sil",
+    "deleteDayConfirm": "Bu gunu silmek istediginden emin misin?",
+    "dayDialogCreateTitle": "Yeni gun",
+    "dayDialogEditTitle": "Gunu duzenle",
+    "dayNameLabel": "Gun adi",
+    "dayOfWeekLabel": "Haftanin gunu",
+    "focusLabel": "Odak",
+    "estimatedDurationMinLabel": "Tahmini sure (dk)",
+    "focus": {
+      "PUSH": "Itme",
+      "PULL": "Cekme",
+      "LEGS": "Bacak",
+      "CARDIO": "Kardiyo",
+      "CORE": "Core",
+      "FULL_BODY": "Tam vucut",
+      "REST": "Dinlenme"
+    },
+    "dayOfWeekTaken": "Bu gun zaten dolu. Once mevcut gunu sil veya tasi."
   },
   "export": {
     "title": "Disa Aktar",
