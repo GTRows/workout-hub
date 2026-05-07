@@ -5,6 +5,7 @@ export const apiErrorSchema = z.object({
   status: z.number().int(),
   error: z.string(),
   message: z.string(),
+  code: z.string().optional(),
   path: z.string(),
   errors: z
     .array(z.object({ field: z.string(), message: z.string() }))

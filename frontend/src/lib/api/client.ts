@@ -15,7 +15,8 @@ export class ApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly body: unknown,
-    message: string
+    message: string,
+    public readonly code: string | undefined = undefined
   ) {
     super(message);
     this.name = "ApiError";
@@ -124,7 +125,8 @@ export function createApiClient(deps: ClientDeps = {}) {
     if (!res.ok) {
       const parsed = apiErrorSchema.safeParse(json);
       const message = parsed.success ? parsed.data.message : res.statusText;
-      throw new ApiError(res.status, json, message);
+      const code = parsed.success ? parsed.data.code : undefined;
+      throw new ApiError(res.status, json, message, code);
     }
 
     if (opts.schema) {
