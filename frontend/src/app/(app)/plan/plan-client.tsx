@@ -34,7 +34,7 @@ import { pickLocaleField } from "@/lib/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
 import { PlanList } from "./plan-list";
-import { DayCard } from "./day-card";
+import { SortableDayGrid } from "./sortable-day-grid";
 
 export function PlanClient() {
   const t = useTranslations("plan");
@@ -59,17 +59,12 @@ export function PlanClient() {
   }
 
   const plan = planQuery.data;
-  const days = Array.from({ length: 7 }, (_, i) => i + 1).map(
-    (dow) => plan.days.find((d) => d.dayOfWeek === dow) ?? null
-  );
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <PlanList />
-      {days.map((day, i) => (
-        <DayCard key={day?.id ?? `empty-${i}`} plan={plan} day={day} dayOfWeek={i + 1} />
-      ))}
+      <SortableDayGrid plan={plan} />
     </div>
   );
 }
