@@ -225,3 +225,181 @@ Files >200 lines elsewhere in the audit scope (Convention candidates beyond Sect
 - `frontend/src/app/(app)/plan/plan-client.tsx` (277 lines)
 - `frontend/src/app/(app)/profile/profile-client.tsx` (263 lines)
 - `frontend/src/app/(app)/metrics/metrics-client.tsx` (246 lines)
+
+---
+
+## Section 4 - API Client Coverage vs v0.4 Backend
+
+### 4a) Frontend wrappers declared in `frontend/src/lib/api/endpoints.ts`
+
+| Wrapper (file:line) | Method | Path | Zod schema (file:line) | Consumed by (route) |
+|---|---|---|---|---|
+| `login` (`endpoints.ts:59`) | POST | `/api/auth/login` | `authResponseSchema` (`schemas.ts:15`) | `/login` |
+| `fetchMe` (`endpoints.ts:69`) | GET | `/api/users/me` | `userMeSchema` (`schemas.ts:22`) | `/profile`, `/nutrition` |
+| `updateMe` (`endpoints.ts:91`) | PUT | `/api/users/me` | `userMeSchema` (`schemas.ts:22`) | `/profile` |
+| `fetchActiveWorkoutPlan` (`endpoints.ts:100`) | GET | `/api/workout-plans/active` | `workoutPlanSchema` (`schemas.ts:64`) | `/dashboard`, `/plan` |
+| `fetchWorkoutDay` (`endpoints.ts:108`) | GET | `/api/workout-days/{dayId}` | `workoutDaySchema` (`schemas.ts:55`) | `/session/[id]` |
+| `fetchActiveSession` (`endpoints.ts:115`) | GET | `/api/sessions/active` | `sessionDetailSchema` (`schemas.ts:87`) | `/dashboard` |
+| `fetchSession` (`endpoints.ts:123`) | GET | `/api/sessions/{id}` | `sessionDetailSchema` (`schemas.ts:87`) | `/session/[id]`, `/history` |
+| `startSession` (`endpoints.ts:130`) | POST | `/api/sessions/start` | `sessionDetailSchema` (`schemas.ts:87`) | `/dashboard` |
+| `addSet` (`endpoints.ts:149`) | POST | `/api/sessions/{id}/sets` | `sessionSetSchema` (`schemas.ts:73`) | `/session/[id]` |
+| `finishSession` (`endpoints.ts:167`) | POST | `/api/sessions/{id}/finish` | `sessionDetailSchema` (`schemas.ts:87`) | `/session/[id]` |
+| `fetchLastPerformance` (`endpoints.ts:179`) | GET | `/api/exercises/{id}/last-performance` | `lastPerformanceSchema` (`schemas.ts:99`) | `/session/[id]` |
+| `fetchExercises` (`endpoints.ts:197`) | GET | `/api/exercises` | `exercisePageSchema` (`schemas.ts:143`) | `/exercises` |
+| `searchExercises` (`endpoints.ts:207`) | GET | `/api/exercises/search` | `exercisePageSchema` (`schemas.ts:143`) | `/exercises` |
+| `fetchExerciseDetail` (`endpoints.ts:219`) | GET | `/api/exercises/{id}` | `exerciseSchema` (`schemas.ts:114`) | `/exercises/[id]`, `/session/[id]` (modal) |
+| `fetchSessionHistory` (`endpoints.ts:226`) | GET | `/api/sessions/history` | `sessionSummaryPageSchema` (`schemas.ts:156`) | `/history` |
+| `fetchClaudeSummary` (`endpoints.ts:237`) | GET | `/api/export/claude-summary?days=N` | - (intentionally untyped pass-through) | `/export` |
+| `fetchFullExport` (`endpoints.ts:246`) | GET | `/api/export/full` | - (untyped) | `/export` |
+| `fetchSectionExport` (`endpoints.ts:259`) | GET | `/api/export/{section}` | - (untyped) | `/export`, `/export/ai` |
+| `searchFoods` (`endpoints.ts:265`) | GET | `/api/foods?q=&size=` | `foodItemListSchema` (`schemas.ts:248`) | `/nutrition` |
+| `fetchNutritionForDate` (`endpoints.ts:273`) | GET | `/api/nutrition?date=` | `nutritionEntryListSchema` (`schemas.ts:263`) | `/nutrition` |
+| `createNutritionEntry` (`endpoints.ts:288`) | POST | `/api/nutrition` | `nutritionEntrySchema` (`schemas.ts:250`) | `/nutrition` |
+| `deleteNutritionEntry` (`endpoints.ts:299`) | DELETE | `/api/nutrition/{id}` | - (204) | `/nutrition` |
+| `fetchWaterDay` (`endpoints.ts:306`) | GET | `/api/water?date=` | `waterDaySchema` (`schemas.ts:274`) | `/nutrition` |
+| `addWater` (`endpoints.ts:314`) | POST | `/api/water` | `waterEntrySchema` (`schemas.ts:268`) | `/nutrition` |
+| `deleteWater` (`endpoints.ts:323`) | DELETE | `/api/water/{id}` | - (204) | `/nutrition` |
+| `fetchSessionsCsv` (`endpoints.ts:330`) | GET | `/api/export/csv/sessions` | - (text/csv via `api.raw`) | `/export` |
+| `importFullDump` (`endpoints.ts:353`) | POST | `/api/export/import` | - (custom `ImportResult` type, no Zod) | `/export`, `/export/ai/apply` |
+| `fetchMetrics` (`endpoints.ts:372`) | GET | `/api/metrics` | `bodyMetricListSchema` (`schemas.ts:173`) | `/metrics` |
+| `upsertMetric` (`endpoints.ts:379`) | POST | `/api/metrics` | `bodyMetricSchema` (`schemas.ts:158`) | `/metrics` |
+| `deleteMetric` (`endpoints.ts:390`) | DELETE | `/api/metrics/{id}` | - (204) | `/metrics` |
+| `fetchWeeklyVolume` (`endpoints.ts:397`) | GET | `/api/analytics/volume?weeks=N` | `weeklyVolumeListSchema` (`schemas.ts:180`) | `/insights` |
+| `fetchOneRepMax` (`endpoints.ts:405`) | GET | `/api/analytics/one-rm/{exerciseId}` | `oneRmPointListSchema` (`schemas.ts:188`) | `/insights` |
+| `fetchStreak` (`endpoints.ts:412`) | GET | `/api/analytics/streak` | `streakSchema` (`schemas.ts:190`) | `/insights` |
+| `fetchPersonalRecords` (`endpoints.ts:419`) | GET | `/api/analytics/prs` | `personalRecordListSchema` (`schemas.ts:205`) | `/insights`, `/prs` |
+| `fetchHeatmap` (`endpoints.ts:426`) | GET | `/api/analytics/heatmap?weeks=N` | `heatmapListSchema` (`schemas.ts:211`) | `/insights` |
+| `fetchSupplements` (`endpoints.ts:445`) | GET | `/api/supplements` | `supplementListSchema` (`schemas.ts:233`) | `/profile` |
+| `createSupplement` (`endpoints.ts:452`) | POST | `/api/supplements` | `supplementSchema` (`schemas.ts:223`) | `/profile` |
+| `updateSupplement` (`endpoints.ts:463`) | PUT | `/api/supplements/{id}` | `supplementSchema` (`schemas.ts:223`) | (declared, no current consumer) |
+| `deleteSupplement` (`endpoints.ts:475`) | DELETE | `/api/supplements/{id}` | - (204) | `/profile` |
+| `reorderDayExercises` (`endpoints.ts:482`) | POST | `/api/workout-plans/{planId}/days/{dayId}/exercises/reorder` | `workoutDaySchema` (`schemas.ts:55`) | `/plan` |
+| `importAppleHealth` (`endpoints.ts:525`) | POST (multipart) | `/api/health/import/apple` | `healthImportResultSchema` (`schemas.ts:310`) | `/export` |
+| `importGoogleFit` (`endpoints.ts:532`) | POST (multipart) | `/api/health/import/google-fit` | `healthImportResultSchema` (`schemas.ts:310`) | `/export` |
+| `importGarminFit` (`endpoints.ts:574`) | POST (multipart) | `/api/health/import/fit` | `healthImportResultSchema` (`schemas.ts:310`) | `/export` |
+| `fetchAchievements` (`endpoints.ts:539`) | GET | `/api/achievements/me` | `achievementListSchema` (`schemas.ts:297`) | `/achievements` |
+| `fetchWebhookTokens` (`endpoints.ts:546`) | GET | `/api/users/me/webhook-tokens?purpose=` | `webhookTokenListSchema` (`schemas.ts:307`) | `/profile` |
+| `mintWebhookToken` (`endpoints.ts:556`) | POST | `/api/users/me/webhook-tokens?purpose=` | `webhookTokenSchema` (`schemas.ts:300`) | `/profile` |
+| `revokeWebhookToken` (`endpoints.ts:567`) | DELETE | `/api/users/me/webhook-tokens/{id}` | - (204) | `/profile` |
+| `subscribePush` (`subscribe.ts:29`) | POST | `/api/push/subscribe` | - (untyped) | `/dashboard` (via PushPermissionCard) |
+| `subscribePush` (`subscribe.ts:35`) | GET | `/api/push/vapid-public-key` | - (inline `VapidResponse` type, no Zod) | `/dashboard` (via PushPermissionCard) |
+
+### 4b) v0.4 backend surface (cross-reference)
+
+Backend surface from v0.4 archives (non-exhaustive but covers Phases 13-19 audited contracts):
+- `auth/`: `POST /api/auth/login`, `POST /api/auth/refresh` (transparent retry path); `POST /api/auth/register` removed in t-51 (admin-only seeding); `POST /api/auth/logout` if exposed.
+- `users/`: `GET /api/users/me`, `PUT /api/users/me`, `GET/POST/DELETE /api/users/me/webhook-tokens(/{id})`.
+- `exercises/`: `GET /api/exercises`, `GET /api/exercises/search`, `GET /api/exercises/{id}`, `GET /api/exercises/{id}/last-performance`, `GET /api/exercises/{id}/progress`, admin CRUD `POST/PUT /api/admin/exercises(/{id})`.
+- `workouts/`: `GET /api/workout-plans`, `POST /api/workout-plans`, `GET /api/workout-plans/active`, `GET /api/workout-plans/{id}`, `PUT /api/workout-plans/{id}`, `DELETE /api/workout-plans/{id}`, `POST /api/workout-plans/{id}/activate`, days/items CRUD (`POST /api/workout-plans/{id}/days`, `PUT/DELETE /api/workout-plans/{id}/days/{dayId}/exercises/{exId}`, `POST /api/workout-plans/{id}/days/{dayId}/exercises/reorder`), `GET /api/workout-days/{dayId}`.
+- `sessions/`: `POST /api/sessions/start`, `GET /api/sessions/active`, `POST /api/sessions/{id}/sets` (with `clientSetId` idempotency from Phase 15-04), `PUT /api/sessions/{id}/sets/{setId}`, `POST /api/sessions/{id}/finish`, `GET /api/sessions/history`, `GET /api/sessions/{id}`.
+- `sessions-analytics/` (Phase 16): `GET /api/analytics/volume`, `GET /api/analytics/one-rm/{exerciseId}`, `GET /api/analytics/streak`, `GET /api/analytics/prs`, `GET /api/analytics/heatmap`.
+- `metrics/`: `GET /api/metrics`, `POST /api/metrics` (UPSERT 200/201 from Phase 17), `DELETE /api/metrics/{id}`.
+- `export/` (Phase 18): `GET /api/export/full`, `GET /api/export/{section}` (5 sections), `GET /api/export/csv/sessions`, `GET /api/export/claude-summary?days=N` (snake_case per-record `@JsonNaming`), `POST /api/export/import` (idempotent re-import with isPr safety net).
+- Operator surfaces: `/livez`, `/healthz`, `/v3/api-docs` (paths-to-match `/api/**` only). Frontend should NOT call these from the browser.
+
+### 4c) Coverage matrix
+
+| Backend endpoint | Frontend wrapper | Zod schema | Consumed by | Status | ApiError handling |
+|---|---|---|---|---|---|
+| `POST /api/auth/login` | `login` | `authResponseSchema` | /login | Wrapped+typed | message-only (`(auth)/login/page.tsx:38-44` - branches on `error.status`, no `error.code` use) |
+| `POST /api/auth/refresh` | implicit in `client.ts:54` | `authResponseSchema` | (interceptor) | Wrapped+typed | none (silent token refresh) |
+| `POST /api/auth/register` | - | - | - | Missing (intentional - removed in t-51) | n/a |
+| `POST /api/auth/logout` | - | - | - | Missing | none |
+| `GET /api/users/me` | `fetchMe` | `userMeSchema` | /profile, /nutrition | Wrapped+typed | none (no error UI on profile load failure) |
+| `PUT /api/users/me` | `updateMe` | `userMeSchema` | /profile | Wrapped+typed | message-only (`profile-client.tsx:62` `flash="error"`) |
+| `GET /api/users/me/webhook-tokens` | `fetchWebhookTokens` | `webhookTokenListSchema` | /profile | Wrapped+typed | none |
+| `POST /api/users/me/webhook-tokens` | `mintWebhookToken` | `webhookTokenSchema` | /profile | Wrapped+typed | none |
+| `DELETE /api/users/me/webhook-tokens/{id}` | `revokeWebhookToken` | - (204) | /profile | Wrapped+typed | none |
+| `GET /api/exercises` | `fetchExercises` | `exercisePageSchema` | /exercises | Wrapped+typed | none |
+| `GET /api/exercises/search` | `searchExercises` | `exercisePageSchema` | /exercises | Wrapped+typed | none |
+| `GET /api/exercises/{id}` | `fetchExerciseDetail` | `exerciseSchema` | /exercises/[id], /session/[id] modal | Wrapped+typed | message-only |
+| `GET /api/exercises/{id}/last-performance` | `fetchLastPerformance` | `lastPerformanceSchema` | /session/[id] | Wrapped+typed | none |
+| `GET /api/exercises/{id}/progress` | - | - | - | Missing | n/a |
+| `POST /api/admin/exercises` | - | - | - | Missing | n/a |
+| `PUT /api/admin/exercises/{id}` | - | - | - | Missing | n/a |
+| `GET /api/workout-plans` | - | - | - | Missing (only "active" wrapped) | n/a |
+| `POST /api/workout-plans` | - | - | - | Missing | n/a |
+| `GET /api/workout-plans/active` | `fetchActiveWorkoutPlan` | `workoutPlanSchema` | /dashboard, /plan | Wrapped+typed | none |
+| `GET /api/workout-plans/{id}` | - | - | - | Missing | n/a |
+| `PUT /api/workout-plans/{id}` | - | - | - | Missing | n/a |
+| `DELETE /api/workout-plans/{id}` | - | - | - | Missing | n/a |
+| `POST /api/workout-plans/{id}/activate` | - | - | - | Missing | n/a |
+| `POST /api/workout-plans/{id}/days` | - | - | - | Missing | n/a |
+| `PUT /api/workout-plans/{id}/days/{dayId}` | - | - | - | Missing | n/a |
+| `DELETE /api/workout-plans/{id}/days/{dayId}` | - | - | - | Missing | n/a |
+| `POST /api/workout-plans/{id}/days/{dayId}/exercises` | - | - | - | Missing | n/a |
+| `PUT /api/workout-plans/{id}/days/{dayId}/exercises/{exId}` | - | - | - | Missing | n/a |
+| `DELETE /api/workout-plans/{id}/days/{dayId}/exercises/{exId}` | - | - | - | Missing | n/a |
+| `POST /api/workout-plans/{id}/days/{dayId}/exercises/reorder` | `reorderDayExercises` | `workoutDaySchema` | /plan | Wrapped+typed | none (silent revert on failure - `plan-client.tsx:133`) |
+| `GET /api/workout-days/{dayId}` | `fetchWorkoutDay` | `workoutDaySchema` | /session/[id] | Wrapped+typed | none |
+| `POST /api/sessions/start` | `startSession` | `sessionDetailSchema` | /dashboard | Wrapped+typed | none (no UI for `SESSION_ALREADY_ACTIVE` typed code) |
+| `GET /api/sessions/active` | `fetchActiveSession` | `sessionDetailSchema` | /dashboard | Wrapped+typed | none |
+| `POST /api/sessions/{id}/sets` | `addSet` | `sessionSetSchema` | /session/[id] | Wrapped+typed | none (no UI for `SESSION_FINISHED`, `SESSION_ALREADY_FINISHED`, `SET_NUMBER_DUPLICATE`) |
+| `PUT /api/sessions/{id}/sets/{setId}` | - | - | - | Missing (no edit-set wrapper) | n/a |
+| `POST /api/sessions/{id}/finish` | `finishSession` | `sessionDetailSchema` | /session/[id] | Wrapped+typed | none |
+| `GET /api/sessions/history` | `fetchSessionHistory` | `sessionSummaryPageSchema` | /history | Wrapped+typed | none |
+| `GET /api/sessions/{id}` | `fetchSession` | `sessionDetailSchema` | /session/[id], /history | Wrapped+typed | message-only (`session-client.tsx:60` shows `notFound`) |
+| `GET /api/analytics/volume` | `fetchWeeklyVolume` | `weeklyVolumeListSchema` | /insights | Wrapped+typed | none |
+| `GET /api/analytics/one-rm/{exerciseId}` | `fetchOneRepMax` | `oneRmPointListSchema` | /insights | Wrapped+typed | none |
+| `GET /api/analytics/streak` | `fetchStreak` | `streakSchema` | /insights | Wrapped+typed | none |
+| `GET /api/analytics/prs` | `fetchPersonalRecords` | `personalRecordListSchema` | /insights, /prs | Wrapped+typed | none |
+| `GET /api/analytics/heatmap` | `fetchHeatmap` | `heatmapListSchema` | /insights | Wrapped+typed | none |
+| `GET /api/metrics` | `fetchMetrics` | `bodyMetricListSchema` | /metrics | Wrapped+typed | none |
+| `POST /api/metrics` (200/201 split) | `upsertMetric` | `bodyMetricSchema` | /metrics | Wrapped+typed | none (does NOT branch on 200 vs 201 - both treated identically; toast not differentiated by insert vs replace) |
+| `DELETE /api/metrics/{id}` | `deleteMetric` | - (204) | /metrics | Wrapped+typed | none |
+| `GET /api/supplements` | `fetchSupplements` | `supplementListSchema` | /profile | Wrapped+typed | none |
+| `POST /api/supplements` | `createSupplement` | `supplementSchema` | /profile | Wrapped+typed | none |
+| `PUT /api/supplements/{id}` | `updateSupplement` | `supplementSchema` | (no consumer) | Wrapped+typed | none |
+| `DELETE /api/supplements/{id}` | `deleteSupplement` | - (204) | /profile | Wrapped+typed | none |
+| `GET /api/foods?q=` | `searchFoods` | `foodItemListSchema` | /nutrition | Wrapped+typed | none |
+| `GET /api/nutrition?date=` | `fetchNutritionForDate` | `nutritionEntryListSchema` | /nutrition | Wrapped+typed | none |
+| `POST /api/nutrition` | `createNutritionEntry` | `nutritionEntrySchema` | /nutrition | Wrapped+typed | none |
+| `DELETE /api/nutrition/{id}` | `deleteNutritionEntry` | - (204) | /nutrition | Wrapped+typed | none |
+| `GET /api/water?date=` | `fetchWaterDay` | `waterDaySchema` | /nutrition | Wrapped+typed | none |
+| `POST /api/water` | `addWater` | `waterEntrySchema` | /nutrition | Wrapped+typed | none |
+| `DELETE /api/water/{id}` | `deleteWater` | - (204) | /nutrition | Wrapped+typed | none |
+| `GET /api/export/full` | `fetchFullExport` | - | /export | Wrapped+untyped | message-only (`export-client.tsx:72`) |
+| `GET /api/export/{section}` | `fetchSectionExport` | - | /export, /export/ai | Wrapped+untyped | message-only |
+| `GET /api/export/csv/sessions` | `fetchSessionsCsv` | - (text) | /export | Wrapped+untyped | message-only |
+| `GET /api/export/claude-summary?days=N` (snake_case) | `fetchClaudeSummary` | - (intentional pass-through) | /export | Wrapped+untyped | message-only |
+| `POST /api/export/import` | `importFullDump` | - (typed `ImportResult`, no Zod) | /export, /export/ai/apply | Wrapped+untyped | message-only (`export-client.tsx:127`) |
+| `POST /api/health/import/apple` | `importAppleHealth` | `healthImportResultSchema` | /export | Wrapped+typed | message-only |
+| `POST /api/health/import/google-fit` | `importGoogleFit` | `healthImportResultSchema` | /export | Wrapped+typed | message-only |
+| `POST /api/health/import/fit` | `importGarminFit` | `healthImportResultSchema` | /export | Wrapped+typed | message-only |
+| `GET /api/achievements/me` | `fetchAchievements` | `achievementListSchema` | /achievements | Wrapped+typed | message-only (`achievements-client.tsx:33`) |
+| `GET /api/push/vapid-public-key` | `subscribePush` (inline) | - (no Zod) | (push card) | Wrapped+untyped | none (caught + status reset) |
+| `POST /api/push/subscribe` | `subscribePush` (inline) | - (no Zod) | (push card) | Wrapped+untyped | none |
+| Operator: `/livez`, `/healthz`, `/v3/api-docs` | - | - | - | Missing (correctly NOT consumed from browser per contract) | n/a |
+
+### 4d) Catalog gaps
+
+**Backend endpoints with no frontend wrapper:**
+- `POST /api/auth/logout` - no client-side logout call. Token clearing happens via `clearTokens()` in `frontend/src/lib/auth/token-store.ts:57`, which only zeroes local state and does not invalidate the refresh token server-side. (Source: no consumer.)
+- Plan CRUD beyond active: `GET /api/workout-plans`, `POST /api/workout-plans`, `GET /api/workout-plans/{id}`, `PUT /api/workout-plans/{id}`, `DELETE /api/workout-plans/{id}`, `POST /api/workout-plans/{id}/activate`, plus day CRUD (`POST /api/workout-plans/{id}/days`, `PUT/DELETE .../days/{dayId}`) and exercise CRUD (`POST/PUT/DELETE .../days/{dayId}/exercises(/{exId})`). Only `reorder` is wrapped (`endpoints.ts:482`). Plan editor (`plan-client.tsx`) can reorder but cannot create plans, switch plans, add/remove days, or add/remove exercises. (Source: no consumer.)
+- `PUT /api/sessions/{id}/sets/{setId}` - no edit-existing-set wrapper. Once a set lands, the user cannot correct reps/weight/rpe from the UI. (Source: no consumer.)
+- `GET /api/exercises/{id}/progress` - per-exercise progress chart not wrapped. ProjectBrief Phase 4 names this. (Source: no consumer.)
+- Admin exercise CRUD (`POST/PUT /api/admin/exercises(/{id})`) - no admin UI exists. Acceptable for v0.5 (admin operations stay backend-only via tooling).
+- `GET /api/sessions/active` is wrapped, but no client-side polling or stale-while-revalidate strategy exists (only the dashboard fetches it on mount).
+
+**Frontend wrappers calling endpoints that diverge from v0.4 contract:**
+- `addSet` (`endpoints.ts:139-147`, `endpoints.ts:149`) - the `AddSetPayload` type does NOT include a `clientSetId` field. The v0.4 contract (Phase 15-04) specifies `clientSetId` as the idempotency key that suppresses `newPr` on replay. Today, every retry from the IndexedDB queue would re-issue without `clientSetId` and rely solely on the DB UNIQUE constraint on `(session_id, exercise_id, set_number)` to dedupe via 409 (`session-set-queue.ts:95`). This works for crash-recovery dedup but loses the clean `newPr` suppression semantics on idempotent replay; PR toast can fire spuriously after offline drain.
+- `upsertMetric` (`endpoints.ts:379`) - does not surface the 200 vs 201 distinction. The wrapper returns `bodyMetricSchema` either way, so `/metrics` cannot show "Yeni kayit" vs "Gunceleme" in the UI based on `wasCreated`. v0.4 Phase 17 designed the split intentionally; the UI ignores it.
+- `subscribePush` (`subscribe.ts:35-38`) - calls `GET /api/push/vapid-public-key` and `POST /api/push/subscribe` with inline `VapidResponse` and `SubscribeBody` types instead of Zod schemas in `frontend/src/lib/api/schemas.ts`. Drift risk if the backend wire format changes.
+- `importFullDump` (`endpoints.ts:353-359`) - uses a hand-written `ImportResult` type (`endpoints.ts:342-351`) rather than a Zod schema. `warnings` and `suggestions` are optional `string[]`, so a backend regression that drops these fields silently passes.
+- `fetchClaudeSummary` (`endpoints.ts:237-244`) - intentionally untyped. The doc comment states this is pass-through to Claude. v0.4 made `ClaudeSummaryDto` snake_case via `@JsonNaming`; the frontend never decodes it, only round-trips it to `downloadJson` (`export-client.tsx:51-56`). Acceptable as long as no consumer reads fields from the response. (Confirmed: no consumer accesses fields.)
+
+**Missing `ApiError.code`-based branching on the four typed values:**
+- `SESSION_ALREADY_ACTIVE` - should appear on `POST /api/sessions/start` from `/dashboard`. No branch in `dashboard/page.tsx:32-38`. (Source: `dashboard/page.tsx:32`.)
+- `SESSION_ALREADY_FINISHED`, `SESSION_FINISHED` - should appear on `POST /api/sessions/{id}/sets` and `POST /api/sessions/{id}/finish` from `/session/[id]`. No branch in `session-client.tsx:154-171` (`addSet` mutation onError absent) or `session-client.tsx:47-54` (`finishSession` mutation onError absent). (Source: `session-client.tsx:153, 47`.)
+- `SET_NUMBER_DUPLICATE` - should appear on `POST /api/sessions/{id}/sets`. No branch in `session-client.tsx:153-171`. The offline queue treats 409 as "already saved" (`session-set-queue.ts:95`) but online path does nothing, so a duplicate set submission silently fails the mutation. (Source: `session-client.tsx:153`.)
+- The login page (`(auth)/login/page.tsx:38-44`) is the only call site that branches on `ApiError.status`. No call site reads `error.body.code` to disambiguate; all other consumers either show a generic toast or no UI at all.
+
+**`ClaudeSummaryDto` snake_case decoding:**
+- Not decoded - intentionally pass-through. `fetchClaudeSummary` returns `unknown` and `export-client.tsx:51-56` writes the body straight to a file via `downloadJson`. PASS for v0.4 contract: snake_case stays snake_case on disk, which is what Claude consumes. No drift risk.
+
+**`isPr` field handling:**
+- Wire schema: `sessionSetSchema.newPr` (`schemas.ts:84`) is the on-display PR flag. Backend `SessionSet.isPr` is exposed as `newPr` in the API response. The frontend does not import a separate `isPr` field; only `newPr` is read.
+- Display path: `session-client.tsx:162` reads `newSet.newPr` and triggers `PrToast`. PASS.
+- Offline replay path: `session-set-queue.ts:65-105` POSTs queued sets one at a time via `postFn`. The response body is not parsed for `newPr`, so toast is suppressed on offline drain - which matches v0.4's idempotent-replay semantics for a `clientSetId` replay (newPr suppressed). However, since `addSet` does NOT send `clientSetId`, a queued set posted after a real first attempt that succeeded would 409-dedupe (PASS), but a queued set posted as the first attempt does not get a `newPr` celebration on the UI because the queue layer drops the response. ACCEPTABLE: the toast is best-effort during offline mode.
+- History display: `history-client.tsx:147-156` lists `s.repsDone` and `s.weightKg` but does not surface `newPr` per set (PR list lives at `/prs`). Acceptable.
+- Export round-trip: full-export and import paths go through `fetchFullExport` / `importFullDump`, both untyped on the frontend. Backend Phase 18-04 added isPr to the 9th tuple field; the frontend just round-trips the JSON without inspecting the field, so no drift risk on the wire.
