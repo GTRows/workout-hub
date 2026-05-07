@@ -2,11 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  getAccessToken,
-  getRefreshToken,
-  subscribeAccessToken,
-} from "@/lib/auth/token-store";
+import { getAccessToken, subscribeAccessToken } from "@/lib/auth/token-store";
 
 /**
  * Shell-level subscriber that redirects to /login when the refresh interceptor
@@ -25,7 +21,6 @@ export function useSessionExpiredRedirect(): void {
       lastSeen = next;
       if (next !== null) return;
       if (previous === null) return;
-      if (getRefreshToken() !== null) return;
       if (pathname.startsWith("/login")) return;
       router.replace(
         `/login?reason=session-expired&next=${encodeURIComponent(pathname)}`

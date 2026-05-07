@@ -7,9 +7,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const replaceMock = vi.fn();
 const pushMock = vi.fn();
+let searchParamsValue = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock, replace: replaceMock, refresh: vi.fn() }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => searchParamsValue,
   usePathname: () => "/login",
 }));
 
@@ -25,6 +26,7 @@ const messages = {
     password: "Secret",
     submit: "Log in",
     invalidCredentials: "Bad email or credentials",
+    sessionExpired: "Session expired",
   },
 };
 
@@ -52,6 +54,7 @@ describe("LoginPage", () => {
     window.localStorage.clear();
     replaceMock.mockReset();
     pushMock.mockReset();
+    searchParamsValue = new URLSearchParams();
   });
 
   afterEach(() => {
@@ -112,5 +115,17 @@ describe("LoginPage", () => {
 
     expect(await screen.findByText(/bad email or credentials/i)).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  it("renders the session-expired alert when reason=session-expired is in the URL", () => {
+    searchParamsValue = new URLSearchParams("reason=session-expired");
+    renderPage(<LoginPage />);
+    expect(screen.getByText(/session expired/i)).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(/session expired/i);
+  });
+
+  it("does not render the session-expired alert when reason is absent", () => {
+    renderPage(<LoginPage />);
+    expect(screen.queryByText(/session expired/i)).toBeNull();
   });
 });
