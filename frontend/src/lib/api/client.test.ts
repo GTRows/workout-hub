@@ -81,3 +81,53 @@ describe("api client refresh interceptor", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("api client ApiError propagation", () => {
+  beforeEach(() => {
+    clearTokens();
+    window.localStorage.clear();
+  });
+
+  it("populates ApiError.code when the backend response includes code", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(409, {
+        timestamp: "2026-05-07T00:00:00Z",
+        status: 409,
+        error: "Conflict",
+        message: "Session already finished",
+        code: "SESSION_FINISHED",
+        path: "/api/sessions/abc/sets",
+      })
+    );
+
+    const api = createApiClient({ baseUrl: "http://api", fetchImpl });
+    await expect(
+      api.request({ path: "/api/sessions/abc/sets", method: "POST", body: {}, auth: false })
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      status: 409,
+      code: "SESSION_FINISHED",
+    });
+  });
+
+  it("leaves ApiError.code undefined when the backend response omits code", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(400, {
+        timestamp: "2026-05-07T00:00:00Z",
+        status: 400,
+        error: "Bad Request",
+        message: "Validation failed",
+        path: "/api/auth/login",
+      })
+    );
+
+    const api = createApiClient({ baseUrl: "http://api", fetchImpl });
+    await expect(
+      api.request({ path: "/api/auth/login", method: "POST", body: {}, auth: false })
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      status: 400,
+      code: undefined,
+    });
+  });
+});
