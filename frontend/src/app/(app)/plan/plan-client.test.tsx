@@ -69,6 +69,8 @@ const messages = {
       REST: "Rest",
     },
     dayOfWeekTaken: "That weekday is already taken.",
+    dayDragHandle: "Drag day",
+    dayMoveError: "Could not move day. Try again.",
   },
 };
 
@@ -289,5 +291,28 @@ describe("PlanClient", () => {
     // Document order: manageHeading must precede dayHeading.
     const position = manageHeading.compareDocumentPosition(dayHeading);
     expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("renders 7 day-card slots after the SortableDayGrid swap", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/workout-plans/active")) {
+          return jsonResponse(200, planWithOneDay());
+        }
+        if (url.endsWith("/api/workout-plans")) {
+          return jsonResponse(200, []);
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+    renderClient(<PlanClient />);
+    await waitFor(() =>
+      expect(screen.getByTestId("sortable-day-grid")).toBeInTheDocument()
+    );
+    for (let dow = 1; dow <= 7; dow++) {
+      expect(screen.getByTestId(`day-card-${dow}`)).toBeInTheDocument();
+    }
   });
 });
