@@ -28,19 +28,19 @@ A user can log a workout end-to-end on a phone (mid-set), see prior performance 
 - [x] Workouts package: weekly plan + days + day-exercises CRUD; cascade-id fix for child entity create - v0.4 Phases 13-14
 - [x] Sessions core: start, active, sets POST/PUT, finish, history, detail; clientSetId idempotency; typed 409 codes (`SESSION_ALREADY_ACTIVE`, `SESSION_ALREADY_FINISHED`, `SESSION_FINISHED`, `SET_NUMBER_DUPLICATE`); heart-rate field exposure; auto-numbering documented as live-online only - v0.4 Phase 15
 - [x] Sessions analytics: `/exercises/:id/last-performance`, `/exercises/:id/progress`; package extraction to `com.workouthub.analytics`; durable `is_pr` column with backfill; Epley 1RM projection on progress points - v0.4 Phase 16
-- [x] Body-metrics API surface: `photo_url` exposure on upsert, optional `from`/`to` range filter on GET `/api/metrics` - v0.4 Phase 17 (plans 01-03 of 4)
+- [x] Body-metrics API surface: `photo_url` exposure on upsert, optional `from`/`to` range filter on GET `/api/metrics`, 201/200 status-code split on `POST /api/metrics` via `UpsertResult` wrapper - v0.4 Phase 17
+- [x] Export refinement: snake_case `ClaudeSummaryDto` (Direction C `@JsonNaming`) aligned with ProjectBrief example (`prs`, `body_metrics`, `consistency`, user.age + goals array, summary subkeys, workouts.type + energy + set rename); `FullExportDto.SetRow` round-trip-stable with `Boolean isPr` 9th component + recompute safety net; `ImportValidator.validateSessionDayIds` rule (422 on stale workoutDayId) - v0.4 Phase 18
+- [x] OpenAPI / Swagger UI surface: SpringDoc 2.6.0 at `GET /v3/api-docs` + `/swagger-ui.html`; two security schemes (`bearerAuth` http/bearer/JWT global + `forwardAuth` apiKey/header `X-Forwarded-Email` alternative); 28 hand-curated `@Tag` groupings; `ApiError` envelope with 11 `@Schema` annotations including 4-value typed-code enum; `OpenApiSurfaceIntegrationTest` as CI runtime smoke; `docs/API.md` rewritten as navigational entry point - v0.4 Phase 19
+- [x] v0.4.0 release cut: multi-arch GHCR images at `ghcr.io/gtrows/workouthub-{backend,frontend}:0.4.0`; draft GitHub Release; `## [0.4.0] - 2026-05-07` CHANGELOG block; CVE-2026-42198 closed via `org.postgresql:postgresql` override to 42.7.11 - v0.4 Phase 20
 
 ### Active
 
-<!-- v0.4 remaining work and forward path through v1.0. -->
+<!-- v0.5 frontend completion + forward path through v1.0. -->
 
-- [ ] Phase 17 plan 04: status-code split (201 on create / 200 on update via `wasCreated` wrapper); optional `BodyMetricValidator` static-helper absorb
-- [ ] Phase 18: `/api/export/claude-summary` aligned with ProjectBrief example (period, summary, prs, consistency); import round-trip stable
-- [ ] Phase 19: OpenAPI via SpringDoc; refresh `docs/API.md`; document JWT and forward-auth schemes
-- [ ] Phase 20: CVE patch sweep; CHANGELOG, RELEASE, MIGRATION; cut `v0.4.0` to GHCR
 - [ ] v0.5 (Phases 21-30): full frontend - auth pages, dashboard, plan editor, session-execution screen with IndexedDB drain wired to v0.4 sync contract, history, exercise catalog, metrics UI, profile, export/import UI
 - [ ] v0.6 (Phases 31-37): charts/stats (volume, 1RM Epley, weight, frequency heatmap, PR list, streak), PWA polish, web push, rest-timer notifications, frontend HTTP metrics (i-4), error states + perf budgets, structured-logging test fix (i-9)
 - [ ] v1.0 (Phases 38-44): Playwright e2e, testcontainers 2.x (i-7), framework majors (Spring Boot 4 i-8, Next 16 i-6, next-intl 4 i-5), security hardening, docs completion, backup/restore drill, `v1.0.0` release
+- [ ] Bump SpringDoc to >= 2.7 (i-13): revert the v0.4 `OpenApiCustomizer` workaround once SpringDoc clears the Spring 6.2 `ControllerAdviceBean(Object)` removal
 
 ### Out of Scope
 
@@ -55,6 +55,7 @@ A user can log a workout end-to-end on a phone (mid-set), see prior performance 
 
 ## Context
 
+- **Current state:** Shipped v0.4.0 on 2026-05-07. Backend feature surface (workouts, sessions, sessions-analytics, body-metrics, export, api-contract-docs) is complete and CI-asserted. Pivoting to frontend completion in v0.5.
 - **Solo project, Turkish-first product, English code/comments.** UI strings live in `next-intl` resource files (`tr` default, `en` available); Java sources and identifiers are English only.
 - **Brownfield as of GSD adoption.** Pre-GSD work shipped v0.1 + v0.2 informally (23 backend feature packages, 25 Flyway migrations, IndexedDB offline queue, OIDC controller, web push, smart-scale webhook, JSON export). GSD planning began at v0.3 (self-hosted contract alignment).
 - **Local Maven gap.** This Windows host has no `mvnw` and no system `mvn`; backend tests run only in CI. Frontend tests run locally (vitest, Playwright).
@@ -97,6 +98,11 @@ A user can log a workout end-to-end on a phone (mid-set), see prior performance 
 | Reference deployment lives in separate `GTRows/homelab` repo            | This repo ends at the registry; operator-specific deployment is out of scope                                            | Good                             |
 | OIDC controller kept dormant in repo                                    | Built earlier; per contract, real OIDC client should not ship here. Marked deferred / removable; review at v1.0 cleanup | - Pending (revisit at Phase 41)  |
 | Local Maven not installed on this host; backend tests run only in CI    | Workflow constraint; plans skip the local mvn verify gate and delegate to CI                                            | - Pending (acceptable while solo)|
+| ClaudeSummary naming: Direction C per-record `@JsonNaming(SnakeCaseStrategy)` on `ClaudeSummaryDto` only; full-export DTOs stay camelCase | LLM-paste surface mirrors ProjectBrief example literally; backup-restore round-trip on prior payloads stays stable | Good (locked v0.4 Phase 18-03)   |
+| PR durability: persist `is_pr` via V27 with ROW_NUMBER backfill         | Survives detail-reread, session update, and full-export round-trip (with `FullExportDto.SetRow.isPr` 9th component + recompute safety net) | Good (locked v0.4 Phases 16-04 + 18-04) |
+| SpringDoc artifact + version: 2.6.0 starter-webmvc-ui, bundled UI       | Conservative pin compatible with Spring Boot 3.5.x; 2.7+ bump deferred via i-13 to avoid pre-release transitive change   | - Pending (revisit when i-13 lands) |
+| Body-metrics status code: `UpsertResult(dto, wasCreated)` wrapper drives 201/200 | V6 UNIQUE-by-`(user, date)` encodes date-keyed identity; rejects PUT-by-id split                                  | Good (locked v0.4 Phase 17-04)   |
+| ApiError typed `code` curation: hand-write `@Schema(allowableValues = ...)` enumerating 4 Phase-15-04 codes | `ApiErrorCode` Java enum extraction deferred to Phase 42 (durable i-NEW-A drift fix); 19-04 ships annotation + CI-asserted enum | - Pending (revisit at Phase 42)  |
 
 ---
-*Last updated: 2026-05-06 after brownfield synthesis from CLAUDE.md, ProjectBrief.md, ROADMAP.md, IDENTITY.yaml, .planning/codebase/, docs/SELF_HOSTED_CONTRACT.md, .planning/HANDOFF.md, .planning/ISSUES.md*
+*Last updated: 2026-05-07 after v0.4 milestone close (backend feature completion shipped; pivoting to v0.5 frontend completion)*
