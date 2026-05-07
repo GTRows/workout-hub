@@ -21,6 +21,11 @@
     "invalidCredentials": "E-posta veya sifre hatali",
     "sessionExpired": "Oturumun zaman asimina ugradi. Lutfen tekrar giris yap."
   },
+  "errors": {
+    "api": {
+      "generic": "Bir hata olustu. Lutfen tekrar dene."
+    }
+  },
   "dashboard": {
     "loading": "Yukleniyor...",
     "resumeTitle": "Devam eden antrenman",

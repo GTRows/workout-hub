@@ -21,6 +21,11 @@
     "invalidCredentials": "Invalid email or password",
     "sessionExpired": "Your session has expired. Please log in again."
   },
+  "errors": {
+    "api": {
+      "generic": "Something went wrong. Please try again."
+    }
+  },
   "dashboard": {
     "loading": "Loading...",
     "resumeTitle": "Active session",
