@@ -19,6 +19,8 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
+  const reasonMessage =
+    searchParams.get("reason") === "session-expired" ? t("sessionExpired") : null;
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -55,6 +57,15 @@ export default function LoginPage() {
       className="space-y-5 rounded-lg border border-border bg-background p-6 shadow-sm"
       noValidate
     >
+      {reasonMessage && (
+        <p
+          role="alert"
+          className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300"
+        >
+          {reasonMessage}
+        </p>
+      )}
+
       <h1 className="text-xl font-semibold">{t("loginTitle")}</h1>
 
       <div className="space-y-2">
