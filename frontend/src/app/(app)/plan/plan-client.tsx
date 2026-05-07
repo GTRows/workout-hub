@@ -32,9 +32,9 @@ import type {
 } from "@/lib/api/schemas";
 import { pickLocaleField } from "@/lib/locale";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card, CardDescription } from "@/components/ui/card";
 import { PlanList } from "./plan-list";
+import { DayCard } from "./day-card";
 
 export function PlanClient() {
   const t = useTranslations("plan");
@@ -74,47 +74,7 @@ export function PlanClient() {
   );
 }
 
-function DayCard({
-  plan,
-  day,
-  dayOfWeek,
-}: {
-  plan: WorkoutPlan;
-  day: WorkoutDay | null;
-  dayOfWeek: number;
-}) {
-  const t = useTranslations("plan");
-  const [expanded, setExpanded] = useState(false);
-
-  const dayName = t(`weekday.${dayOfWeek}` as `weekday.1`);
-  const title = day ? day.name : dayName;
-  const subtitle = day
-    ? `${dayName} · ${day.exercises.length}`
-    : `${dayName}`;
-
-  return (
-    <Card
-      className={cn("space-y-3", !day && "opacity-60")}
-      aria-label={`day-${dayOfWeek}`}
-    >
-      <button
-        type="button"
-        className="flex w-full flex-col items-start text-left"
-        onClick={() => day && setExpanded((v) => !v)}
-        disabled={!day}
-      >
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{subtitle}</CardDescription>
-      </button>
-
-      {day && expanded && (
-        <DayExercises plan={plan} day={day} />
-      )}
-    </Card>
-  );
-}
-
-function DayExercises({ plan, day }: { plan: WorkoutPlan; day: WorkoutDay }) {
+export function DayExercises({ plan, day }: { plan: WorkoutPlan; day: WorkoutDay }) {
   const t = useTranslations("plan");
   const locale = useLocale();
   const qc = useQueryClient();
