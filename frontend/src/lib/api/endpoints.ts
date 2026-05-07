@@ -27,6 +27,7 @@ import {
   supplementSchema,
   userMeSchema,
   weeklyVolumeListSchema,
+  workoutDayExerciseSchema,
   workoutDaySchema,
   workoutPlanSchema,
   workoutPlanListSchema,
@@ -54,6 +55,7 @@ import {
   type UserMe,
   type WeeklyVolume,
   type WorkoutDay,
+  type WorkoutDayExercise,
   type WorkoutFocus,
   type WorkoutPlan,
 } from "@/lib/api/schemas";
@@ -585,6 +587,63 @@ export async function deleteWorkoutDay(
   await api.request({
     method: "DELETE",
     path: `/api/workout-plans/${planId}/days/${dayId}`,
+  });
+}
+
+export type AddDayExercisePayload = {
+  exerciseId: string;
+  targetSets: number;
+  targetRepsMin?: number | null;
+  targetRepsMax?: number | null;
+  targetWeightKg?: number | null;
+  restSeconds?: number | null;
+  notes?: string | null;
+};
+
+export async function addDayExercise(
+  planId: string,
+  dayId: string,
+  payload: AddDayExercisePayload
+): Promise<WorkoutDayExercise> {
+  return api.request({
+    method: "POST",
+    path: `/api/workout-plans/${planId}/days/${dayId}/exercises`,
+    body: payload,
+    schema: workoutDayExerciseSchema,
+  });
+}
+
+export type UpdateDayExercisePayload = {
+  targetSets?: number;
+  targetRepsMin?: number | null;
+  targetRepsMax?: number | null;
+  targetWeightKg?: number | null;
+  restSeconds?: number | null;
+  notes?: string | null;
+};
+
+export async function updateDayExercise(
+  planId: string,
+  dayId: string,
+  itemId: string,
+  payload: UpdateDayExercisePayload
+): Promise<WorkoutDayExercise> {
+  return api.request({
+    method: "PUT",
+    path: `/api/workout-plans/${planId}/days/${dayId}/exercises/${itemId}`,
+    body: payload,
+    schema: workoutDayExerciseSchema,
+  });
+}
+
+export async function removeDayExercise(
+  planId: string,
+  dayId: string,
+  itemId: string
+): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/workout-plans/${planId}/days/${dayId}/exercises/${itemId}`,
   });
 }
 
