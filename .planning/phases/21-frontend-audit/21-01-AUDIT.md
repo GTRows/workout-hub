@@ -403,3 +403,92 @@ Backend surface from v0.4 archives (non-exhaustive but covers Phases 13-19 audit
 - Offline replay path: `session-set-queue.ts:65-105` POSTs queued sets one at a time via `postFn`. The response body is not parsed for `newPr`, so toast is suppressed on offline drain - which matches v0.4's idempotent-replay semantics for a `clientSetId` replay (newPr suppressed). However, since `addSet` does NOT send `clientSetId`, a queued set posted after a real first attempt that succeeded would 409-dedupe (PASS), but a queued set posted as the first attempt does not get a `newPr` celebration on the UI because the queue layer drops the response. ACCEPTABLE: the toast is best-effort during offline mode.
 - History display: `history-client.tsx:147-156` lists `s.repsDone` and `s.weightKg` but does not surface `newPr` per set (PR list lives at `/prs`). Acceptable.
 - Export round-trip: full-export and import paths go through `fetchFullExport` / `importFullDump`, both untyped on the frontend. Backend Phase 18-04 added isPr to the 9th tuple field; the frontend just round-trips the JSON without inspecting the field, so no drift risk on the wire.
+
+---
+
+## Section 5 - ProjectBrief Phase 4-6 Gap Matrix
+
+ProjectBrief sections cited: Phase 4 (workout execution + offline) `ProjectBrief.md:291-318`; Phase 5 (frontend surfaces) `ProjectBrief.md:321-386`; Phase 6 (charts and stats) `ProjectBrief.md:389-406`.
+
+Status legend: `Implemented` (route + backend wiring + at least one test); `Partial` (renders but a major behavior is missing); `Stub` (placeholder only); `Missing` (no route or component).
+
+| Requirement (PB lines) | Current implementation | Status | Evidence | Phase target |
+|---|---|---|---|---|
+| **Auth** |  |  |  |  |
+| Login (PB:327, PB:202) | `(auth)/login/page.tsx` | Implemented | `(auth)/login/page.tsx:17-103`; test `(auth)/login/page.test.tsx` static: 3 | done |
+| Register (PB:327, PB:202) | - | Missing | n/a (admin-only seeding per t-51) | defer-v0.6 (or accept-as-omitted) |
+| Logout (PB:327) | - | Missing | `clearTokens` exists in `token-store.ts:57` but no UI invokes it; no nav button | 22 (auth-pages) |
+| Refresh-token transparent retry (PB:204) | `client.ts:49-78` interceptor | Implemented | `client.ts:80-96` retry-once on 401; covered by `client.test.ts` static: 3 | done |
+| **Dashboard** (PB:328-333) |  |  |  |  |
+| Today's workout card | `dashboard/page.tsx` | Implemented | `dashboard/page.tsx:73-97`; test `dashboard/page.test.tsx` static: 5 | done |
+| Weekly summary (kac antrenman, hedef vs gercek) | - | Missing | No weekly summary card on dashboard | 23 (dashboard) |
+| Last weight readout | - | Missing | Dashboard does not call `fetchMetrics`; no weight chip | 23 (dashboard) |
+| Quick actions (Antrenmani basla, Kilo ekle) | `dashboard/page.tsx:121-132` `QuickActions` | Partial | "View plan" + "Quick add" present; "Antrenmani basla" handled separately by main card | 23 (dashboard) - polish |
+| **Plan editor** (PB:334-336, PB:265-288) |  |  |  |  |
+| Weekly view (Mon-Sun) | `plan-client.tsx` | Implemented | `plan-client.tsx:56-66`; test `plan-client.test.tsx` static: 4 | done |
+| Day reorder (drag-and-drop) | - | Missing | Day cards not draggable; only exercises within a day reorder | 24 (plan-editor) |
+| Exercise reorder (within a day) | `plan-client.tsx:111-195` `DayExercises` | Implemented | `plan-client.tsx:127-137` (`reorderDayExercises`); covered by `plan-client.test.tsx` | done |
+| Exercise CRUD modal | - | Missing | No add/remove/edit exercise UI; only reorder | 24 (plan-editor) |
+| Plan create | - | Missing | No `POST /api/workout-plans` consumer | 24 (plan-editor) |
+| Plan activate/deactivate / switch | - | Missing | No `POST /api/workout-plans/{id}/activate` consumer | 24 (plan-editor) |
+| Day add/remove/edit | - | Missing | No `POST /api/workout-plans/{id}/days` consumer | 24 (plan-editor) |
+| **Session execution** (PB:291-318, PB:339-345) |  |  |  |  |
+| Set logging UI (reps/weight/rpe) | `session-client.tsx:127-279` `ExerciseBlock` | Partial | Reps + weightKg captured; **rpe missing** (`session-client.tsx:181-189` does not send `rpe`); covered by `session-client.test.tsx` static: 5 | 25 (session-execution) |
+| Rest timer (PB:344) | `useRestTimer` (`rest-timer.ts:11`) | Implemented | `session-client.tsx:144` consumes hook; auto-start on `addSet` success | done |
+| Last-performance display (PB:341) | `LastPerformanceChip` (`session-client.tsx:300-325`) | Implemented | `session-client.tsx:218`; data via `fetchLastPerformance` | done |
+| isPr toast | `PrToast` (`pr-toast.tsx`) | Implemented | `session-client.tsx:226-231` triggers on `newSet.newPr`; test `pr-toast.test.tsx` static: 2 | done |
+| IndexedDB queue (Dexie) (PB:310-313) | `session-set-queue.ts` | Partial | Dexie table + drain function exist (`session-set-queue.ts:43-105`); test `session-set-queue.test.ts` static: 7. **NOT WIRED into `session-client.tsx`** - online `addSet` calls `addSet` directly, no queue path; `subscribeOnline` (`session-set-queue.ts:107`) has no caller in app. | 25 (session-execution) |
+| Drain on online event | `subscribeOnline` (`session-set-queue.ts:107`) | Stub | Helper exists but has zero call sites in `frontend/src/app/**`; offline writes never enqueue, drain never runs in production code path | 25 (session-execution) |
+| Exercise-detail modal during a session (PB:345) | `exercise-detail-modal.tsx` | Implemented | `session-client.tsx:220-225`; test `exercise-detail-modal.test.tsx` static: 3 | done |
+| `clientSetId` idempotency | - | Missing | `AddSetPayload` (`endpoints.ts:139-147`) lacks `clientSetId`; relies on 409 dedupe | 25 (session-execution) |
+| Edit existing set (PB:300, "PUT /api/sessions/:id/sets/:setId") | - | Missing | No wrapper exists | defer-v0.6 (or 25 if scope allows) |
+| **Exercise catalog** (PB:365-369) |  |  |  |  |
+| List | `exercises-client.tsx` | Implemented | `exercises-client.tsx:41-54`; test `exercises-client.test.tsx` static: 3 | done |
+| Filters (muscle/equipment/difficulty) | `exercises-client.tsx:14-24` | Implemented | `FilterSelect` rows for category, equipment, difficulty | done |
+| Search | `searchExercises` (`endpoints.ts:207`) | Implemented | `exercises-client.tsx:35-54` (300ms debounce) | done |
+| Detail page | `exercises/[id]/exercise-detail-client.tsx` | Implemented | `exercise-detail-client.tsx:11-94` | done |
+| Detail modal (in-session) | `exercise-detail-modal.tsx` | Implemented | covered above | done |
+| **History** (PB:357-359) |  |  |  |  |
+| Calendar with completed days marked | `history-client.tsx:73-105` | Implemented | `history-client.tsx`; test `history-client.test.tsx` static: 4 | done |
+| Per-session detail | `history-client.tsx:126-163` `SelectedSessionCard` | Implemented | shows sets list + link to `/session/{id}` | done |
+| **Metrics** (PB:360-364) |  |  |  |  |
+| Weight chart (weekly/monthly/all-time) | `metrics-client.tsx:82-121` | Implemented | recharts LineChart with range toggles; test `metrics-client.test.tsx` static: 3 | done |
+| Measurement form | `metrics-client.tsx:123-188` | Implemented | weightKg / bodyFatPercent / waistCm / notes | done |
+| Other measurements (chest/arm/thigh) (PB:184) | - | Missing | `bodyMetricSchema` defines them (`schemas.ts:163-166`) but form omits them | 28 (metrics-ui) |
+| Progress photo upload (optional) (PB:184, PB:362) | - | Missing | `bodyMetricSchema.photoUrl` exists but form has no upload widget; no `/uploads` endpoint wired | defer-v0.6 |
+| **Profile** (PB:370-374) |  |  |  |  |
+| User info edit | `profile-client.tsx` | Implemented | `profile-client.tsx:86-225`; test `profile-client.test.tsx` static: 3 | done |
+| Health notes | `profile-client.tsx:150-158` | Implemented | single-line input | done |
+| Goals | `profile-client.tsx:160-166` | Implemented | single-line input | done |
+| Daily macro goals (kcal/protein/carbs/fat) | `profile-client.tsx:168-205` | Implemented | 4 numeric fields | done |
+| Supplements list edit | `supplements-section.tsx` | Implemented | CRUD list with timing + reminderTime; test static: 3 | done |
+| Webhook tokens (scale) | `webhook-tokens-section.tsx` | Implemented | mint/revoke; test static: 2 | done |
+| **Export / Import** (PB:376-380) |  |  |  |  |
+| Full JSON download | `export-client.tsx:197-218` | Implemented | `fullMutation`; covered by `export-client.test.tsx` static: 9 | done |
+| JSON restore | `export-client.tsx:262-326` | Implemented | file picker + `importFullDump`; result + warnings rendered | done |
+| Claude summary action | `export-client.tsx:153-195` | Implemented | days input + download | done |
+| Per-section export (5 sections) | `export-client.tsx:220-260` | Implemented | profile/plans/sessions/metrics/supplements buttons | done |
+| CSV sessions export | `export-client.tsx:246-258` | Implemented | `fetchSessionsCsv` | done |
+| AI prepare flow | `ai-prepare-client.tsx` | Implemented | `/export/ai`; test static: 2 | done |
+| AI apply flow (commit JSON dump) | `ai-apply-client.tsx` | Implemented | `/export/ai/apply` upload + diff + commit; test static: 3 | done |
+| Apple Health import | `health-import-client.tsx` | Implemented | XML/zip picker; test `health-import-client.test.tsx` static: 4 | done |
+| Google Fit import | `health-import-client.tsx:94-108` | Implemented | JSON picker | done |
+| Garmin .fit import | `health-import-client.tsx:111-125` | Implemented | binary upload | done |
+| **Phase 6 charts and stats** (PB:389-406) |  |  |  |  |
+| Volume (weekly total kg x reps) | `insights-client.tsx:92-119` | Implemented | recharts BarChart of `weeklyVolume`; test `insights-client.test.tsx` static: 2 | done |
+| 1RM (Epley) per exercise | `insights-client.tsx:121-168` | Implemented | recharts LineChart of `oneRepMax`; exercise picker | done |
+| Weight change (PB:393) | `metrics-client.tsx` | Implemented | weight chart on /metrics page | done |
+| Frequency heatmap (GitHub-style) | `Heatmap` (`heatmap.tsx`) + `insights-client.tsx:85-89` | Implemented | renders heatmapDay grid | done |
+| PR list | `prs-client.tsx` | Implemented | `/prs` page; test `prs-client.test.tsx` static: 2 | done |
+| Streak | `insights-client.tsx:65-90` | Implemented | streak chips + heatmap | done |
+
+Summary: Implemented 38, Partial 4, Stub 1, Missing 14.
+
+Stub call-out:
+- "Drain on online event" - `frontend/src/lib/offline/session-set-queue.ts:107-111` exposes `subscribeOnline(handler)`; grep across `frontend/src/app/**` and `frontend/src/components/**` shows zero call sites that wire this to a real drain. The Dexie table is built and tested in isolation but the production session client (`session-client.tsx:153-171`) calls `addSet` directly without an enqueue-or-flush wrapper.
+
+Routes that exist but are NOT in any ProjectBrief Phase 4-6 surface (extras shipped beyond brief):
+- `/nutrition` and `/api/water` flow - nutrition tracking lives in ProjectBrief Phase 7+ bonus list (PB:456-459); already shipped in v0.4 backend + pre-gsd frontend.
+- `/achievements` - gamification (PB:475-477 bonus); shipped early.
+- Webhook tokens UI in profile - scale-webhook (pre-gsd backend), exposed via UI.
+- AI prepare/apply flow - separate from raw JSON download; not explicitly in PB but supports PB:504-573 "Claude data management".
