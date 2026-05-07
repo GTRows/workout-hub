@@ -54,6 +54,7 @@ import {
   type UserMe,
   type WeeklyVolume,
   type WorkoutDay,
+  type WorkoutFocus,
   type WorkoutPlan,
 } from "@/lib/api/schemas";
 
@@ -535,6 +536,55 @@ export async function activateWorkoutPlan(planId: string): Promise<WorkoutPlan> 
     method: "POST",
     path: `/api/workout-plans/${planId}/activate`,
     schema: workoutPlanSchema,
+  });
+}
+
+export type CreateWorkoutDayPayload = {
+  dayOfWeek: number;
+  name: string;
+  focus: WorkoutFocus;
+  estimatedDurationMin?: number | null;
+};
+
+export async function createWorkoutDay(
+  planId: string,
+  payload: CreateWorkoutDayPayload
+): Promise<WorkoutDay> {
+  return api.request({
+    method: "POST",
+    path: `/api/workout-plans/${planId}/days`,
+    body: payload,
+    schema: workoutDaySchema,
+  });
+}
+
+export type UpdateWorkoutDayPayload = {
+  dayOfWeek?: number;
+  name?: string;
+  focus?: WorkoutFocus;
+  estimatedDurationMin?: number | null;
+};
+
+export async function updateWorkoutDay(
+  planId: string,
+  dayId: string,
+  payload: UpdateWorkoutDayPayload
+): Promise<WorkoutDay> {
+  return api.request({
+    method: "PUT",
+    path: `/api/workout-plans/${planId}/days/${dayId}`,
+    body: payload,
+    schema: workoutDaySchema,
+  });
+}
+
+export async function deleteWorkoutDay(
+  planId: string,
+  dayId: string
+): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/workout-plans/${planId}/days/${dayId}`,
   });
 }
 

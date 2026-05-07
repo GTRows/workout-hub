@@ -53,11 +53,23 @@ export const workoutDayExerciseSchema = z.object({
   notes: z.string().nullable().optional(),
 });
 
+export const workoutFocusValues = [
+  "PUSH",
+  "PULL",
+  "LEGS",
+  "CARDIO",
+  "CORE",
+  "FULL_BODY",
+  "REST",
+] as const;
+export const workoutFocusSchema = z.enum(workoutFocusValues);
+export type WorkoutFocus = z.infer<typeof workoutFocusSchema>;
+
 export const workoutDaySchema = z.object({
   id: z.string().uuid(),
   dayOfWeek: z.number().int().min(1).max(7),
   name: z.string(),
-  focus: z.string(),
+  focus: workoutFocusSchema,
   estimatedDurationMin: z.number().int().nullable().optional(),
   exercises: z.array(workoutDayExerciseSchema),
 });
