@@ -253,7 +253,9 @@
     "exerciseRequired": "Pick an exercise",
     "targetSetsRequired": "Sets must be at least 1",
     "repsRangeInvalid": "Min reps must be less than or equal to max",
-    "loadingExercises": "Loading exercises..."
+    "loadingExercises": "Loading exercises...",
+    "dayDragHandle": "Drag day",
+    "dayMoveError": "Could not move day. Try again."
   },
   "export": {
     "title": "Export",

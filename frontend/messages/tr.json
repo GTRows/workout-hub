@@ -253,7 +253,9 @@
     "exerciseRequired": "Egzersiz secmen gerek",
     "targetSetsRequired": "Set sayisi en az 1 olmali",
     "repsRangeInvalid": "Min tekrar max'tan kucuk olmali",
-    "loadingExercises": "Egzersizler yukleniyor..."
+    "loadingExercises": "Egzersizler yukleniyor...",
+    "dayDragHandle": "Gunu surukle",
+    "dayMoveError": "Gun tasinamadi. Tekrar dene."
   },
   "export": {
     "title": "Disa Aktar",
