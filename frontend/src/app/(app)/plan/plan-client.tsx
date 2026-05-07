@@ -34,6 +34,7 @@ import { pickLocaleField } from "@/lib/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { PlanList } from "./plan-list";
 
 export function PlanClient() {
   const t = useTranslations("plan");
@@ -47,9 +48,13 @@ export function PlanClient() {
   }
   if (!planQuery.data) {
     return (
-      <Card>
-        <CardDescription>{t("noPlan")}</CardDescription>
-      </Card>
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <PlanList />
+        <Card>
+          <CardDescription>{t("noPlan")}</CardDescription>
+        </Card>
+      </div>
     );
   }
 
@@ -61,6 +66,7 @@ export function PlanClient() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <PlanList />
       {days.map((day, i) => (
         <DayCard key={day?.id ?? `empty-${i}`} plan={plan} day={day} dayOfWeek={i + 1} />
       ))}

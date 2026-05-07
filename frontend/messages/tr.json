@@ -199,7 +199,23 @@
       "7": "Pazar"
     },
     "setsReps": "{sets} set x {min}-{max} tekrar",
-    "setsOnly": "{sets} set"
+    "setsOnly": "{sets} set",
+    "manageTitle": "Planlarim",
+    "newPlanTitle": "Yeni plan",
+    "newPlanNameLabel": "Plan adi",
+    "newPlanSubmit": "Olustur",
+    "activeBadge": "Aktif",
+    "activate": "Aktiflestir",
+    "rename": "Yeniden adlandir",
+    "delete": "Sil",
+    "deleteConfirm": "Bu plani silmek istediginden emin misin?",
+    "cannotDeleteActive": "Aktif plan silinemez",
+    "noPlans": "Henuz plan olusturmadin",
+    "renameDialogTitle": "Plani yeniden adlandir",
+    "dialogSave": "Kaydet",
+    "dialogCancel": "Iptal",
+    "nameRequired": "Plan adi bos olamaz",
+    "mutationError": "Islem basarisiz. Tekrar dene."
   },
   "export": {
     "title": "Disa Aktar",

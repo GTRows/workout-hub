@@ -33,6 +33,22 @@ const messages = {
     },
     setsReps: "{sets} sets x {min}-{max} reps",
     setsOnly: "{sets} sets",
+    manageTitle: "My plans",
+    newPlanTitle: "New plan",
+    newPlanNameLabel: "Plan name",
+    newPlanSubmit: "Create",
+    activeBadge: "Active",
+    activate: "Set active",
+    rename: "Rename",
+    delete: "Delete",
+    deleteConfirm: "Delete this plan?",
+    cannotDeleteActive: "Cannot delete the active plan",
+    noPlans: "No plans yet",
+    renameDialogTitle: "Rename plan",
+    dialogSave: "Save",
+    dialogCancel: "Cancel",
+    nameRequired: "Plan name is required",
+    mutationError: "Operation failed. Try again.",
   },
 };
 
@@ -112,7 +128,16 @@ describe("PlanClient", () => {
   });
 
   it("shows 'No active plan' when /workout-plans/active returns 204", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => noContent()));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/workout-plans")) {
+          return jsonResponse(200, []);
+        }
+        return noContent();
+      })
+    );
     renderClient(<PlanClient />);
     expect(await screen.findByText(/no active plan/i)).toBeInTheDocument();
   });
@@ -120,7 +145,13 @@ describe("PlanClient", () => {
   it("renders all seven weekdays and surfaces the planned day's name", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => jsonResponse(200, planWithOneDay()))
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/workout-plans")) {
+          return jsonResponse(200, []);
+        }
+        return jsonResponse(200, planWithOneDay());
+      })
     );
     renderClient(<PlanClient />);
     expect(await screen.findByRole("heading", { name: "Monday Push" })).toBeInTheDocument();
@@ -139,6 +170,9 @@ describe("PlanClient", () => {
         const url = typeof input === "string" ? input : input.toString();
         if (url.endsWith("/api/workout-plans/active")) {
           return jsonResponse(200, planWithOneDay());
+        }
+        if (url.endsWith("/api/workout-plans")) {
+          return jsonResponse(200, []);
         }
         if (url.includes("/exercises/reorder")) {
           reorderBody = JSON.parse(init!.body as string);
@@ -179,6 +213,9 @@ describe("PlanClient", () => {
         if (url.endsWith("/api/workout-plans/active")) {
           return jsonResponse(200, plan);
         }
+        if (url.endsWith("/api/workout-plans")) {
+          return jsonResponse(200, []);
+        }
         throw new Error("unexpected fetch: " + url);
       })
     );
@@ -194,5 +231,43 @@ describe("PlanClient", () => {
       "Drag to reorder"
     );
     expect(screen.getByTestId(`drag-handle-${b}`)).toBeInTheDocument();
+  });
+
+  it("mounts PlanList above the day grid", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/workout-plans/active")) {
+          return jsonResponse(200, planWithOneDay());
+        }
+        if (url.endsWith("/api/workout-plans")) {
+          return jsonResponse(200, [
+            {
+              id: planId,
+              name: "Test Plan",
+              active: true,
+              createdAt: "2026-04-01T00:00:00Z",
+              updatedAt: "2026-04-01T00:00:00Z",
+              days: [],
+            },
+          ]);
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<PlanClient />);
+
+    const manageHeading = await screen.findByRole("heading", {
+      name: "My plans",
+    });
+    const dayHeading = await screen.findByRole("heading", {
+      name: "Monday Push",
+    });
+
+    // Document order: manageHeading must precede dayHeading.
+    const position = manageHeading.compareDocumentPosition(dayHeading);
+    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

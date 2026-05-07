@@ -199,7 +199,23 @@
       "7": "Sunday"
     },
     "setsReps": "{sets} sets x {min}-{max} reps",
-    "setsOnly": "{sets} sets"
+    "setsOnly": "{sets} sets",
+    "manageTitle": "My plans",
+    "newPlanTitle": "New plan",
+    "newPlanNameLabel": "Plan name",
+    "newPlanSubmit": "Create",
+    "activeBadge": "Active",
+    "activate": "Set active",
+    "rename": "Rename",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this plan?",
+    "cannotDeleteActive": "Cannot delete the active plan",
+    "noPlans": "No plans yet",
+    "renameDialogTitle": "Rename plan",
+    "dialogSave": "Save",
+    "dialogCancel": "Cancel",
+    "nameRequired": "Plan name is required",
+    "mutationError": "Operation failed. Try again."
   },
   "export": {
     "title": "Export",
