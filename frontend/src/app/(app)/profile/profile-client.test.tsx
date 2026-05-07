@@ -15,6 +15,9 @@ import { ProfileClient } from "@/app/(app)/profile/profile-client";
 import { clearTokens } from "@/lib/auth/token-store";
 
 const messages = {
+  nav: {
+    logout: "Log out",
+  },
   profile: {
     title: "Profile",
     loading: "Loading...",
@@ -34,6 +37,7 @@ const messages = {
     dailyProteinGGoal: "Protein (g/day)",
     dailyCarbsGGoal: "Carbs (g/day)",
     dailyFatGGoal: "Fat (g/day)",
+    logoutHeading: "Account",
   },
 };
 
