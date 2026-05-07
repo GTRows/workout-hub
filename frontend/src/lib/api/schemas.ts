@@ -110,6 +110,7 @@ export type UserMe = z.infer<typeof userMeSchema>;
 export type WorkoutDayExercise = z.infer<typeof workoutDayExerciseSchema>;
 export type WorkoutDay = z.infer<typeof workoutDaySchema>;
 export type WorkoutPlan = z.infer<typeof workoutPlanSchema>;
+export const workoutPlanListSchema = z.array(workoutPlanSchema);
 export type SessionSet = z.infer<typeof sessionSetSchema>;
 export type SessionDetail = z.infer<typeof sessionDetailSchema>;
 export const exerciseSchema = z.object({

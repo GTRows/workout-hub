@@ -29,6 +29,7 @@ import {
   weeklyVolumeListSchema,
   workoutDaySchema,
   workoutPlanSchema,
+  workoutPlanListSchema,
   type Achievement,
   type AuthResponse,
   type BodyMetric,
@@ -489,6 +490,51 @@ export async function reorderDayExercises(
     path: `/api/workout-plans/${planId}/days/${dayId}/exercises/reorder`,
     body: { itemIdsInOrder },
     schema: workoutDaySchema,
+  });
+}
+
+export async function fetchWorkoutPlans(): Promise<WorkoutPlan[]> {
+  return api.request({
+    path: "/api/workout-plans",
+    schema: workoutPlanListSchema,
+  });
+}
+
+export async function createWorkoutPlan(payload: {
+  name: string;
+}): Promise<WorkoutPlan> {
+  return api.request({
+    method: "POST",
+    path: "/api/workout-plans",
+    body: payload,
+    schema: workoutPlanSchema,
+  });
+}
+
+export async function updateWorkoutPlan(
+  planId: string,
+  payload: { name: string }
+): Promise<WorkoutPlan> {
+  return api.request({
+    method: "PUT",
+    path: `/api/workout-plans/${planId}`,
+    body: payload,
+    schema: workoutPlanSchema,
+  });
+}
+
+export async function deleteWorkoutPlan(planId: string): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/workout-plans/${planId}`,
+  });
+}
+
+export async function activateWorkoutPlan(planId: string): Promise<WorkoutPlan> {
+  return api.request({
+    method: "POST",
+    path: `/api/workout-plans/${planId}/activate`,
+    schema: workoutPlanSchema,
   });
 }
 
