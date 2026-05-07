@@ -80,7 +80,7 @@ function dayWithOneExercise() {
     id: dayId,
     dayOfWeek: 3,
     name: "Push Day",
-    focus: "push",
+    focus: "PUSH",
     estimatedDurationMin: 45,
     exercises: [
       {
