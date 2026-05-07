@@ -122,3 +122,106 @@ Middleware coverage (`frontend/src/middleware.ts:14-26`):
 `PROTECTED_PREFIXES = [/dashboard, /plan, /history, /exercises, /insights, /prs, /nutrition, /metrics, /profile, /export, /session]`. The `wh.hasSession` cookie (set via `frontend/src/lib/auth/token-store.ts:18`) gates the (app) shell; missing cookie -> redirect to `/login?next=<pathname>`.
 
 Routes existing today but absent from v0.5 outline (Phases 22-30): `/insights`, `/prs`, `/achievements`, `/nutrition`, `/export/ai`, `/export/ai/apply`, `/offline`. The middleware also gates `/insights`, `/prs`, `/nutrition` and `/exercises/[id]` though the outline does not name these routes.
+
+---
+
+## Section 3 - Component and Library Inventory
+
+### 3a) Components (`frontend/src/components/**`)
+
+| File | Exported | Role | "use client" | Consumers (routes) | Lines | Has-test |
+|---|---|---|---|---|---|---|
+| `frontend/src/components/providers.tsx` | `Providers` | layout chrome (TanStack Query + next-intl) | yes | root layout | 33 | no |
+| `frontend/src/components/nav.tsx` | `Nav` | layout chrome (top nav, sm+) | yes | (app) layout | 53 | no |
+| `frontend/src/components/bottom-nav.tsx` | `BottomNav` | layout chrome (mobile bottom tabs) | yes | (app) layout | 55 | no |
+| `frontend/src/components/theme-toggle.tsx` | `ThemeToggle` | one-shot helper (theme cycler) | yes | top nav | 58 | yes (`theme-toggle.test.tsx` static: 2) |
+| `frontend/src/components/heatmap.tsx` | `Heatmap` | cross-route widget (analytics grid) | yes | insights | 44 | no |
+| `frontend/src/components/pr-toast.tsx` | `PrToast` | one-shot helper (PR celebration toast) | yes | session-client | 28 | yes (`pr-toast.test.tsx` static: 2) |
+| `frontend/src/components/exercise-media.tsx` | `ExerciseMedia` | cross-route widget (lazy video/image) | yes | exercise detail | 78 | yes (`exercise-media.test.tsx` static: 3) |
+| `frontend/src/components/push-permission-card.tsx` | `PushPermissionCard` | cross-route widget (push opt-in) | yes | dashboard | 53 | yes (`push-permission-card.test.tsx` static: 4) |
+| `frontend/src/components/service-worker-registrar.tsx` | `ServiceWorkerRegistrar` | one-shot helper (registers /sw.js) | yes | root layout | 22 | yes (`service-worker-registrar.test.tsx` static: 2) |
+| `frontend/src/components/ui/button.tsx` | `Button`, `buttonVariants` | UI primitive (shadcn) | no (server-safe) | many | 48 | no |
+| `frontend/src/components/ui/card.tsx` | `Card`, `CardTitle`, `CardDescription` | UI primitive (shadcn) | no | many | 41 | no |
+| `frontend/src/components/ui/input.tsx` | `Input` | UI primitive (shadcn) | no | many | 25 | no |
+| `frontend/src/components/ui/label.tsx` | `Label` | UI primitive (shadcn) | no | many | 17 | no |
+
+No file in `frontend/src/components/` exceeds 200 lines. Cross-route widgets `Heatmap`, `ExerciseMedia`, and `PushPermissionCard` are the only candidates that might grow; `PrToast` is a single-purpose helper that should stay tight.
+
+### 3b) Library modules (`frontend/src/lib/**`)
+
+| File | Exported symbols | Responsibility | Lines | Has-test |
+|---|---|---|---|---|
+| `frontend/src/lib/api/client.ts` | `ApiError`, `createApiClient`, `api` | HTTP client + auth refresh interceptor + Zod parsing | 139 | yes (`client.test.ts` static: 3) |
+| `frontend/src/lib/api/endpoints.ts` | 40+ wrappers: `login`, `fetchMe`, `updateMe`, `fetchActiveWorkoutPlan`, `fetchWorkoutDay`, `fetchActiveSession`, `fetchSession`, `startSession`, `addSet`, `finishSession`, `fetchLastPerformance`, `fetchExercises`, `searchExercises`, `fetchExerciseDetail`, `fetchSessionHistory`, `fetchClaudeSummary`, `fetchFullExport`, `fetchSectionExport`, `searchFoods`, `fetchNutritionForDate`, `createNutritionEntry`, `deleteNutritionEntry`, `fetchWaterDay`, `addWater`, `deleteWater`, `fetchSessionsCsv`, `importFullDump`, `fetchMetrics`, `upsertMetric`, `deleteMetric`, `fetchWeeklyVolume`, `fetchOneRepMax`, `fetchStreak`, `fetchPersonalRecords`, `fetchHeatmap`, `fetchSupplements`, `createSupplement`, `updateSupplement`, `deleteSupplement`, `reorderDayExercises`, `importAppleHealth`, `importGoogleFit`, `fetchAchievements`, `fetchWebhookTokens`, `mintWebhookToken`, `revokeWebhookToken`, `importGarminFit`; types `UpdateProfilePayload`, `AddSetPayload`, `FinishSessionPayload`, `ExerciseListFilters`, `ExportSection`, `ImportResult`, `UpsertBodyMetricPayload`, `CreateSupplementPayload`, `UpdateSupplementPayload`, `CreateNutritionEntryPayload` | API wrapper layer (Zod-validated calls into `client.ts`) | 591 | no (only `client.test.ts` exercises core fetch) |
+| `frontend/src/lib/api/schemas.ts` | Zod schemas + types: `apiErrorSchema`, `authResponseSchema`, `userMeSchema`, `workoutDayExerciseSchema`, `workoutDaySchema`, `workoutPlanSchema`, `sessionSetSchema`, `sessionDetailSchema`, `lastPerformanceSchema`, `exerciseSchema`, `pageSchema`, `exercisePageSchema`, `sessionSummarySchema`, `sessionSummaryPageSchema`, `bodyMetricSchema`, `weeklyVolumeSchema`, `oneRmPointSchema`, `streakSchema`, `personalRecordSchema`, `heatmapDaySchema`, `supplementTimingSchema`, `supplementSchema`, `foodItemSchema`, `nutritionEntrySchema`, `waterEntrySchema`, `waterDaySchema`, `achievementSchema`, `webhookTokenSchema`, `healthImportResultSchema` | Wire-format Zod definitions (mirror v0.4 backend DTOs) | 332 | no (consumed by `client.test.ts` indirectly) |
+| `frontend/src/lib/auth/token-store.ts` | `getAccessToken`, `setAccessToken`, `subscribeAccessToken`, `getRefreshToken`, `setRefreshToken`, `clearTokens` | Auth token store (in-memory access, localStorage refresh, `wh.hasSession` cookie marker) | 60 | no |
+| `frontend/src/lib/auth/login-schema.ts` | `loginFormSchema`, `LoginFormValues` | Zod login form schema | 8 | no |
+| `frontend/src/lib/offline/session-set-queue.ts` | `QueuedSet`, `getOfflineDb`, `__resetOfflineDb`, `enqueueSet`, `queuedCount`, `queuedForSession`, `drainForSession`, `subscribeOnline`, types `PostOutcome`, `DrainResult` | Dexie offline queue. **IndexedDB store name:** `workouthub-offline` (Dexie database) with object store `queuedSets`. **Primary key:** auto-increment `++id` (numeric); secondary index on `sessionId`. **Drain trigger:** `subscribeOnline()` (line 107) attaches `window.addEventListener("online", ...)` so callers can wire `drainForSession(sessionId, postFn)` to fire when the browser reports network return. | 111 | yes (`session-set-queue.test.ts` static: 7) |
+| `frontend/src/lib/push/subscribe.ts` | `subscribePush` | Push subscription flow: fetch VAPID public key, call `pushManager.subscribe`, POST endpoint to `/api/push/subscribe` | 60 | no |
+| `frontend/src/lib/push/rest-timer.ts` | `useRestTimer` (hook), `notifyRestElapsed` | Client-side rest timer + Notification API helper for service-worker / fallback notification | 81 | no |
+| `frontend/src/lib/locale.ts` | `pickLocaleField`, `pickLocaleArray` | Bilingual field picker (TR/EN with cross-fallback) | 21 | no |
+| `frontend/src/lib/time/today.ts` | `getTodayIsoDayOfWeek` | ISO-8601 day-of-week (Mon=1..Sun=7) for plan lookup | 9 | no |
+| `frontend/src/lib/utils.ts` | `cn` | Tailwind class merge helper | 6 | no |
+
+Files >200 lines (Convention "max ~200 lines per file" candidates):
+- `frontend/src/lib/api/endpoints.ts` (591 lines) - thin wrapper layer; could be split by feature (auth/users/workouts/sessions/exercises/metrics/analytics/export/nutrition/water/supplements/health/webhooks/achievements/push).
+- `frontend/src/lib/api/schemas.ts` (332 lines) - Zod schema collection; could be split per feature in lockstep with `endpoints.ts`.
+
+### 3c) Cross-cutting assets
+
+**`frontend/src/middleware.ts:42-54`** - `config.matcher`:
+```
+matcher: [
+  "/dashboard/:path*",
+  "/plan/:path*",
+  "/history/:path*",
+  "/exercises/:path*",
+  "/insights/:path*",
+  "/prs/:path*",
+  "/nutrition/:path*",
+  "/metrics/:path*",
+  "/profile/:path*",
+  "/export/:path*",
+  "/session/:path*",
+],
+```
+Missing from matcher (compared to `(app)/` route group): `/achievements/:path*`. The `achievements` route exists at `frontend/src/app/(app)/achievements/page.tsx` and is reachable via top-nav (`frontend/src/components/nav.tsx:16`), but the middleware does not gate it. Server-side fetch from this route still requires Bearer token, so unauthenticated render shows a loading state and then API errors.
+
+**`frontend/src/i18n/request.ts:1-17`** - locale resolution:
+- Supported locales: `["tr", "en"]`.
+- Default: `process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? "tr"`.
+- Fallback: any unsupported `requestLocale` falls back to default. Messages are imported via `await import("../../messages/${locale}.json")`.
+
+**`frontend/messages/{en,tr}.json`** - top-level namespaces (identical between en and tr):
+`nav`, `auth`, `dashboard`, `session`, `profile`, `nutrition`, `metrics`, `insights`, `prs`, `push`, `supplements`, `plan`, `export`, `ai`, `history`, `exercises`, `common`, `achievements`, `webhookTokens`, `health`. (20 namespaces.)
+
+**`frontend/public/manifest.webmanifest`** (verbatim):
+- `name: "WorkoutHub"`, `short_name: "WorkoutHub"`.
+- `description: "Self-hosted workout tracker"`.
+- `start_url: "/dashboard"`, `scope: "/"`, `display: "standalone"`, `orientation: "portrait"`.
+- `lang: "tr"`, `theme_color: "#0ea5e9"`, `background_color: "#ffffff"`.
+- `icons`: 192/any, 512/any, 512/maskable from `/icons/`.
+
+**`frontend/public/sw.js`** (cache strategy, lines 31-40):
+- `CACHE = "wh-shell-v1"`, `SHELL = ["/offline", "/manifest.webmanifest", "/icons/icon-192.png"]`.
+- Install (line 7): pre-cache shell + `skipWaiting()`.
+- Activate (line 13): purge caches != `wh-shell-v1`, `clients.claim()`.
+- Fetch (lines 24-40): `req.method !== "GET"` -> bypass; `url.pathname.startsWith("/api/")` -> bypass (never cache API). Navigation requests are **network-first** with `/offline` fallback (lines 31-37). Non-navigation GETs are **cache-first** with network fallback (line 40).
+
+**`frontend/playwright.config.ts:1-29`**:
+- Test dir: `./e2e`. baseURL: `process.env.E2E_WEB_BASE_URL ?? "http://localhost:3000"`.
+- Projects: `chromium` only (`...devices["Desktop Chrome"]`); responsive 360 spec uses `test.use({ viewport: { width: 360, height: 800 } })` to override per-test.
+- `fullyParallel: false`, `workers: 1`, retries 2 in CI.
+- Trace, screenshot, video all "retain-on-failure".
+
+**`frontend/e2e/critical-flow.spec.ts`** - admin login -> start session -> log 3 sets -> finish -> /export download Claude summary JSON. Requires `E2E_ADMIN_EMAIL` + `E2E_ADMIN_PASSWORD`.
+
+**`frontend/e2e/responsive-360.spec.ts`** - login + iterate `[/dashboard, /plan, /history, /exercises, /nutrition]` at 360x800; assert no horizontal overflow and `data-testid="bottom-nav"` visible. Captures screenshots to `e2e/screenshots/`.
+
+Files >200 lines elsewhere in the audit scope (Convention candidates beyond Section 3a/3b):
+- `frontend/src/app/(app)/session/[id]/session-client.tsx` (352 lines)
+- `frontend/src/app/(app)/export/export-client.tsx` (329 lines)
+- `frontend/src/app/(app)/nutrition/nutrition-client.tsx` (316 lines)
+- `frontend/src/app/(app)/plan/plan-client.tsx` (277 lines)
+- `frontend/src/app/(app)/profile/profile-client.tsx` (263 lines)
+- `frontend/src/app/(app)/metrics/metrics-client.tsx` (246 lines)
