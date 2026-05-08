@@ -277,4 +277,53 @@ describe("SessionClient", () => {
     expect(confirmSpy).toHaveBeenCalled();
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/dashboard"));
   });
+
+  it("includes a clientSetId UUID in the addSet request body", async () => {
+    const user = userEvent.setup();
+    const newSet = {
+      id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      exerciseId,
+      exerciseNameTr: "Sinav",
+      exerciseNameEn: "Push-up",
+      setNumber: 1,
+      repsDone: 10,
+      weightKg: 20,
+      rpe: null,
+      completed: true,
+      notes: null,
+    };
+
+    let posted: RequestInit | undefined;
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () => jsonResponse(200, baseSession()),
+        [`/api/workout-days/${dayId}`]: () => jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets`]: (init) => {
+          posted = init;
+          return jsonResponse(201, newSet);
+        },
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.type(screen.getByLabelText("Reps"), "10");
+    await user.type(screen.getByLabelText("Weight"), "20");
+    await user.click(screen.getByRole("button", { name: "Done" }));
+
+    await waitFor(() =>
+      expect(screen.getByText(/^1\. 10 x 20kg$/)).toBeInTheDocument()
+    );
+    expect(posted).toBeDefined();
+    const body = JSON.parse(posted!.body as string) as { clientSetId?: unknown };
+    expect(typeof body.clientSetId).toBe("string");
+    expect(body.clientSetId).toEqual(
+      expect.stringMatching(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      )
+    );
+  });
 });
