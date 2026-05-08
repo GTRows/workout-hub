@@ -14,10 +14,13 @@ class OfflineDb extends Dexie {
   constructor() {
     super("workouthub-offline");
     this.version(1).stores({
-      // The composite (sessionId, exerciseId, setNumber) on the payload is
-      // the natural idempotency key -- DB UNIQUE(session_id, exercise_id,
-      // set_number) stops real duplicates on the server side, so flushing
-      // treats a 409 as 'already saved' and drops the queued item.
+      // Per-payload `clientSetId` (Phase 15-04 backend; threaded by Phase 25-01
+      // frontend) is the primary idempotency key -- the backend looks up
+      // `findBySessionIdAndClientSetId` and returns the existing row on replay.
+      // Fallback dedup: the DB UNIQUE(session_id, exercise_id, set_number)
+      // constraint stops real duplicates if the client somehow omits clientSetId.
+      // Either way, flushing treats a 409 as 'already saved' and drops the
+      // queued item.
       queuedSets: "++id, sessionId",
     });
   }
