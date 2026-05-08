@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/endpoints";
 import {
   ApiErrorCode,
+  apiErrorCodeMessageKey,
   isApiError,
   isApiErrorWithCode,
 } from "@/lib/api/api-error-codes";
@@ -74,6 +75,7 @@ function makeDrainPostFn(sessionId: string) {
 
 export function SessionClient({ sessionId }: { sessionId: string }) {
   const t = useTranslations("session");
+  const tFull = useTranslations();
   const router = useRouter();
   const qc = useQueryClient();
 
@@ -81,6 +83,7 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
   const [queuedToast, setQueuedToast] = useState<string | null>(null);
   const [drainedToast, setDrainedToast] = useState<string | null>(null);
   const [droppedToast, setDroppedToast] = useState<string | null>(null);
+  const [apiErrorToast, setApiErrorToast] = useState<string | null>(null);
 
   const refreshQueued = useCallback(async () => {
     try {
@@ -114,6 +117,27 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
       qc.setQueryData(["sessions", sessionId], finished);
       qc.setQueryData(["sessions", "active"], null);
       router.push("/dashboard");
+    },
+    onError: (err: unknown) => {
+      if (
+        isApiErrorWithCode(err, ApiErrorCode.SESSION_ALREADY_FINISHED) ||
+        isApiErrorWithCode(err, ApiErrorCode.SESSION_FINISHED)
+      ) {
+        const code = isApiErrorWithCode(
+          err,
+          ApiErrorCode.SESSION_ALREADY_FINISHED
+        )
+          ? ApiErrorCode.SESSION_ALREADY_FINISHED
+          : ApiErrorCode.SESSION_FINISHED;
+        setApiErrorToast(tFull(apiErrorCodeMessageKey(code)));
+        router.push("/dashboard");
+        return;
+      }
+      if (isApiError(err)) {
+        setApiErrorToast(tFull(apiErrorCodeMessageKey(err.code)));
+        return;
+      }
+      setApiErrorToast(tFull(apiErrorCodeMessageKey(undefined)));
     },
   });
 
@@ -195,6 +219,7 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
           locked={session.finished}
           onOfflineQueued={onOfflineQueued}
           refreshQueued={refreshQueued}
+          setApiErrorToast={setApiErrorToast}
         />
       ))}
 
@@ -224,7 +249,12 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
         {t("finishButton")}
       </Button>
 
-      {droppedToast ? (
+      {apiErrorToast ? (
+        <PrToast
+          message={apiErrorToast}
+          onDismiss={() => setApiErrorToast(null)}
+        />
+      ) : droppedToast ? (
         <PrToast
           message={droppedToast}
           onDismiss={() => setDroppedToast(null)}
@@ -251,6 +281,7 @@ function ExerciseBlock({
   locked,
   onOfflineQueued,
   refreshQueued,
+  setApiErrorToast,
 }: {
   sessionId: string;
   planItem: WorkoutDayExercise;
@@ -258,9 +289,12 @@ function ExerciseBlock({
   locked: boolean;
   onOfflineQueued: () => void;
   refreshQueued: () => void;
+  setApiErrorToast: (msg: string) => void;
 }) {
   const t = useTranslations("session");
+  const tFull = useTranslations();
   const qc = useQueryClient();
+  const router = useRouter();
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
@@ -306,13 +340,33 @@ function ExerciseBlock({
       }
       void refreshQueued();
     },
-    onError: (err) => {
+    onError: (err: unknown) => {
       if (err instanceof OfflineQueuedError) {
         setReps("");
         setWeight("");
         onOfflineQueued();
         void refreshQueued();
+        return;
       }
+      if (isApiErrorWithCode(err, ApiErrorCode.SESSION_FINISHED)) {
+        setApiErrorToast(
+          tFull(apiErrorCodeMessageKey(ApiErrorCode.SESSION_FINISHED))
+        );
+        router.push("/dashboard");
+        return;
+      }
+      if (isApiErrorWithCode(err, ApiErrorCode.SET_NUMBER_DUPLICATE)) {
+        setApiErrorToast(
+          tFull(apiErrorCodeMessageKey(ApiErrorCode.SET_NUMBER_DUPLICATE))
+        );
+        void qc.invalidateQueries({ queryKey: ["sessions", sessionId] });
+        return;
+      }
+      if (isApiError(err)) {
+        setApiErrorToast(tFull(apiErrorCodeMessageKey(err.code)));
+        return;
+      }
+      setApiErrorToast(tFull(apiErrorCodeMessageKey(undefined)));
     },
   });
 
