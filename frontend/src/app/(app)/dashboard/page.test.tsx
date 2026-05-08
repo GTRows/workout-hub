@@ -45,6 +45,19 @@ const messages = {
     lastWeightAddCta: "Log weight",
     viewHistory: "History",
   },
+  errors: {
+    api: {
+      generic: "Something went wrong. Please try again.",
+      sessionAlreadyActive:
+        "You already have an active session. Redirecting to resume.",
+      sessionAlreadyFinished:
+        "This session is already finished. Returning to dashboard.",
+      sessionFinished:
+        "Session was finished while you were submitting. Returning to dashboard.",
+      setNumberDuplicate:
+        "Set number conflict, list refreshed. Please try again.",
+    },
+  },
 };
 
 function renderDashboard(ui: ReactElement) {
@@ -310,5 +323,54 @@ describe("DashboardPage", () => {
     renderDashboard(<DashboardPage />);
     const link = await screen.findByRole("link", { name: /history/i });
     expect(link).toHaveAttribute("href", "/history");
+  });
+
+  it("shows the SESSION_ALREADY_ACTIVE toast and refetches the active session when startSession returns 409 + code SESSION_ALREADY_ACTIVE", async () => {
+    const user = (await import("@testing-library/user-event")).default.setup();
+    let activeFetchCount = 0;
+    const sessionRow = {
+      id: "ffffffff-aaaa-bbbb-cccc-111111111111",
+      workoutDayId: activePlan.days[0].id,
+      startedAt: "2026-05-09T10:00:00Z",
+      endedAt: null,
+      finished: false,
+      sets: [],
+    };
+
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        "/api/workout-plans/active": () => jsonResponse(200, activePlan),
+        "/api/sessions/active": () => {
+          activeFetchCount++;
+          return activeFetchCount === 1
+            ? noContent()
+            : jsonResponse(200, sessionRow);
+        },
+        "/api/sessions/start": () =>
+          jsonResponse(409, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 409,
+            error: "Conflict",
+            message: "Already active",
+            code: "SESSION_ALREADY_ACTIVE",
+            path: "/api/sessions/start",
+          }),
+        ...dashboardSideRoutes,
+      })
+    );
+
+    renderDashboard(<DashboardPage />);
+    const button = await screen.findByRole("button", {
+      name: /start workout/i,
+    });
+    await user.click(button);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("pr-toast")).toHaveTextContent(
+        "You already have an active session. Redirecting to resume."
+      )
+    );
+    await waitFor(() => expect(activeFetchCount).toBeGreaterThanOrEqual(2));
   });
 });
