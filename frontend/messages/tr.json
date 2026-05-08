@@ -68,7 +68,11 @@
     "restTimer": "Dinlenme: {seconds}s",
     "finishButton": "Antrenmani bitir",
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
-    "finished": "Tamamlandi"
+    "finished": "Tamamlandi",
+    "queuedOffline": "Internet yok - set kaydedildi, baglandiginda gonderilecek.",
+    "queuedDrained": "{count} bekleyen set gonderildi.",
+    "queuedDropped": "Bazi bekleyen setler artik kaydedilemiyor (oturum kapanmis olabilir).",
+    "queuedBadge": "{count} bekleyen"
   },
   "profile": {
     "title": "Profil",

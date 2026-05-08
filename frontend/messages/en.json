@@ -68,7 +68,11 @@
     "restTimer": "Rest: {seconds}s",
     "finishButton": "Finish workout",
     "finishConfirm": "Finish this workout?",
-    "finished": "Finished"
+    "finished": "Finished",
+    "queuedOffline": "Offline - set queued, will sync when reconnected.",
+    "queuedDrained": "{count} queued sets synced.",
+    "queuedDropped": "Some queued sets could not be saved (session may already be finished).",
+    "queuedBadge": "{count} pending"
   },
   "profile": {
     "title": "Profile",
