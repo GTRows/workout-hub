@@ -50,9 +50,10 @@ function makeDrainPostFn(sessionId: string) {
       await addSet(sessionId, payload);
       return { ok: true };
     } catch (err) {
-      if (isApiError(err) && err.status === 409) {
-        return { ok: false, status: 409 };
-      }
+      // Permanent rejects (session finished elsewhere) come BEFORE the bare
+      // 409 check because they may carry status 409 with a more specific
+      // code; treating them as duplicates would silently drop them under
+      // the wrong counter.
       if (
         isApiErrorWithCode(err, ApiErrorCode.SESSION_FINISHED) ||
         isApiErrorWithCode(err, ApiErrorCode.SESSION_ALREADY_FINISHED)
@@ -62,6 +63,9 @@ function makeDrainPostFn(sessionId: string) {
           permanent: true,
           reason: err.code ?? "SESSION_FINISHED",
         };
+      }
+      if (isApiError(err) && err.status === 409) {
+        return { ok: false, status: 409 };
       }
       throw err;
     }
