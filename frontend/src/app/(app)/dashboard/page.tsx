@@ -4,23 +4,32 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   fetchActiveSession,
   fetchActiveWorkoutPlan,
   startSession,
 } from "@/lib/api/endpoints";
+import {
+  ApiErrorCode,
+  apiErrorCodeMessageKey,
+  isApiErrorWithCode,
+} from "@/lib/api/api-error-codes";
 import type { SessionDetail, WorkoutDay } from "@/lib/api/schemas";
 import { getTodayIsoDayOfWeek } from "@/lib/time/today";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { PrToast } from "@/components/pr-toast";
 import { PushPermissionCard } from "@/components/push-permission-card";
 import { WeeklySummaryCard } from "@/components/dashboard/weekly-summary-card";
 import { LastWeightCard } from "@/components/dashboard/last-weight-card";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
+  const tFull = useTranslations();
   const router = useRouter();
   const qc = useQueryClient();
+  const [apiErrorToast, setApiErrorToast] = useState<string | null>(null);
 
   const planQuery = useQuery({
     queryKey: ["workout-plans", "active"],
@@ -37,11 +46,28 @@ export default function DashboardPage() {
       qc.setQueryData(["sessions", "active"], session);
       router.push(`/session/${session.id}`);
     },
+    onError: (err: unknown) => {
+      if (isApiErrorWithCode(err, ApiErrorCode.SESSION_ALREADY_ACTIVE)) {
+        setApiErrorToast(
+          tFull(apiErrorCodeMessageKey(ApiErrorCode.SESSION_ALREADY_ACTIVE))
+        );
+        void qc.invalidateQueries({ queryKey: ["sessions", "active"] });
+        return;
+      }
+      setApiErrorToast(tFull(apiErrorCodeMessageKey(undefined)));
+    },
   });
 
   if (planQuery.isLoading || sessionQuery.isLoading) {
     return <p className="text-muted-foreground">{t("loading")}</p>;
   }
+
+  const apiErrorToastNode = apiErrorToast ? (
+    <PrToast
+      message={apiErrorToast}
+      onDismiss={() => setApiErrorToast(null)}
+    />
+  ) : null;
 
   const active = sessionQuery.data ?? null;
   if (active) {
@@ -64,6 +90,7 @@ export default function DashboardPage() {
         <LastWeightCard />
         <PushPermissionCard />
         <QuickActions />
+        {apiErrorToastNode}
       </div>
     );
   }
@@ -98,6 +125,7 @@ export default function DashboardPage() {
         <LastWeightCard />
         <PushPermissionCard />
         <QuickActions />
+        {apiErrorToastNode}
       </div>
     );
   }
@@ -112,6 +140,7 @@ export default function DashboardPage() {
         <LastWeightCard />
         <PushPermissionCard />
         <QuickActions />
+        {apiErrorToastNode}
       </div>
     );
   }
@@ -128,6 +157,7 @@ export default function DashboardPage() {
       <LastWeightCard />
       <PushPermissionCard />
       <QuickActions />
+      {apiErrorToastNode}
     </div>
   );
 }
