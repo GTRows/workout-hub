@@ -61,13 +61,25 @@ export async function queuedForSession(sessionId: string): Promise<QueuedSet[]> 
   return db.queuedSets.where("sessionId").equals(sessionId).sortBy("id");
 }
 
-export type PostOutcome = { ok: true } | { ok: false; status: number };
+export type PostOutcome =
+  | { ok: true }
+  | { ok: false; status: number }
+  | { ok: false; permanent: true; reason: string };
 
-export type DrainResult = { drained: number; dropped: number; remaining: number };
+export type DrainResult = {
+  drained: number;
+  dropped: number;
+  permanentlyDropped: number;
+  remaining: number;
+};
 
 /**
  * Drains queued sets for a session by invoking postFn one row at a time.
- * - 2xx or 409 (duplicate per UNIQUE constraint) -> drop the item and count.
+ * - 2xx -> drop the item, increment `drained`.
+ * - 409 (duplicate per UNIQUE constraint) -> drop the item, increment `dropped`.
+ * - permanent: true (server says this row will never succeed; e.g. the
+ *   session was finished elsewhere) -> drop the item, increment
+ *   `permanentlyDropped`, CONTINUE the drain.
  * - Other HTTP error -> stop the drain and leave remaining items for retry.
  * - Network failure (postFn throws) -> stop the drain.
  */
@@ -83,6 +95,7 @@ export async function drainForSession(
 
   let drained = 0;
   let dropped = 0;
+  let permanentlyDropped = 0;
   for (const item of items) {
     let outcome: PostOutcome;
     try {
@@ -95,6 +108,11 @@ export async function drainForSession(
       drained++;
       continue;
     }
+    if ("permanent" in outcome && outcome.permanent) {
+      await db.queuedSets.delete(item.id!);
+      permanentlyDropped++;
+      continue;
+    }
     if (outcome.status === 409) {
       await db.queuedSets.delete(item.id!);
       dropped++;
@@ -104,7 +122,7 @@ export async function drainForSession(
     break;
   }
   const remaining = await queuedCount(sessionId);
-  return { drained, dropped, remaining };
+  return { drained, dropped, permanentlyDropped, remaining };
 }
 
 export function subscribeOnline(handler: () => void): () => void {

@@ -53,7 +53,7 @@ describe("offline session-set queue", () => {
     const postFn = vi.fn().mockResolvedValue({ ok: true });
     const result = await drainForSession(sessionId, postFn);
 
-    expect(result).toEqual({ drained: 2, dropped: 0, remaining: 0 });
+    expect(result).toEqual({ drained: 2, dropped: 0, permanentlyDropped: 0, remaining: 0 });
     expect(postFn).toHaveBeenCalledTimes(2);
     expect(await queuedCount(sessionId)).toBe(0);
   });
@@ -68,7 +68,7 @@ describe("offline session-set queue", () => {
       .mockResolvedValueOnce({ ok: true });
     const result = await drainForSession(sessionId, postFn);
 
-    expect(result).toEqual({ drained: 1, dropped: 1, remaining: 0 });
+    expect(result).toEqual({ drained: 1, dropped: 1, permanentlyDropped: 0, remaining: 0 });
   });
 
   it("stops draining on a non-409 HTTP error and leaves subsequent items", async () => {
