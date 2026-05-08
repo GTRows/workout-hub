@@ -125,4 +125,26 @@ describe("offline session-set queue", () => {
     window.dispatchEvent(new Event("online"));
     expect(handler).toHaveBeenCalledTimes(1);
   });
+
+  it("drops a permanent-reject item and continues draining the rest", async () => {
+    await enqueueSet(sessionId, payload(1));
+    await enqueueSet(sessionId, payload(2));
+    await enqueueSet(sessionId, payload(3));
+
+    const postFn = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true })
+      .mockResolvedValueOnce({ ok: false, permanent: true, reason: "SESSION_FINISHED" })
+      .mockResolvedValueOnce({ ok: true });
+    const result = await drainForSession(sessionId, postFn);
+
+    expect(result).toEqual({
+      drained: 2,
+      dropped: 0,
+      permanentlyDropped: 1,
+      remaining: 0,
+    });
+    expect(postFn).toHaveBeenCalledTimes(3);
+    expect(await queuedCount(sessionId)).toBe(0);
+  });
 });
