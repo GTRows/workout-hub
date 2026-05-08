@@ -109,6 +109,17 @@ export const sessionDetailSchema = z.object({
   sets: z.array(sessionSetSchema),
 });
 
+export const addSetRequestSchema = z.object({
+  exerciseId: z.string().uuid(),
+  setNumber: z.number().int().positive().optional(),
+  repsDone: z.number().int().nonnegative(),
+  weightKg: z.number().nonnegative().optional(),
+  rpe: z.number().int().min(1).max(10).optional(),
+  completed: z.boolean().optional(),
+  notes: z.string().max(1000).optional(),
+  clientSetId: z.string().uuid().optional(),
+});
+
 export const lastPerformanceSchema = z.object({
   sessionId: z.string().uuid(),
   startedAt: z.string(),
@@ -125,6 +136,7 @@ export type WorkoutPlan = z.infer<typeof workoutPlanSchema>;
 export const workoutPlanListSchema = z.array(workoutPlanSchema);
 export type SessionSet = z.infer<typeof sessionSetSchema>;
 export type SessionDetail = z.infer<typeof sessionDetailSchema>;
+export type AddSetRequest = z.infer<typeof addSetRequestSchema>;
 export const exerciseSchema = z.object({
   id: z.string().uuid(),
   nameTr: z.string(),
