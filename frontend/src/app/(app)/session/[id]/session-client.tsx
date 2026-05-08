@@ -185,6 +185,7 @@ function ExerciseBlock({
       repsDone: Number(reps),
       weightKg: weight === "" ? undefined : Number(weight),
       completed: true,
+      clientSetId: crypto.randomUUID(),
     });
   };
 
