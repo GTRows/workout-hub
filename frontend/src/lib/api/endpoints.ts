@@ -1,6 +1,7 @@
 import { ApiError, api } from "@/lib/api/client";
 import {
   achievementListSchema,
+  addSetRequestSchema,
   apiErrorSchema,
   authResponseSchema,
   bodyMetricListSchema,
@@ -32,6 +33,7 @@ import {
   workoutPlanSchema,
   workoutPlanListSchema,
   type Achievement,
+  type AddSetRequest,
   type AuthResponse,
   type BodyMetric,
   type Exercise,
@@ -140,24 +142,17 @@ export async function startSession(workoutDayId?: string): Promise<SessionDetail
   });
 }
 
-export type AddSetPayload = {
-  exerciseId: string;
-  setNumber?: number;
-  repsDone: number;
-  weightKg?: number;
-  rpe?: number;
-  completed?: boolean;
-  notes?: string;
-};
+export type AddSetPayload = AddSetRequest;
 
 export async function addSet(
   sessionId: string,
   payload: AddSetPayload
 ): Promise<SessionSet> {
+  const validated = addSetRequestSchema.parse(payload);
   return api.request({
     method: "POST",
     path: `/api/sessions/${sessionId}/sets`,
-    body: payload,
+    body: validated,
     schema: sessionSetSchema,
   });
 }
