@@ -23,7 +23,11 @@
   },
   "errors": {
     "api": {
-      "generic": "Bir hata olustu. Lutfen tekrar dene."
+      "generic": "Bir hata olustu. Lutfen tekrar dene.",
+      "sessionAlreadyActive": "Aktif bir antrenmanin zaten var. Devam ekranina yonlendiriliyorsun.",
+      "sessionAlreadyFinished": "Bu antrenman zaten bitirilmis. Panele donuluyor.",
+      "sessionFinished": "Antrenman bu sirada bitirilmis. Panele donuluyor.",
+      "setNumberDuplicate": "Set numarasi cakismasi, sayfa yenilendi. Tekrar kaydet."
     }
   },
   "dashboard": {

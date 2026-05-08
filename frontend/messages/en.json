@@ -23,7 +23,11 @@
   },
   "errors": {
     "api": {
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "sessionAlreadyActive": "You already have an active session. Redirecting to resume.",
+      "sessionAlreadyFinished": "This session is already finished. Returning to dashboard.",
+      "sessionFinished": "Session was finished while you were submitting. Returning to dashboard.",
+      "setNumberDuplicate": "Set number conflict, list refreshed. Please try again."
     }
   },
   "dashboard": {
