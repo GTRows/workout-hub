@@ -45,6 +45,19 @@ const messages = {
     queuedDropped: "Some queued dropped",
     queuedBadge: "{count} pending",
   },
+  errors: {
+    api: {
+      generic: "Something went wrong. Please try again.",
+      sessionAlreadyActive:
+        "You already have an active session. Redirecting to resume.",
+      sessionAlreadyFinished:
+        "This session is already finished. Returning to dashboard.",
+      sessionFinished:
+        "Session was finished while you were submitting. Returning to dashboard.",
+      setNumberDuplicate:
+        "Set number conflict, list refreshed. Please try again.",
+    },
+  },
 };
 
 function renderClient(ui: ReactElement) {
@@ -630,5 +643,143 @@ describe("SessionClient offline drain wiring", () => {
     expect(items).toHaveLength(2);
 
     expect(screen.queryByTestId("pr-toast")).not.toBeInTheDocument();
+  });
+});
+
+describe("SessionClient typed error UX", () => {
+  beforeEach(async () => {
+    clearTokens();
+    window.localStorage.clear();
+    pushMock.mockReset();
+    __resetOfflineDb();
+    await getOfflineDb().queuedSets.clear();
+    Object.defineProperty(navigator, "onLine", {
+      value: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("shows the SESSION_FINISHED toast and routes to /dashboard when addSet returns 409 + code SESSION_FINISHED on the live submit", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () => jsonResponse(200, baseSession()),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets`]: () =>
+          jsonResponse(409, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 409,
+            error: "Conflict",
+            message: "Session already finished",
+            code: "SESSION_FINISHED",
+            path: `/api/sessions/${sessionId}/sets`,
+          }),
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.type(screen.getByLabelText("Reps"), "10");
+    await user.click(screen.getByRole("button", { name: "Done" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("pr-toast")).toHaveTextContent(
+        "Session was finished while you were submitting. Returning to dashboard."
+      )
+    );
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith("/dashboard")
+    );
+  });
+
+  it("shows the SET_NUMBER_DUPLICATE toast and refetches the session when addSet returns 409 + code SET_NUMBER_DUPLICATE", async () => {
+    const user = userEvent.setup();
+    let sessionFetchCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () => {
+          sessionFetchCount++;
+          return jsonResponse(200, baseSession());
+        },
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets`]: () =>
+          jsonResponse(409, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 409,
+            error: "Conflict",
+            message: "Set number duplicate",
+            code: "SET_NUMBER_DUPLICATE",
+            path: `/api/sessions/${sessionId}/sets`,
+          }),
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+    const initialFetchCount = sessionFetchCount;
+
+    await user.type(screen.getByLabelText("Reps"), "10");
+    await user.click(screen.getByRole("button", { name: "Done" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("pr-toast")).toHaveTextContent(
+        "Set number conflict, list refreshed. Please try again."
+      )
+    );
+    await waitFor(() =>
+      expect(sessionFetchCount).toBeGreaterThan(initialFetchCount)
+    );
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it("shows the SESSION_ALREADY_FINISHED toast and routes to /dashboard when finishSession returns 409 + code SESSION_ALREADY_FINISHED", async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () => jsonResponse(200, baseSession()),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/finish`]: () =>
+          jsonResponse(409, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 409,
+            error: "Conflict",
+            message: "Session already finished",
+            code: "SESSION_ALREADY_FINISHED",
+            path: `/api/sessions/${sessionId}/finish`,
+          }),
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.click(screen.getByRole("button", { name: /finish workout/i }));
+    expect(confirmSpy).toHaveBeenCalled();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("pr-toast")).toHaveTextContent(
+        "This session is already finished. Returning to dashboard."
+      )
+    );
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith("/dashboard")
+    );
   });
 });
