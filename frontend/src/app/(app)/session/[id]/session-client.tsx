@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   addSet,
   fetchLastPerformance,
@@ -12,6 +12,18 @@ import {
   finishSession,
   type AddSetPayload,
 } from "@/lib/api/endpoints";
+import {
+  ApiErrorCode,
+  isApiError,
+  isApiErrorWithCode,
+} from "@/lib/api/api-error-codes";
+import {
+  drainForSession,
+  enqueueSet,
+  queuedCount,
+  subscribeOnline,
+  type PostOutcome,
+} from "@/lib/offline/session-set-queue";
 import type {
   SessionDetail,
   SessionSet,
@@ -25,10 +37,58 @@ import { notifyRestElapsed, useRestTimer } from "@/lib/push/rest-timer";
 import { PrToast } from "@/components/pr-toast";
 import { ExerciseDetailModal } from "./exercise-detail-modal";
 
+class OfflineQueuedError extends Error {
+  constructor() {
+    super("offline-queued");
+    this.name = "OfflineQueuedError";
+  }
+}
+
+function makeDrainPostFn(sessionId: string) {
+  return async (payload: AddSetPayload): Promise<PostOutcome> => {
+    try {
+      await addSet(sessionId, payload);
+      return { ok: true };
+    } catch (err) {
+      if (isApiError(err) && err.status === 409) {
+        return { ok: false, status: 409 };
+      }
+      if (
+        isApiErrorWithCode(err, ApiErrorCode.SESSION_FINISHED) ||
+        isApiErrorWithCode(err, ApiErrorCode.SESSION_ALREADY_FINISHED)
+      ) {
+        return {
+          ok: false,
+          permanent: true,
+          reason: err.code ?? "SESSION_FINISHED",
+        };
+      }
+      throw err;
+    }
+  };
+}
+
 export function SessionClient({ sessionId }: { sessionId: string }) {
   const t = useTranslations("session");
   const router = useRouter();
   const qc = useQueryClient();
+
+  const [queuedCountState, setQueuedCount] = useState(0);
+  const [queuedToast, setQueuedToast] = useState<string | null>(null);
+  const [drainedToast, setDrainedToast] = useState<string | null>(null);
+  const [droppedToast, setDroppedToast] = useState<string | null>(null);
+
+  const refreshQueued = useCallback(async () => {
+    try {
+      setQueuedCount(await queuedCount(sessionId));
+    } catch {
+      // IndexedDB unavailable (SSR or denied) - skip silently.
+    }
+  }, [sessionId]);
+
+  const onOfflineQueued = useCallback(() => {
+    setQueuedToast(t("queuedOffline"));
+  }, [t]);
 
   const sessionQuery = useQuery({
     queryKey: ["sessions", sessionId],
@@ -52,6 +112,38 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
       router.push("/dashboard");
     },
   });
+
+  useEffect(() => {
+    let cancelled = false;
+    const safeRunDrain = async () => {
+      if (cancelled) return;
+      try {
+        const result = await drainForSession(
+          sessionId,
+          makeDrainPostFn(sessionId)
+        );
+        if (cancelled) return;
+        if (result.drained > 0) {
+          await qc.invalidateQueries({ queryKey: ["sessions", sessionId] });
+          setDrainedToast(t("queuedDrained", { count: result.drained }));
+        }
+        if (result.permanentlyDropped > 0) {
+          setDroppedToast(t("queuedDropped"));
+        }
+        setQueuedCount(result.remaining);
+      } catch {
+        // IndexedDB unavailable (SSR or denied) - skip silently.
+      }
+    };
+    void safeRunDrain();
+    const unsubscribe = subscribeOnline(() => {
+      void safeRunDrain();
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [sessionId, qc, t]);
 
   if (sessionQuery.isLoading) {
     return <p className="text-muted-foreground">{t("loading")}</p>;
@@ -81,6 +173,11 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
             {t("finished")}
           </CardDescription>
         )}
+        {queuedCountState > 0 && (
+          <CardDescription className="font-medium text-amber-700 dark:text-amber-400">
+            {t("queuedBadge", { count: queuedCountState })}
+          </CardDescription>
+        )}
       </Card>
 
       {plannedExercises.map((planItem) => (
@@ -92,6 +189,8 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
             setsByExerciseId.get(planItem.exerciseId ?? "?") ?? []
           }
           locked={session.finished}
+          onOfflineQueued={onOfflineQueued}
+          refreshQueued={refreshQueued}
         />
       ))}
 
@@ -120,6 +219,23 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
       >
         {t("finishButton")}
       </Button>
+
+      {droppedToast ? (
+        <PrToast
+          message={droppedToast}
+          onDismiss={() => setDroppedToast(null)}
+        />
+      ) : drainedToast ? (
+        <PrToast
+          message={drainedToast}
+          onDismiss={() => setDrainedToast(null)}
+        />
+      ) : queuedToast ? (
+        <PrToast
+          message={queuedToast}
+          onDismiss={() => setQueuedToast(null)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -129,11 +245,15 @@ function ExerciseBlock({
   planItem,
   existingSets,
   locked,
+  onOfflineQueued,
+  refreshQueued,
 }: {
   sessionId: string;
   planItem: WorkoutDayExercise;
   existingSets: SessionSet[];
   locked: boolean;
+  onOfflineQueued: () => void;
+  refreshQueued: () => void;
 }) {
   const t = useTranslations("session");
   const qc = useQueryClient();
@@ -151,7 +271,20 @@ function ExerciseBlock({
   });
 
   const mutation = useMutation({
-    mutationFn: (payload: AddSetPayload) => addSet(sessionId, payload),
+    mutationFn: async (payload: AddSetPayload) => {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        await enqueueSet(sessionId, payload);
+        throw new OfflineQueuedError();
+      }
+      // Drain anything queued during a brief offline blip BEFORE shipping
+      // the new submit, so FIFO ordering is preserved.
+      try {
+        await drainForSession(sessionId, makeDrainPostFn(sessionId));
+      } catch {
+        // Drain errors don't block the live submit.
+      }
+      return addSet(sessionId, payload);
+    },
     onSuccess: (newSet) => {
       qc.setQueryData<SessionDetail | undefined>(
         ["sessions", sessionId],
@@ -166,6 +299,15 @@ function ExerciseBlock({
       }
       if (planItem.restSeconds && planItem.restSeconds > 0) {
         restTimer.start(planItem.restSeconds);
+      }
+      void refreshQueued();
+    },
+    onError: (err) => {
+      if (err instanceof OfflineQueuedError) {
+        setReps("");
+        setWeight("");
+        onOfflineQueued();
+        void refreshQueued();
       }
     },
   });

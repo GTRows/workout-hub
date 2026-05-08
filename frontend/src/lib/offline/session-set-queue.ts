@@ -108,7 +108,7 @@ export async function drainForSession(
       drained++;
       continue;
     }
-    if ("permanent" in outcome && outcome.permanent) {
+    if ("permanent" in outcome) {
       await db.queuedSets.delete(item.id!);
       permanentlyDropped++;
       continue;
