@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   Bar,
@@ -25,8 +25,39 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Heatmap } from "@/components/heatmap";
 import { Label } from "@/components/ui/label";
 
+type ChartTooltipProps = {
+  active?: boolean;
+  label?: string | number;
+  payload?: { value?: unknown }[];
+};
+
+function renderChartTooltip(
+  { active, label, payload }: ChartTooltipProps,
+  locale: string,
+  valueLabel: string
+) {
+  if (!active || !payload || payload.length === 0) return null;
+  const raw = payload[0]?.value;
+  const num = typeof raw === "number" ? raw : Number(raw);
+  const formatted = Number.isFinite(num)
+    ? new Intl.NumberFormat(locale).format(num)
+    : String(raw ?? "");
+  return (
+    <div
+      className="rounded-md border border-border bg-background px-2 py-1 text-xs shadow"
+      data-testid="insights-tooltip"
+    >
+      <p className="font-medium">{label ?? ""}</p>
+      <p className="text-muted-foreground">
+        {valueLabel}: {formatted}
+      </p>
+    </div>
+  );
+}
+
 export function InsightsClient() {
   const t = useTranslations("insights");
+  const locale = useLocale();
 
   const volumeQuery = useQuery({
     queryKey: ["analytics", "volume", 12],
@@ -106,7 +137,15 @@ export function InsightsClient() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="weekStart" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip />
+                <Tooltip
+                  content={(props) =>
+                    renderChartTooltip(
+                      props as ChartTooltipProps,
+                      locale,
+                      t("volumeTooltipLabel")
+                    )
+                  }
+                />
                 <Bar
                   dataKey="totalVolumeKg"
                   fill="#0ea5e9"
@@ -151,7 +190,15 @@ export function InsightsClient() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} domain={["auto", "auto"]} />
-                <Tooltip />
+                <Tooltip
+                  content={(props) =>
+                    renderChartTooltip(
+                      props as ChartTooltipProps,
+                      locale,
+                      t("oneRmTooltipLabel")
+                    )
+                  }
+                />
                 <Line
                   type="monotone"
                   dataKey="estimatedOneRmKg"
