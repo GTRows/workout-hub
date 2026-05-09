@@ -9,8 +9,10 @@ import {
   exercisePageSchema,
   exerciseSchema,
   foodItemListSchema,
+  fullExportSchema,
   healthImportResultSchema,
   heatmapListSchema,
+  importResultSchema,
   webhookTokenListSchema,
   webhookTokenSchema,
   lastPerformanceSchema,
@@ -41,7 +43,9 @@ import {
   type Exercise,
   type ExercisePage,
   type FoodItem,
+  type FullExport,
   type HealthImportResult,
+  type ImportResult,
   type WebhookToken,
   type WaterDay,
   type WaterEntry,
@@ -270,9 +274,10 @@ export async function fetchClaudeSummary(days = 30): Promise<unknown> {
   });
 }
 
-export async function fetchFullExport(): Promise<unknown> {
+export async function fetchFullExport(): Promise<FullExport> {
   return api.request({
     path: "/api/export/full",
+    schema: fullExportSchema,
   });
 }
 
@@ -366,22 +371,14 @@ export async function fetchSessionsCsv(): Promise<string> {
   return res.text();
 }
 
-export type ImportResult = {
-  profileUpdated: number;
-  metricsInserted: number;
-  supplementsInserted: number;
-  plansInserted: number;
-  sessionsInserted: number;
-  userEmail: string;
-  warnings?: string[];
-  suggestions?: string[];
-};
+export type { ImportResult } from "./schemas";
 
 export async function importFullDump(body: unknown): Promise<ImportResult> {
-  return api.request<ImportResult>({
+  return api.request({
     method: "POST",
     path: "/api/export/import",
     body,
+    schema: importResultSchema,
   });
 }
 
