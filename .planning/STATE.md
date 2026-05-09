@@ -5,13 +5,15 @@
 Milestone: v1.1 Deferred Debt Closure (ACTIVE)
 Phase: 46 of 50 (jackson-2-to-3-migration) - DEFERRED 2026-05-09
 Phase: 47 of 50 (spring-boot-4-with-jackson-3) - SHIPPED 2026-05-09 (consolidates Phase 46 + 47 scope per Phase 46-01 deferral)
+Phase: 48 of 50 (next-16) - SHIPPED 2026-05-09
 Plan: 46-01 jackson-2-to-3-migration - shipped 2026-05-09 (deferral; no source / pom edits; consolidates 36-file Jackson rewrite into Phase 47)
 Plan: 47-01 spring-boot-4-with-jackson-3 - shipped 2026-05-09 (Spring Boot 3.5.14 -> 4.0.6, SpringDoc 2.8.17 -> 3.0.3, 36 Jackson 2 files migrated to tools.jackson.*, JacksonConfig flipped to JsonMapperBuilderCustomizer, PrometheusMetricsController actuator imports relocated, Netty 4.2.13.Final pin preserved; closes i-8b)
-Status: v1.1 Phase 47 shipped: the 36-file Jackson 2 -> 3 migration landed in a single CI-validated commit alongside the Spring Boot 4 BOM bump. JacksonConfig now declares a Jackson 3 `JsonMapperBuilderCustomizer @Bean` from `org.springframework.boot.jackson.autoconfigure` (registers JavaTimeModule, disables WRITE_DATES_AS_TIMESTAMPS, sets NON_NULL inclusion). PrometheusMetricsController flipped to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.*`. AuditLogService + WebPushNotificationDispatcher catch `JacksonException` (Jackson 3 unified hierarchy). i-8b closed; the v1.1 milestone advances to Phase 48 (next-16) which is the next phase to plan via `/gsd:plan-phase 48`.
-Last activity: 2026-05-09 - Phase 47 Plan 01 shipped (Spring Boot 4 + Jackson 3 + SpringDoc 3; closes i-8b).
+Plan: 48-01 next-16 - shipped 2026-05-09 (Next 15.1 -> 16.2.6, eslint-config-next 15.5.15 -> 16.2.6, engines.node >=20.9.0, frontend/src/middleware.ts -> proxy.ts with function rename, login page Suspense-wrapped via Path B, eslint flat-config migration, 6 react-hooks/set-state-in-effect targeted disables, exercise-progress-chart renderTooltip refactor; closes i-6b)
+Status: v1.1 Phase 48 shipped: Next.js bumped from ^15.1.0 to ^16.2.6 in a single CI-validated commit. The Middleware -> Proxy rename landed (function + file + companion test); the login page's useSearchParams body is wrapped in <Suspense> via Path B (single-file inner LoginForm with inline skeleton fallback); engines.node bumped to >=20.9.0; bundler stayed on webpack via --webpack opt-out flag for the v1.1 ship. eslint-config-next 16's flat-config migration required moving frontend/eslint.config.mjs from FlatCompat to direct imports. eslint-plugin-react-hooks@7 introduced two new rules (set-state-in-effect, static-components); the 6 set-state-in-effect violations were targeted-disabled with platform-API rationale, the static-components violation was refactored to a render-prop pattern. Local gates green: typecheck, lint (0 errors), test 351/351 across 64 files, build --webpack "Compiled successfully in 9.3s". i-6b closed; the v1.1 milestone advances to Phase 49 (lighthouse-ci) which is the next phase to plan via `/gsd:plan-phase 49`.
+Last activity: 2026-05-09 - Phase 48 Plan 01 shipped (Next 16.2.6 + middleware->proxy + Suspense-wrap login + engines.node 20.9.0; closes i-6b).
 
-Progress: v1.1 ##########___________   50% (3/7 plans complete; 3/6 phases shipped)
-          v1.1 - Phase 48 (next-16) NEXT
+Progress: v1.1 ##############_______   67% (5/7 plans complete; 4/6 phases shipped)
+          v1.1 - Phase 49 (lighthouse-ci) NEXT
 
 ## Project Reference
 
@@ -22,10 +24,10 @@ Progress: v1.1 ##########___________   50% (3/7 plans complete; 3/6 phases shipp
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/milestones/v1.0-ROADMAP.md` for full v1.0 archive
 - See: `.planning/ROADMAP.md` for the active roadmap (v0.3 through v1.0 shipped and archived; v1.1 active with Phases 45-50 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-15 open; i-6b/i-15 scheduled for v1.1; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-8b, i-9, i-10, i-12, i-13, i-14 closed)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-7b, i-15 open; i-15 scheduled for v1.1 Phase 49; i-1, i-2, i-4, i-5, i-6, i-6b, i-7, i-8, i-8b, i-9, i-10, i-12, i-13, i-14 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
-**Current focus:** v1.1 Deferred Debt Closure active. The milestone closes the four open carry-forward issues from v1.0: i-13 (Phase 45 springdoc-2.7; SHIPPED), i-8b (Phase 46 jackson-2-to-3-migration preparatory + Phase 47 spring-boot-4; SHIPPED), i-6b (Phase 48 next-16), i-15 (Phase 49 lighthouse-ci; protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits user-pre-approved). Phase 50 cuts v1.1.0. The two remaining open issues NOT in v1.1 scope are i-3 (`.gitignore` `data/` glob audit reference; documentation note only) and i-7b (Testcontainers 2.0.0 jump; trigger blocked on upstream Maven Central GA). Phase 48 is the next-up phase to plan via `/gsd:plan-phase 48`.
+**Current focus:** v1.1 Deferred Debt Closure active. The milestone closes the four open carry-forward issues from v1.0: i-13 (Phase 45 springdoc-2.7; SHIPPED), i-8b (Phase 46 jackson-2-to-3-migration preparatory + Phase 47 spring-boot-4; SHIPPED), i-6b (Phase 48 next-16; SHIPPED), i-15 (Phase 49 lighthouse-ci; protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits user-pre-approved). Phase 50 cuts v1.1.0. The two remaining open issues NOT in v1.1 scope are i-3 (`.gitignore` `data/` glob audit reference; documentation note only) and i-7b (Testcontainers 2.0.0 jump; trigger blocked on upstream Maven Central GA). Phase 49 is the next-up phase to plan via `/gsd:plan-phase 49`.
 
 ## Accumulated Context
 
@@ -60,6 +62,7 @@ Full decision logs live in `.planning/milestones/v0.3-ROADMAP.md`, `.planning/mi
 - Rate-limiting posture (v1.0 Phase 41 lock-in): zero generic in-process rate limiter; the Self-Hosted Contract delegates rate limiting to the operator's reverse proxy. The only in-process throttle is `BruteForceGuard` (per-email login throttle). Adding a generic rate limiter was rejected because it would duplicate operator-layer enforcement and contradict the contract's "never assume public exposure" posture (tailnet-only deployment is the v0.3 lock-in).
 - Jackson 3 migration posture (v1.1 Phase 47 lock-in): shipped in Phase 47-01. The 36-file Jackson 2 -> Jackson 3 (`com.fasterxml.jackson.*` -> `tools.jackson.*`) rewrite landed in a single CI-validated commit alongside the `<spring-boot-starter-parent>` 3.5.14 -> 4.0.6 bump and the `<springdoc.version>` 2.8.17 -> 3.0.3 bump. Path B (full Jackson 3 migration) selected; Path A (`spring-boot-jackson2` compat module) foreclosed. JacksonConfig declares a Jackson 3 `JsonMapperBuilderCustomizer @Bean` from `org.springframework.boot.jackson.autoconfigure` that registers `tools.jackson.datatype.jsr310.JavaTimeModule`, disables `tools.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS`, and sets `tools.jackson.annotation.JsonInclude.Include.NON_NULL`. `AuditLogService` + `WebPushNotificationDispatcher` catch `tools.jackson.core.JacksonException` (Jackson 3 unified exception hierarchy; replaces `JsonProcessingException`). PrometheusMetricsController actuator imports flipped from `org.springframework.boot.actuate.metrics.export.prometheus.*` to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.*` (Spring Boot 4 per-feature autoconfigure module split).
 - Spring Boot 4 BOM transitive lock-ins (v1.1 Phase 47-01): Spring Framework 7.0.7 / Spring Security 7.0.5 / Hibernate 7.2.12.Final / Jakarta EE 11 (Servlet 6.1.0, Persistence 3.2.0, Validation 3.1.1, Annotation 3.0) / Tomcat 11 / Micrometer 1.15.x / Netty 4.2.13.Final (override preserved across the bump; the SB4 BOM default of 4.2.12.Final is overridden to retain CVE-2026-42577 patch posture per i-14) / Jackson 3.0.x / SpringDoc 3.0.3 (bumped from 2.8.17 alongside the SB4 jump per Phase 45's i-13 closure note that explicitly sequenced SpringDoc 3.x for Phase 47).
+- Next.js runtime line (v1.1 Phase 48 lock-in): `^16.2.6` pinned in `frontend/package.json` (latest stable on the npm `latest` dist-tag at execute time). The Middleware -> Proxy rename landed (`frontend/src/middleware.ts` -> `frontend/src/proxy.ts`; function `middleware` -> `proxy`; companion test renamed in lockstep). The `<Suspense>` boundary around the `useSearchParams`-reading body of `frontend/src/app/(auth)/login/page.tsx` (Path B: single-file inner `LoginForm` function with inline skeleton fallback) closes the Next 16 hard-error gate. `engines.node` bumped to `>=20.9.0`. Bundler stayed on webpack via `--webpack` opt-out flag for the v1.1 ship; Turbopack-as-default migration deferred as a separate concern. Codebase has zero `next/image` callers (`frontend/src/components/exercise-media.tsx` uses raw `<img>` intentionally); framework default `images.localPatterns` enforcement is moot. `next.config.ts` untouched (no `images:`, `experimental:`, `webpack:`, or `turbo:` block needed). next-intl 4.11.1 (Phase 40-03 lock-in) peers cleanly against `next@^16`; install is clean with zero `pnpm.overrides` or `--strict-peer-dependencies=false` hacks. eslint-config-next@16 ships flat config natively; `frontend/eslint.config.mjs` migrated from `FlatCompat` shim to direct imports of `eslint-config-next/core-web-vitals` and `/typescript`. eslint-plugin-react-hooks@7 (transitive via eslint-config-next@16) introduced two new rules: `set-state-in-effect` (6 targeted disables with platform-API rationale) and `static-components` (refactored exercise-progress-chart's `TooltipContent` to a `renderTooltip` render-prop function). The Phase 35 metric-recording contract and the Phase 29.5 matcher-coverage contract both survive the rename intact (the renamed `proxy.test.ts` 11 cases assert this).
 
 ### v0.6 Findings (archived)
 
@@ -100,19 +103,51 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
   runtime stays pinned within the existing `^15.1.0` caret (latest 15.x
   backport `15.5.18` per the npm `backport` dist-tag). Successor work
   tracked as i-6b. v0.5 + v0.6 stayed on Next 15.
-- i-6b (NEW in v1.0 Phase 40 Plan 02): residual Next.js 16.x major bump
-  deferred until Phase 40-03 (i-5 next-intl 3 -> 4 migration) ships
-  green. Closure plan must (a) probe the lockfile resolution with
-  co-installed next@^16 and next-intl@^4, (b) rename
-  `frontend/src/middleware.ts` -> `proxy.ts` (or accept the deprecation
-  warning), (c) wrap `frontend/src/app/(auth)/login/page.tsx` in a
-  `<Suspense>` boundary so `useSearchParams` does not error at build
-  time, (d) bump `engines.node: ">=20.0.0"` -> `">=20.9.0"`, (e) audit
-  `next/image` callers for query-string `src` values that the new
-  `images.localPatterns` enforcement gates, and (f) decide on Turbopack
-  vs `--webpack`. Closure plan must also exercise the protected-file
-  pre-authorisation flow because `frontend/package.json` and
-  `frontend/pnpm-lock.yaml` are both protected.
+- i-6b: closed by v1.1 Phase 48 Plan 01 (next-16). Bumped `next` from
+  `^15.1.0` to `^16.2.6` and `eslint-config-next` from `^15.5.15` to
+  `^16.2.6` in `frontend/package.json`; bumped `engines.node` from
+  `>=20.0.0` to `>=20.9.0`; regenerated `frontend/pnpm-lock.yaml`
+  cleanly (zero peer warnings, zero `pnpm.overrides`, zero
+  `--strict-peer-dependencies=false` flags). Renamed
+  `frontend/src/middleware.ts` -> `frontend/src/proxy.ts` (function
+  `middleware` -> `proxy`; comment block updated to reference the v1.1
+  Phase 48 closure context) and the companion test
+  `frontend/src/middleware.test.ts` -> `frontend/src/proxy.test.ts`
+  (import + 8 call-site updates + 3 cosmetic describe-label updates;
+  preserved the matcher-coverage + redirect-behavior + metric-recording
+  assertions verbatim). Wrapped the `useSearchParams`-reading body of
+  `frontend/src/app/(auth)/login/page.tsx` in a `<Suspense>` boundary
+  via Path B (single-file inner `LoginForm` function with inline
+  skeleton fallback). Bundler choice: webpack via `--webpack` flag
+  retained on `dev` and `build` scripts; Turbopack-as-default migration
+  deferred. Codebase has zero `next/image` callers; `images.localPatterns`
+  enforcement is moot. `next.config.ts` untouched.
+  `frontend/eslint.config.mjs` migrated from `FlatCompat` shim to
+  native flat-config import paths (eslint-config-next@16 ships flat
+  config natively; the shim triggered a circular-structure JSON
+  serialization error). Six files received targeted
+  `react-hooks/set-state-in-effect` disable comments with rationale
+  (`install-prompt-card`, `push-permission-card`, `theme-toggle`,
+  `exercise-media`, `profile/notifications-section`,
+  `profile/profile-client`) where state is initialized from platform
+  APIs (localStorage, Notification.permission, IntersectionObserver,
+  TanStack Query cache) that the new eslint-plugin-react-hooks@7 rule
+  does not model. `exercise-progress-chart.tsx` refactored its inner
+  `TooltipContent` to a `renderTooltip` render-prop function (recharts
+  `Tooltip` `content` prop accepts both) to satisfy the new
+  `react-hooks/static-components` rule without disabling.
+  `frontend/tsconfig.json` + `frontend/next-env.d.ts` auto-updated by
+  Next 16's build (`jsx` -> `react-jsx`; routes.d.ts triple-slash
+  reference -> import; `.next/dev/types/**/*.ts` include added). Local
+  gates green: `pnpm typecheck` clean, `pnpm lint` zero errors (3
+  pre-existing warnings unrelated to the bump), `pnpm test` 351/351
+  across 64 files (proxy.test.ts 11/11; login/page.test.tsx 5/5),
+  `pnpm build --webpack` "Compiled successfully in 9.3s" with 18
+  static pages generated and the "Proxy (Middleware)" route surfaced.
+  The Phase 35 metric-recording contract and the Phase 29.5
+  matcher-coverage contract both survive the rename. next-intl 4.11.1
+  (Phase 40-03 lock-in) peers cleanly against `next@^16` (peer range
+  `^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0`).
 - i-7: closed by v1.0 Phase 39 (testcontainers-major).
 - i-7b (NEW in v1.0 Phase 39): residual 2.x major bump, deferred until
   upstream `org.testcontainers:testcontainers:2.0.0` GA on Maven Central.
@@ -162,8 +197,8 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
 
 ## Session Continuity
 
-Last session: 2026-05-09 - v1.1 Phase 47-01 (spring-boot-4-with-jackson-3) shipped via the orchestrator executor.
-Stopped at: Phase 47 Plan 01 landed atomically across 6 task commits (pom bump, 7 main-source Jackson migration, Prometheus actuator import flip, 29 test-source Jackson migration, i-8b closure in ISSUES.md, STATE.md bookkeeping). Awaiting CI run on push to validate Spring Boot 4 / Jackson 3 / SpringDoc 3 / Spring Framework 7 / Spring Security 7 / Hibernate 7 / Jakarta EE 11 / Tomcat 11 / Netty 4.2.13.Final compatibility. Next action: push commits + monitor GitHub Actions backend job; on green, plan Phase 48 (next-16) via `/gsd:plan-phase 48`.
+Last session: 2026-05-09 - v1.1 Phase 48-01 (next-16) shipped via the orchestrator executor.
+Stopped at: Phase 48 Plan 01 landed atomically: a single source/dep commit (Next 15.1 -> 16.2.6, eslint-config-next 15.5.15 -> 16.2.6, engines.node >=20.9.0, lockfile regeneration, middleware -> proxy rename + function rename, login page Suspense-wrap via Path B, eslint flat-config migration, 6 react-hooks/set-state-in-effect targeted disables, exercise-progress-chart renderTooltip refactor, auto-applied tsconfig + next-env.d.ts updates), then i-6b closure in ISSUES.md, then STATE.md bookkeeping. Local frontend gates green (typecheck clean, lint 0 errors, test 351/351 across 64 files, build --webpack "Compiled successfully in 9.3s" with 18 static pages and "Proxy (Middleware)" route surfaced). Next action: push commits + monitor GitHub Actions frontend job; on green, plan Phase 49 (lighthouse-ci) via `/gsd:plan-phase 49`.
 Resume file: None.
 
 ## Reference Documents
