@@ -4,13 +4,14 @@
 
 Milestone: v1.1 Deferred Debt Closure (ACTIVE)
 Phase: 46 of 50 (jackson-2-to-3-migration) - DEFERRED 2026-05-09
-Phase: 47 of 50 (spring-boot-4-with-jackson-3) - NEXT (consolidates Phase 46 + 47 scope per Phase 46-01 deferral).
+Phase: 47 of 50 (spring-boot-4-with-jackson-3) - SHIPPED 2026-05-09 (consolidates Phase 46 + 47 scope per Phase 46-01 deferral)
 Plan: 46-01 jackson-2-to-3-migration - shipped 2026-05-09 (deferral; no source / pom edits; consolidates 36-file Jackson rewrite into Phase 47)
-Status: v1.1 Phase 46 deferred: the 36-file Jackson 2 -> 3 source-only rewrite consolidates into Phase 47 (renamed spring-boot-4-with-jackson-3) because Spring Boot 3.5.14 has no Jackson 3 auto-configuration / HttpMessageConverter / ObjectMapper bean to host an intermediate state. i-8b updated with the consolidation note; ROADMAP.md Phase 46 + 47 lines updated; no source / pom edits in Phase 46. Phase 47 (spring-boot-4-with-jackson-3) is the next phase to plan via `/gsd:plan-phase 47`.
-Last activity: 2026-05-09 - Phase 46 Plan 01 shipped (deferral; consolidates Jackson 3 migration into Phase 47).
+Plan: 47-01 spring-boot-4-with-jackson-3 - shipped 2026-05-09 (Spring Boot 3.5.14 -> 4.0.6, SpringDoc 2.8.17 -> 3.0.3, 36 Jackson 2 files migrated to tools.jackson.*, JacksonConfig flipped to JsonMapperBuilderCustomizer, PrometheusMetricsController actuator imports relocated, Netty 4.2.13.Final pin preserved; closes i-8b)
+Status: v1.1 Phase 47 shipped: the 36-file Jackson 2 -> 3 migration landed in a single CI-validated commit alongside the Spring Boot 4 BOM bump. JacksonConfig now declares a Jackson 3 `JsonMapperBuilderCustomizer @Bean` from `org.springframework.boot.jackson.autoconfigure` (registers JavaTimeModule, disables WRITE_DATES_AS_TIMESTAMPS, sets NON_NULL inclusion). PrometheusMetricsController flipped to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.*`. AuditLogService + WebPushNotificationDispatcher catch `JacksonException` (Jackson 3 unified hierarchy). i-8b closed; the v1.1 milestone advances to Phase 48 (next-16) which is the next phase to plan via `/gsd:plan-phase 48`.
+Last activity: 2026-05-09 - Phase 47 Plan 01 shipped (Spring Boot 4 + Jackson 3 + SpringDoc 3; closes i-8b).
 
-Progress: v1.1 ######_______________   33% (2/6 plans complete; 2/6 phases shipped)
-          v1.1 - Phase 47 (spring-boot-4-with-jackson-3) NEXT
+Progress: v1.1 ##########___________   50% (3/7 plans complete; 3/6 phases shipped)
+          v1.1 - Phase 48 (next-16) NEXT
 
 ## Project Reference
 
@@ -21,10 +22,10 @@ Progress: v1.1 ######_______________   33% (2/6 plans complete; 2/6 phases shipp
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/milestones/v1.0-ROADMAP.md` for full v1.0 archive
 - See: `.planning/ROADMAP.md` for the active roadmap (v0.3 through v1.0 shipped and archived; v1.1 active with Phases 45-50 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-15 open; i-6b/i-8b/i-15 scheduled for v1.1; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12, i-13, i-14 closed)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-15 open; i-6b/i-15 scheduled for v1.1; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-8b, i-9, i-10, i-12, i-13, i-14 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
-**Current focus:** v1.1 Deferred Debt Closure active. The milestone closes the four open carry-forward issues from v1.0: i-13 (Phase 45 springdoc-2.7), i-8b (Phase 46 jackson-2-to-3-migration preparatory + Phase 47 spring-boot-4), i-6b (Phase 48 next-16), i-15 (Phase 49 lighthouse-ci; protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits user-pre-approved). Phase 50 cuts v1.1.0. The two remaining open issues NOT in v1.1 scope are i-3 (`.gitignore` `data/` glob audit reference; documentation note only) and i-7b (Testcontainers 2.0.0 jump; trigger blocked on upstream Maven Central GA). Phase 45 is the next-up phase to plan via `/gsd:plan-phase 45`.
+**Current focus:** v1.1 Deferred Debt Closure active. The milestone closes the four open carry-forward issues from v1.0: i-13 (Phase 45 springdoc-2.7; SHIPPED), i-8b (Phase 46 jackson-2-to-3-migration preparatory + Phase 47 spring-boot-4; SHIPPED), i-6b (Phase 48 next-16), i-15 (Phase 49 lighthouse-ci; protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits user-pre-approved). Phase 50 cuts v1.1.0. The two remaining open issues NOT in v1.1 scope are i-3 (`.gitignore` `data/` glob audit reference; documentation note only) and i-7b (Testcontainers 2.0.0 jump; trigger blocked on upstream Maven Central GA). Phase 48 is the next-up phase to plan via `/gsd:plan-phase 48`.
 
 ## Accumulated Context
 
@@ -38,7 +39,7 @@ Full decision logs live in `.planning/milestones/v0.3-ROADMAP.md`, `.planning/mi
 - Auth modes: built-in JWT default, `AUTH_MODE=forward-auth` opt-in. No OIDC client code.
 - Image registry: `ghcr.io/gtrows/workouthub-{backend,frontend}` (separate version cadences). Multi-arch amd64+arm64.
 - BIND_ADDR: parametric env var, default `127.0.0.1`.
-- Spring Boot version line: 3.5.x (bumped from 3.4 in v0.3.1 to close CVEs); Netty pinned to 4.1.133.Final via override (v0.5.0 patch window) to close CVE-2026-42583/42584/42587. Spring Boot 4 bump (i-8) and Netty 4.2 bump (i-14) deferred to v1.0 Phase 40 / 41.
+- Spring Boot version line: 4.0.x (bumped from 3.5.14 in v1.1 Phase 47-01 to close i-8b; the v0.3.1 -> v0.5.0 -> v1.0 history was 3.4 -> 3.5.x; v0.5.0 pinned Netty 4.1.133.Final to close CVE-2026-42583/42584/42587; v1.0 Phase 41-01 bumped Netty 4.1.133.Final -> 4.2.13.Final to close i-14 CVE-2026-42577; the 4.2.13.Final pin is preserved via `<netty.version>` property override across the SB4 jump because the SB4 BOM ships 4.2.12.Final).
 - Image tag construction: `${IMAGE_PREFIX,,}` lowercase via bash parameter expansion (mixed-case `github.repository_owner` safe).
 - ClaudeSummary naming: Direction C per-record `@JsonNaming(SnakeCaseStrategy)` on `ClaudeSummaryDto` only; full-export DTOs stay camelCase for backup-restore stability.
 - PR durability: persisted via V27 `is_pr` column with ROW_NUMBER backfill; the wire field round-trips via `FullExportDto.SetRow.isPr` (9th component) with a recompute safety net per touched exercise on import.
@@ -57,7 +58,8 @@ Full decision logs live in `.planning/milestones/v0.3-ROADMAP.md`, `.planning/mi
 - Refresh-token hashing posture (v1.0 Phase 41 lock-in): SHA-256 hex over the full JWT bytes via `MessageDigest.getInstance("SHA-256")` + `HexFormat.of().formatHex(...)`, persisted in `refresh_tokens.token_hash VARCHAR(128) UNIQUE` (V7 migration). The 2026-05-04 `pending_ci_fixes.md` "refresh-token hash collisions" entry was superseded — those tests pass on `96d81b0`. No source change needed; tightening to bcrypt/Argon2 was rejected because refresh tokens carry full JWT entropy at issuance and the hash is a fingerprint for DB lookup, not a password derivation.
 - Brute-force lockout posture (v1.0 Phase 41 lock-in): `BruteForceGuard` enforces 10 failures / 15-minute window / 60-minute lockout, throws HTTP 423 via `ResponseStatusException(HttpStatus.LOCKED, ...)`, records every login outcome in `login_attempts` (V15 migration) via `@Transactional(propagation = REQUIRES_NEW)`. `BruteForceLockoutIntegrationTest` covers under-threshold pass, at-threshold lock, post-cooldown unlock — all green on origin/main. Threshold-tightening + (email, IP)-keyed lockout were rejected as v1.0 scope creep.
 - Rate-limiting posture (v1.0 Phase 41 lock-in): zero generic in-process rate limiter; the Self-Hosted Contract delegates rate limiting to the operator's reverse proxy. The only in-process throttle is `BruteForceGuard` (per-email login throttle). Adding a generic rate limiter was rejected because it would duplicate operator-layer enforcement and contradict the contract's "never assume public exposure" posture (tailnet-only deployment is the v0.3 lock-in).
-- Jackson 3 migration posture (v1.1 Phase 46 lock-in): consolidated into Phase 47 (renamed `spring-boot-4-with-jackson-3`). Static audit at HEAD (commit `931cb69`, 2026-05-09) found four Spring Boot 3.5 blockers that prevent a Jackson 3 source-only intermediate state: (1) no `JacksonObjectMapperBuilderCustomizer` for Jackson 3 (only `Jackson2ObjectMapperBuilderCustomizer` exists in Spring Boot 3.5); (2) Spring Framework 6.2 ships only the Jackson 2 `HttpMessageConverter` family; (3) auto-configured `ObjectMapper` `@Bean` is Jackson 2 (would break `tools.jackson.databind.ObjectMapper` injection sites); (4) all 28 integration tests `@Autowired` the Jackson 2 bean. Path B (full Jackson 3 migration) is the closure path; Path A (`spring-boot-jackson2` compat module) is foreclosed. Phase 47 lands the 36-file rewrite + the SB4 BOM bump in a single commit / single CI round-trip.
+- Jackson 3 migration posture (v1.1 Phase 47 lock-in): shipped in Phase 47-01. The 36-file Jackson 2 -> Jackson 3 (`com.fasterxml.jackson.*` -> `tools.jackson.*`) rewrite landed in a single CI-validated commit alongside the `<spring-boot-starter-parent>` 3.5.14 -> 4.0.6 bump and the `<springdoc.version>` 2.8.17 -> 3.0.3 bump. Path B (full Jackson 3 migration) selected; Path A (`spring-boot-jackson2` compat module) foreclosed. JacksonConfig declares a Jackson 3 `JsonMapperBuilderCustomizer @Bean` from `org.springframework.boot.jackson.autoconfigure` that registers `tools.jackson.datatype.jsr310.JavaTimeModule`, disables `tools.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS`, and sets `tools.jackson.annotation.JsonInclude.Include.NON_NULL`. `AuditLogService` + `WebPushNotificationDispatcher` catch `tools.jackson.core.JacksonException` (Jackson 3 unified exception hierarchy; replaces `JsonProcessingException`). PrometheusMetricsController actuator imports flipped from `org.springframework.boot.actuate.metrics.export.prometheus.*` to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.*` (Spring Boot 4 per-feature autoconfigure module split).
+- Spring Boot 4 BOM transitive lock-ins (v1.1 Phase 47-01): Spring Framework 7.0.7 / Spring Security 7.0.5 / Hibernate 7.2.12.Final / Jakarta EE 11 (Servlet 6.1.0, Persistence 3.2.0, Validation 3.1.1, Annotation 3.0) / Tomcat 11 / Micrometer 1.15.x / Netty 4.2.13.Final (override preserved across the bump; the SB4 BOM default of 4.2.12.Final is overridden to retain CVE-2026-42577 patch posture per i-14) / Jackson 3.0.x / SpringDoc 3.0.3 (bumped from 2.8.17 alongside the SB4 jump per Phase 45's i-13 closure note that explicitly sequenced SpringDoc 3.x for Phase 47).
 
 ### v0.6 Findings (archived)
 
@@ -120,24 +122,39 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
   default-classpath shift surfaced; runtime stays pinned at Spring Boot
   3.5.14 (tail of the 3.5.x line on Maven Central). Successor work tracked
   as i-8b. v0.6 stayed on Spring Boot 3.5.x.
-- i-8b (NEW in v1.0 Phase 40 Plan 01; consolidated in v1.1 Phase 46 Plan 01):
-  residual Spring Boot 4.0.x major bump locked onto Path B (full Jackson 3
-  migration). Phase 46 (jackson-2-to-3-migration) deferred its 36-file
-  source-only rewrite into Phase 47 (renamed spring-boot-4-with-jackson-3)
-  because Spring Boot 3.5.14 has no Jackson 3 auto-configuration surface to
-  host an intermediate state (no `JacksonObjectMapperBuilderCustomizer`; no
-  Jackson 3 `HttpMessageConverter` on Spring Framework 6.2; auto-configured
-  `ObjectMapper` bean is Jackson 2; all 28 integration tests inject the
-  Jackson 2 bean). Path A (`spring-boot-jackson2` compat module) foreclosed.
-  Phase 47 closure plan must (a) bump `<spring-boot-starter-parent>` 3.5.14
-  -> 4.0.x in `backend/pom.xml`; (b) rewrite all 36 Jackson 2 files
-  (`com.fasterxml.jackson.*` -> `tools.jackson.*`); (c) flip the
-  `JacksonConfig` `Jackson2ObjectMapperBuilderCustomizer` to the Spring
-  Boot 4 Jackson 3 customizer surface; (d) flip the Prometheus-actuator
-  package import to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus`;
-  (e) audit Spring Framework 7 / Spring Security 7 / Hibernate 7 / Jakarta
-  EE 11 BOM transitives; (f) preserve the Netty 4.2.13.Final pin via
-  `<netty.version>` property override (the SB4 BOM ships 4.2.12).
+- i-8b: closed by v1.1 Phase 47 Plan 01 (spring-boot-4-with-jackson-3).
+  Bumped `<spring-boot-starter-parent>` from `3.5.14` to `4.0.6` and
+  `<springdoc.version>` from `2.8.17` to `3.0.3` in `backend/pom.xml`;
+  preserved `<netty.version>4.2.13.Final</netty.version>` property
+  override across the bump (SB4 BOM defaults to 4.2.12.Final; override
+  retains the i-14 CVE-2026-42577 patch posture). Migrated 36 Jackson
+  2 source files (`com.fasterxml.jackson.*` -> `tools.jackson.*`): 7
+  main-source files (`JacksonConfig.java` rewritten to declare a Jackson
+  3 `JsonMapperBuilderCustomizer @Bean` from `org.springframework.boot.jackson.autoconfigure`;
+  `ClaudeSummaryDto`, `AuditLogService`, `WebPushNotificationDispatcher`,
+  `GoogleFitParser`, `ScalePayload`, `SupplementTiming`) plus 29
+  test-source files (28 `@Autowired ObjectMapper` integration tests +
+  the standalone `WebPushNotificationDispatcherTest`). Renamed
+  `JsonProcessingException` catch sites to `JacksonException` in
+  `AuditLogService.toJson` and `WebPushNotificationDispatcher.buildPayload`
+  (Jackson 3 unified exception hierarchy). Flipped
+  `PrometheusMetricsController` actuator imports to
+  `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.*`.
+  Path B (full Jackson 3 migration) shipped; Path A
+  (`spring-boot-jackson2` compat module) foreclosed per Phase 46-01
+  lock-in. BOM transitives carried forward: Spring Framework 7.0.7,
+  Spring Security 7.0.5, Hibernate 7.2.12.Final, Jakarta EE 11 (Servlet
+  6.1.0, Persistence 3.2.0, Validation 3.1.1, Annotation 3.0), Tomcat
+  11, Micrometer 1.15.x, Jackson 3.0.x. CI is the authoritative gate
+  (local Maven gap on the Windows dev host); the GitHub Actions backend
+  job validates `mvn verify` (Java 21), the Testcontainers integration
+  test suite, `OpenApiSurfaceIntegrationTest` (5 tests), `MetricsIntegrationTest`,
+  `ExportIntegrationTest`, `FullExportImportIntegrationTest`,
+  `AuditLogIntegrationTest`, `WebPushNotificationDispatcherTest`,
+  `StructuredLoggingTest`, `GrafanaDashboardTest`, the trivy image-scan
+  job, and the jacoco >= 70% coverage gate. Concludes the largest open
+  carry-forward debt from v1.0 and unblocks v1.1 Phase 48 (next-16) and
+  Phase 49 (lighthouse-ci).
 - i-9: closed by v0.6 Phase 37 (structured-logging-test-fix).
 - i-13: closed by v1.1 Phase 45 Plan 01 (springdoc-2.7-bump). Bumped `<springdoc.version>` from `2.6.0` to `2.8.17` in `backend/pom.xml` (commit 4889375); deleted the `apiErrorSchemaCustomizer` `OpenApiCustomizer` `@Bean` from `OpenApiConfig.java` (33 lines + 6 orphan imports; commit 1140faa); deleted the `springdoc.override-with-generic-response: false` line + comment block from `application.yml` (commit f3be469). SpringDoc 2.7.0 patches the removed Spring Framework 6.2 `ControllerAdviceBean(Object)` constructor; the framework default `GenericResponseService` scan now surfaces ApiError schemas without the manual customizer. CI gate validates `mvn verify` green and `OpenApiSurfaceIntegrationTest` (5 tests) green. Closes the v0.4 fix bundle (commit `c1b95f7`) workaround.
 - i-14: closed by v1.0 Phase 41 Plan 01 (security-hardening). Bumped `<netty.version>` from `4.1.133.Final` to `4.2.13.Final` in `backend/pom.xml` (commit 99f0fb4); removed `CVE-2026-42577` suppression block from `.trivyignore` (commit 5c1cd42). Static audit at HEAD confirmed zero `WebFlux` / `reactor.netty` / `spring-boot-starter-webflux` matches under `backend/`; the only Netty consumer is `async-http-client:2.12.4` for outbound web push (not on the request-handling path). CI is the authoritative gate (local Maven unavailable on the dev host); `mvn verify` and the trivy image-scan job validate Spring Boot 3.5.14 + Netty 4.2.x runtime compatibility on push. Concludes the trivy-suppression carry-forward debt from v0.5.0 + v0.6.0.
@@ -145,8 +162,8 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
 
 ## Session Continuity
 
-Last session: 2026-05-09 - v1.1 milestone opened (deferred debt closure).
-Stopped at: v1.1 milestone-opening bookkeeping commit landed (ROADMAP.md re-opened with v1.1 active section + 6 phase outlines; PROJECT.md Active list extended with the v1.1 entry; this STATE.md cursor advanced from project-complete to v1.1 Phase 45 not-started). Next action: `/gsd:plan-phase 45` to author `.planning/phases/45-springdoc-2.7-bump/45-01-PLAN.md`.
+Last session: 2026-05-09 - v1.1 Phase 47-01 (spring-boot-4-with-jackson-3) shipped via the orchestrator executor.
+Stopped at: Phase 47 Plan 01 landed atomically across 6 task commits (pom bump, 7 main-source Jackson migration, Prometheus actuator import flip, 29 test-source Jackson migration, i-8b closure in ISSUES.md, STATE.md bookkeeping). Awaiting CI run on push to validate Spring Boot 4 / Jackson 3 / SpringDoc 3 / Spring Framework 7 / Spring Security 7 / Hibernate 7 / Jakarta EE 11 / Tomcat 11 / Netty 4.2.13.Final compatibility. Next action: push commits + monitor GitHub Actions backend job; on green, plan Phase 48 (next-16) via `/gsd:plan-phase 48`.
 Resume file: None.
 
 ## Reference Documents
