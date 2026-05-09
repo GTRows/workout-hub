@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
@@ -27,6 +28,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Heatmap } from "@/components/heatmap";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { pickLocaleField } from "@/lib/locale";
 
 const VOLUME_RANGE_TO_WEEKS = {
   fourWeeks: 4,
@@ -97,6 +99,7 @@ function renderChartTooltip(
 
 export function InsightsClient() {
   const t = useTranslations("insights");
+  const tPrs = useTranslations("prs");
   const locale = useLocale();
 
   const [volumeRange, setVolumeRange] = useState<VolumeRange>("twelveWeeks");
@@ -157,6 +160,14 @@ export function InsightsClient() {
     queryFn: () => fetchOneRepMax(effectiveExerciseId),
     enabled: effectiveExerciseId.length > 0,
   });
+
+  const prTeaser = useMemo(() => {
+    const all = prsQuery.data ?? [];
+    const sorted = [...all].sort((a, b) =>
+      b.achievedAt.localeCompare(a.achievedAt)
+    );
+    return sorted.slice(0, 3);
+  }, [prsQuery.data]);
 
   return (
     <div className="space-y-4">
@@ -356,6 +367,39 @@ export function InsightsClient() {
           </div>
         ) : (
           <p className="text-muted-foreground">{t("oneRmEmpty")}</p>
+        )}
+      </Card>
+
+      <Card className="space-y-3" data-testid="pr-teaser-card">
+        <div className="flex items-center justify-between">
+          <CardTitle>{t("prTeaserTitle")}</CardTitle>
+          <Link
+            href="/prs"
+            className="text-xs text-primary hover:underline"
+            data-testid="pr-teaser-view-all"
+          >
+            {t("prTeaserViewAll")}
+          </Link>
+        </div>
+        {prTeaser.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{tPrs("empty")}</p>
+        ) : (
+          <ul className="space-y-1">
+            {prTeaser.map((pr) => (
+              <li
+                key={pr.exerciseId}
+                className="flex items-center justify-between text-sm"
+                data-testid={`pr-teaser-row-${pr.exerciseId}`}
+              >
+                <span className="font-medium">
+                  {pickLocaleField(locale, pr.exerciseNameTr, pr.exerciseNameEn)}
+                </span>
+                <span className="text-muted-foreground">
+                  {pr.weightKg ?? 0} kg x {pr.repsDone} ({pr.achievedAt})
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </Card>
     </div>
