@@ -9,7 +9,7 @@ export function ServiceWorkerRegistrar() {
     if (process.env.NODE_ENV !== "production") return;
 
     const register = () => {
-      navigator.serviceWorker.register("/sw.js").catch((err) => {
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((err) => {
         console.warn("service worker registration failed", err);
       });
     };
