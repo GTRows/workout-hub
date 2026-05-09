@@ -57,7 +57,7 @@ openssl rand -base64 48
 ./scripts/hash-password.sh 'your-strong-password'
 
 # VAPID keypair for Web Push (writes both keys to stdout)
-./scripts/vapid-keygen.sh
+npx web-push generate-vapid-keys
 ```
 
 Copy the outputs into the matching `.env` keys. `.env` is gitignored.
@@ -154,12 +154,27 @@ Recommended RPO: daily snapshots at minimum. Live workout sessions are written t
 
 Updates flow through the operator's deployment repository (Renovate PR -> human merge -> orchestrator redeploys the new pinned tag), not through auto-update daemons inside this image. Image tags are immutable `vX.Y.Z` references; `:latest` is never published. Rollback in short: revert the bump in the deployment repo, redeploy the previous tag, and restore the most recent `pg_dump` if the schema or data changed in the new release. The full recipe lives in `docs/MIGRATION.md` per release.
 
-## Reference
+## Documentation map
 
-- [`docs/SELF_HOSTED_CONTRACT.md`](docs/SELF_HOSTED_CONTRACT.md) — binding contract this repo follows (ports, volumes, healthchecks, logging, metrics, auth modes, release flow).
-- [`docs/API.md`](docs/API.md) — navigational entry point to the runtime OpenAPI document and per-section API contracts.
-- [`docs/DATA_SCHEMA.md`](docs/DATA_SCHEMA.md) — database schema and entity relationships.
-- [`docs/EXPORT_FORMAT.md`](docs/EXPORT_FORMAT.md) — JSON export format for the AI coach summary endpoint.
-- [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) — health endpoints, structured logs, Prometheus metrics.
-- [`docs/BACKUP.md`](docs/BACKUP.md) — reference offsite-backup setup (restic).
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — operator deployment notes.
+| Doc | Purpose |
+|-----|---------|
+| [`docs/SELF_HOSTED_CONTRACT.md`](docs/SELF_HOSTED_CONTRACT.md) | Binding operational contract this repo follows (ports, volumes, healthchecks, logging, metrics, auth modes, release flow). |
+| [`docs/API.md`](docs/API.md) | Navigational entry to the runtime OpenAPI document and per-section API contracts. |
+| [`docs/DATA_SCHEMA.md`](docs/DATA_SCHEMA.md) | Postgres schema overview and Flyway migration history. |
+| [`docs/EXPORT_FORMAT.md`](docs/EXPORT_FORMAT.md) | JSON export format for the AI coach summary endpoint. |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Operator deployment notes (TLS, env vars, push, rest-timer). |
+| [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) | `/livez`, `/healthz`, structured logs, Prometheus metrics. |
+| [`docs/BACKUP.md`](docs/BACKUP.md) | Reference offsite-backup setup with restic. |
+| [`docs/MIGRATION.md`](docs/MIGRATION.md) | Per-version operator upgrade steps. |
+| [`docs/PERF_BUDGETS.md`](docs/PERF_BUDGETS.md) | Frontend Core Web Vitals and bundle-size ceilings. |
+
+## Versioning and support
+
+WorkoutHub follows [semver](https://semver.org/): every release ships under
+a `vX.Y.Z` git tag that publishes a multi-arch image to GHCR. The `:latest`
+tag is intentionally never published, per
+[`docs/SELF_HOSTED_CONTRACT.md`](docs/SELF_HOSTED_CONTRACT.md). Operators
+upgrade by bumping a Renovate-pinned tag in their deployment repository
+([`CHANGELOG.md`](CHANGELOG.md) is the user-visible-change signal,
+[`docs/MIGRATION.md`](docs/MIGRATION.md) is the per-version operator-step
+signal); read both before merging a bump.
