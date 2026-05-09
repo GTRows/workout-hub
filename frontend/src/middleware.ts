@@ -11,13 +11,14 @@ import { NextResponse, type NextRequest } from "next/server";
  * The client mirrors the refresh token into a cookie on login; the
  * in-memory access token continues to drive actual API calls.
  */
-const PROTECTED_PREFIXES = [
+export const PROTECTED_PREFIXES = [
   "/dashboard",
   "/plan",
   "/history",
   "/exercises",
   "/insights",
   "/prs",
+  "/achievements",
   "/nutrition",
   "/metrics",
   "/profile",
@@ -46,6 +47,7 @@ export const config = {
     "/exercises/:path*",
     "/insights/:path*",
     "/prs/:path*",
+    "/achievements/:path*",
     "/nutrition/:path*",
     "/metrics/:path*",
     "/profile/:path*",
