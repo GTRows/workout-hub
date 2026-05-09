@@ -2,8 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { PrToast } from "@/components/pr-toast";
 import {
   fetchWebhookTokens,
   mintWebhookToken,
@@ -17,7 +19,10 @@ function buildScaleUrl(token: string): string {
 
 export function WebhookTokensSection() {
   const t = useTranslations("webhookTokens");
+  const tProfile = useTranslations("profile");
   const qc = useQueryClient();
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const listQuery = useQuery({
     queryKey: ["webhook-tokens", "scale"],
@@ -27,11 +32,13 @@ export function WebhookTokensSection() {
   const mintMutation = useMutation({
     mutationFn: () => mintWebhookToken("scale"),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["webhook-tokens"] }),
+    onError: () => setToastMessage(t("toastMintError")),
   });
 
   const revokeMutation = useMutation({
     mutationFn: (id: string) => revokeWebhookToken(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["webhook-tokens"] }),
+    onError: () => setToastMessage(t("toastRevokeError")),
   });
 
   return (
@@ -40,6 +47,16 @@ export function WebhookTokensSection() {
         <CardTitle className="text-lg">{t("title")}</CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </div>
+      {listQuery.isError && (
+        <div className="space-y-2">
+          <p role="alert" className="text-sm text-destructive">
+            {t("loadError")}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => listQuery.refetch()}>
+            {tProfile("retry")}
+          </Button>
+        </div>
+      )}
       <div>
         <Button
           variant="outline"
@@ -51,6 +68,12 @@ export function WebhookTokensSection() {
           {mintMutation.isPending ? t("minting") : t("mint")}
         </Button>
       </div>
+      {toastMessage && (
+        <PrToast
+          message={toastMessage}
+          onDismiss={() => setToastMessage(null)}
+        />
+      )}
       {listQuery.data && listQuery.data.length > 0 && (
         <ul className="space-y-2 text-sm">
           {listQuery.data.map((tk) => (
