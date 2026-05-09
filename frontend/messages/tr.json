@@ -149,6 +149,9 @@
       "all": "Tumu"
     },
     "saveSuccess": "Kaydedildi",
+    "toastCreated": "Olcum kaydedildi",
+    "toastUpdated": "Olcum guncellendi",
+    "toastError": "Olcum kaydedilemedi",
     "deleteAction": "Sil",
     "deleteConfirm": "Bu kaydi sil?"
   },

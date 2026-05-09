@@ -149,6 +149,9 @@
       "all": "All"
     },
     "saveSuccess": "Saved",
+    "toastCreated": "Measurement saved",
+    "toastUpdated": "Measurement updated",
+    "toastError": "Could not save measurement",
     "deleteAction": "Delete",
     "deleteConfirm": "Delete this entry?"
   },
