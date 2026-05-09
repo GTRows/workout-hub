@@ -152,16 +152,16 @@ describe("ExerciseProgressChart", () => {
   });
 
   it("renders the loading copy during the initial fetch", async () => {
-    let resolve: ((res: Response) => void) | null = null;
+    let resolveFn: (res: Response) => void = () => undefined;
     const pending = new Promise<Response>((r) => {
-      resolve = r;
+      resolveFn = r;
     });
     vi.stubGlobal("fetch", vi.fn(() => pending));
 
     renderClient(<ExerciseProgressChart exerciseId={EXERCISE_ID} />);
 
     expect(screen.getByText("Loading...")).toBeInTheDocument();
-    resolve?.(jsonResponse(200, []));
+    resolveFn(jsonResponse(200, []));
     await waitFor(() =>
       expect(screen.getByText("No progression yet")).toBeInTheDocument()
     );
