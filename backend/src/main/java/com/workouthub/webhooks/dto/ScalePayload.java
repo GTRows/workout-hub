@@ -1,7 +1,7 @@
 package com.workouthub.webhooks.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import tools.jackson.annotation.JsonAlias;
+import tools.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.Instant;
 

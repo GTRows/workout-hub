@@ -1,7 +1,7 @@
 package com.workouthub.notifications;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.workouthub.push.domain.PushSubscription;
 import com.workouthub.push.domain.PushSubscriptionRepository;
 import java.util.List;
@@ -72,7 +72,7 @@ public class WebPushNotificationDispatcher implements NotificationDispatcher {
         try {
             return objectMapper.writeValueAsString(
                     Map.of("title", title, "body", body, "url", clickUrl));
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalStateException("Failed to serialize push payload", ex);
         }
     }

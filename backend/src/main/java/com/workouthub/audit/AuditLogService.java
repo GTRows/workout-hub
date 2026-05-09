@@ -1,7 +1,7 @@
 package com.workouthub.audit;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.workouthub.audit.domain.AuditLog;
 import com.workouthub.audit.domain.AuditLogRepository;
 import java.util.UUID;
@@ -35,7 +35,7 @@ public class AuditLogService {
         if (payload == null) return null;
         try {
             return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return "{\"error\":\"serialization-failed\"}";
         }
     }
