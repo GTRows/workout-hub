@@ -11,13 +11,27 @@ Self-hosted deployment guide for WorkoutHub.
 
 ## First-time deploy
 
-1. Copy `.env.example` to `.env` and fill in:
+1. Copy `.env.example` to `.env` and fill in. The README's [Configuration
+   table](../README.md#configuration) groups every variable; the deploy-time
+   minimum is:
    - `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`
    - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
    - `APP_JWT_SECRET` (32+ bytes of random)
    - `APP_ADMIN_EMAIL`, `APP_ADMIN_PASSWORD_HASH` (BCrypt hash of plaintext), `APP_ADMIN_DISPLAY_NAME`
-   - `APP_PUSH_VAPID_PUBLIC_KEY`, `APP_PUSH_VAPID_PRIVATE_KEY` (generated once via `npx web-push generate-vapid-keys`)
+   - `APP_PUSH_VAPID_PUBLIC_KEY`, `APP_PUSH_VAPID_PRIVATE_KEY`, `APP_PUSH_VAPID_SUBJECT` (generated once via `npx web-push generate-vapid-keys`; subject is `mailto:` or `https:` per the Web Push spec)
    - `APP_CORS_ALLOWED_ORIGINS=https://yourdomain.tld`
+   - `APP_REMINDERS_WORKOUT_CRON`, `APP_REMINDERS_WEIGHT_CRON`, `APP_REMINDERS_SUPPLEMENT_CRON` (Spring 6-field cron expressions; a single dash `-` disables a trigger)
+   - `APP_REST_TIMER_POLL_INTERVAL_MS`, `APP_REST_TIMER_CLEANUP_INTERVAL_MS` (defaults `1000` / `300000` are sane; rarely overridden)
+
+   When fronting the app with an SSO gateway (Authentik, Authelia,
+   oauth2-proxy, Keycloak), also set:
+   - `APP_AUTH_MODE=forward-auth`
+   - `APP_AUTH_TRUSTED_PROXIES` (comma-separated CIDRs the proxy lives in)
+   - `APP_AUTH_HEADER_USER`, `APP_AUTH_HEADER_EMAIL`, `APP_AUTH_HEADER_GROUPS`
+
+   For the opt-in `pg_dump` sidecar set `COMPOSE_PROFILES=backup` plus
+   `ENABLE_PG_DUMP=true`, `PG_DUMP_SCHEDULE`, `PG_DUMP_RETENTION_DAYS`. See
+   [BACKUP.md](./BACKUP.md) for the full restore drill.
 
 2. Obtain an initial certificate (one-shot, before first nginx boot):
 
@@ -136,6 +150,13 @@ schedule fired even before VAPID keys are flipped on.
 
 `/api/auth/*` is rate-limited to 10 req/min per client IP with a 5-burst tolerance (see `limit_req_zone auth_rl`). Responses beyond that return `429 Too Many Requests`.
 
+The application's only in-process throttle is the per-email login lockout
+in `BruteForceGuard` (login attempts within a sliding window per email).
+General-purpose request rate limiting is the operator's reverse-proxy
+responsibility; see
+[`SELF_HOSTED_CONTRACT.md`](SELF_HOSTED_CONTRACT.md) for the binding split
+between application-layer and proxy-layer concerns.
+
 ## Backups and restore
 
 See [BACKUP.md](./BACKUP.md).
@@ -177,3 +198,20 @@ docker compose -f compose.yml -f compose.prod.yml down
 ```
 
 Append `-v` to also drop the database volume. Never do that on a live host.
+
+## What's not here
+
+This file is the operator-deploy quickstart. Topics it deliberately
+delegates:
+
+- **Backup setup details (restic, offsite responsibility):**
+  [`BACKUP.md`](BACKUP.md).
+- **Health endpoints, structured logs, Prometheus metrics:**
+  [`OBSERVABILITY.md`](OBSERVABILITY.md).
+- **Per-version operator upgrade steps:** [`MIGRATION.md`](MIGRATION.md).
+- **Binding contract (ports, volumes, healthchecks, logging, metrics, auth
+  modes, release flow):** [`SELF_HOSTED_CONTRACT.md`](SELF_HOSTED_CONTRACT.md).
+- **Database schema and entity relationships:**
+  [`DATA_SCHEMA.md`](DATA_SCHEMA.md).
+- **Forward-auth header configuration for SSO:** README's [Exposure
+  section](../README.md#exposure).
