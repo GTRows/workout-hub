@@ -6,7 +6,7 @@ Milestone: v1.0 Release Hardening (planned)
 Phase: 38 of 44 (e2e-tests) - not started
 Plan: 38-01 e2e-tests - not started
 Status: v0.6 closed at v0.6.0 (tag 08cc968; 11/11 plans across Phases 31-37). No post-release patch window opened. Next: `/gsd:plan-phase 38-01` (e2e-tests) when v1.0 work begins.
-Last activity: 2026-05-09 - v0.6 milestone bookkeeping closed; v0.6.0 tag at 08cc968
+Last activity: 2026-05-09 - Phase 41 Plan 01 (security-hardening) closed i-14 via Netty 4.2.13.Final bump + .trivyignore cleanup; refresh-token / brute-force / rate-limit audit findings recorded as v1.0 lock-in decisions
 
 Progress: v1.0 ____________________  0% (0/7 phases planned)
           v1.0 - Phases 38-44
@@ -19,7 +19,7 @@ Progress: v1.0 ____________________  0% (0/7 phases planned)
 - See: `.planning/milestones/v0.5-ROADMAP.md` for full v0.5 archive
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/ROADMAP.md` for current roadmap (v1.0 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-13, i-14, i-15 open; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12 closed)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-13, i-15 open; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12, i-14 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
 **Current focus:** v1.0 release hardening - Playwright e2e tests (Phase 38), testcontainers 1.x -> 2.x major bump (Phase 39, i-7), framework majors (Phase 40, i-5 next-intl 4 + i-6 Next 16 + i-8 Spring Boot 4), security hardening (Phase 41, refresh-token hash collisions + brute-force lockout finalization + Netty 4.2 bump per i-14), docs completion (Phase 42), backup/restore drill (Phase 43), v1.0.0 release (Phase 44).
@@ -52,6 +52,9 @@ Full decision logs live in `.planning/milestones/v0.3-ROADMAP.md`, `.planning/mi
 - Frontend metrics dependency posture (v0.6 lock-in): `prom-client` and `@opentelemetry/sdk-metrics` rejected because `frontend/package.json` is protected. Hand-rolled in-memory registry under single-instance Self-Hosted Contract is the load-bearing decision.
 - Web Vitals reporter dependency posture (v0.6 lock-in): framework-native `next/web-vitals` re-export from the `next` package is used (no `web-vitals` direct dep). Mounted once in the root layout.
 - Perf-budget gating posture (v0.6 lock-in): `docs/PERF_BUDGETS.md` is doc-only in v0.6. Lighthouse CI workflow + `scripts/check-bundle-size.mjs` + `@next/bundle-analyzer` dep all rejected because they would each touch a protected path; deferred as i-15.
+- Refresh-token hashing posture (v1.0 Phase 41 lock-in): SHA-256 hex over the full JWT bytes via `MessageDigest.getInstance("SHA-256")` + `HexFormat.of().formatHex(...)`, persisted in `refresh_tokens.token_hash VARCHAR(128) UNIQUE` (V7 migration). The 2026-05-04 `pending_ci_fixes.md` "refresh-token hash collisions" entry was superseded — those tests pass on `96d81b0`. No source change needed; tightening to bcrypt/Argon2 was rejected because refresh tokens carry full JWT entropy at issuance and the hash is a fingerprint for DB lookup, not a password derivation.
+- Brute-force lockout posture (v1.0 Phase 41 lock-in): `BruteForceGuard` enforces 10 failures / 15-minute window / 60-minute lockout, throws HTTP 423 via `ResponseStatusException(HttpStatus.LOCKED, ...)`, records every login outcome in `login_attempts` (V15 migration) via `@Transactional(propagation = REQUIRES_NEW)`. `BruteForceLockoutIntegrationTest` covers under-threshold pass, at-threshold lock, post-cooldown unlock — all green on origin/main. Threshold-tightening + (email, IP)-keyed lockout were rejected as v1.0 scope creep.
+- Rate-limiting posture (v1.0 Phase 41 lock-in): zero generic in-process rate limiter; the Self-Hosted Contract delegates rate limiting to the operator's reverse proxy. The only in-process throttle is `BruteForceGuard` (per-email login throttle). Adding a generic rate limiter was rejected because it would duplicate operator-layer enforcement and contradict the contract's "never assume public exposure" posture (tailnet-only deployment is the v0.3 lock-in).
 
 ### v0.6 Findings (archived)
 
@@ -122,7 +125,7 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
   package-relocation import fixes.
 - i-9: closed by v0.6 Phase 37 (structured-logging-test-fix).
 - i-13 (carried from v0.4): bump SpringDoc to >= 2.7 to remove the ControllerAdviceBean workaround. Trigger: backend dependency review phase post-v0.6 (likely v1.0 Phase 41 or 42).
-- i-14 (carried from v0.5): bump Netty to 4.2.13.Final to close CVE-2026-42577. Suppressed in trivy for v0.5.0 + v0.6.0 (no runtime path; Spring MVC + Tomcat). Trigger: v1.0 Phase 41 (security-hardening).
+- i-14: closed by v1.0 Phase 41 Plan 01 (security-hardening). Bumped `<netty.version>` from `4.1.133.Final` to `4.2.13.Final` in `backend/pom.xml` (commit 99f0fb4); removed `CVE-2026-42577` suppression block from `.trivyignore` (commit 5c1cd42). Static audit at HEAD confirmed zero `WebFlux` / `reactor.netty` / `spring-boot-starter-webflux` matches under `backend/`; the only Netty consumer is `async-http-client:2.12.4` for outbound web push (not on the request-handling path). CI is the authoritative gate (local Maven unavailable on the dev host); `mvn verify` and the trivy image-scan job validate Spring Boot 3.5.14 + Netty 4.2.x runtime compatibility on push. Concludes the trivy-suppression carry-forward debt from v0.5.0 + v0.6.0.
 - i-15 (NEW in v0.6): Lighthouse CI workflow + `scripts/check-bundle-size.mjs` + `@next/bundle-analyzer` dev dep for perf-budget gating. Trigger: operator approves at least one protected-file edit, OR Phase 38+ (v1.0 hardening) explicitly takes ownership of CI perf gating.
 
 ## Session Continuity

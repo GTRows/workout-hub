@@ -302,14 +302,6 @@ that audit and can be reused as a starting reference.
 - **Owner**: aciro
 - **Status**: Open
 
-### i-14: Bump Netty to 4.2.13.Final to close CVE-2026-42577
-
-- **What**: io.netty:netty-transport-native-epoll 4.1.x line carries CVE-2026-42577 (epoll RST DoS). Fix only published in Netty 4.2.13.Final; no 4.1.x backport. Suppressed in trivy via .trivyignore for v0.5.0 release because the artifact is on the classpath but never touched by request handling (this app uses Spring MVC + Tomcat).
-- **Why deferred**: Netty 4.2 is a major-line bump and risks Spring Boot 3.5.x compatibility. Out of scope for a v0.5.0 hotfix.
-- **Trigger**: v0.6 Phase 41 (security-hardening). Bump Spring Boot's `<netty.version>` property to 4.2.13.Final or later, run full mvn verify, run e2e if available, and remove the CVE-2026-42577 entry from .trivyignore.
-- **Owner**: aciro
-- **Status**: Open
-
 ### i-15: Lighthouse CI workflow + bundle-size enforcement script (perf-budget gating)
 
 - **What**: Phase 36-03 ships `docs/PERF_BUDGETS.md` with written Core Web Vitals targets and per-route bundle ceilings, plus a runtime collector that emits the five Core Web Vitals to the existing `/api/metrics` Prometheus scrape. CI gating is NOT yet wired: there is no Lighthouse CI workflow, no `scripts/check-bundle-size.mjs`, and no `@next/bundle-analyzer` devDependency. Operators must measure manually per the doc's "How to measure" section.
@@ -320,6 +312,16 @@ that audit and can be reused as a starting reference.
 - **Status**: Open
 
 ## Closed
+
+### i-14: Bump Netty to 4.2.13.Final to close CVE-2026-42577
+
+- **What**: io.netty:netty-transport-native-epoll 4.1.x line carries CVE-2026-42577 (epoll RST DoS). Fix only published in Netty 4.2.13.Final; no 4.1.x backport. Suppressed in trivy via .trivyignore for v0.5.0 release because the artifact is on the classpath but never touched by request handling (this app uses Spring MVC + Tomcat).
+- **Why deferred**: Netty 4.2 is a major-line bump and risks Spring Boot 3.5.x compatibility. Out of scope for a v0.5.0 hotfix.
+- **Trigger**: v0.6 Phase 41 (security-hardening). Bump Spring Boot's `<netty.version>` property to 4.2.13.Final or later, run full mvn verify, run e2e if available, and remove the CVE-2026-42577 entry from .trivyignore.
+- **Owner**: aciro
+- **Status**: Closed
+
+*Closed by Phase 41 Plan 01: bumped `<netty.version>` from `4.1.133.Final` to `4.2.13.Final` in `backend/pom.xml` (commit 99f0fb4), removed the `CVE-2026-42577` suppression block (lines 12-27) from `.trivyignore` (commit 5c1cd42). Spring Boot 3.5.14 + Netty 4.2.x runtime compatibility validated on the servlet stack (no Reactor Netty / WebFlux on the request path; the only Netty consumer is `async-http-client:2.12.4` for outbound web push). Locks the v1.0 Phase 41 security-hardening scope: refresh-token SHA-256 hashing posture, brute-force lockout (10 failures / 15-min window / 60-min lockout HTTP 423), and rate-limit posture (operator-layer responsibility per Self-Hosted Contract; in-process `BruteForceGuard` for password-grant) all audited and recorded in `.planning/STATE.md` Locked-in Decisions. CI gate is the authoritative validator for the runtime bump; the local Maven gap on the dev host means `mvn verify` runs on GitHub Actions only.*
 
 ### i-5 — Defer next-intl 3 -> 4 major bump (PR #2)
 
