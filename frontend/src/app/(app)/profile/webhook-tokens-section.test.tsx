@@ -24,6 +24,12 @@ const messages = {
     revokeConfirm: "Revoke this webhook URL?",
     lastUsed: "Last ping: {time}",
     never: "Never used",
+    loadError: "Could not load tokens.",
+    toastMintError: "Could not mint token.",
+    toastRevokeError: "Could not revoke token.",
+  },
+  profile: {
+    retry: "Retry",
   },
 };
 
@@ -108,5 +114,67 @@ describe("WebhookTokensSection", () => {
     const user = userEvent.setup();
     await user.click(screen.getByTestId("mint-token"));
     await waitFor(() => expect(mintCalled).toBe(true));
+  });
+
+  it("shows an inline error banner with retry when webhook tokens fail to load", async () => {
+    let attempt = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        attempt += 1;
+        if (attempt === 1) {
+          return jsonResponse(500, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 500,
+            error: "internal",
+            message: "boom",
+            path: "/api/users/me/webhook-tokens",
+          });
+        }
+        return jsonResponse(200, []);
+      })
+    );
+
+    renderClient(<WebhookTokensSection />);
+
+    await screen.findByRole("alert");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Could not load tokens."
+    );
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+  });
+
+  it("shows the mint-error toast when minting fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.includes("/api/users/me/webhook-tokens") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.includes("/api/users/me/webhook-tokens") && method === "POST") {
+          return jsonResponse(500, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 500,
+            error: "internal",
+            message: "db busy",
+            path: "/api/users/me/webhook-tokens",
+          });
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<WebhookTokensSection />);
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId("mint-token"));
+
+    const toast = await screen.findByTestId("pr-toast");
+    expect(toast).toHaveTextContent("Could not mint token.");
   });
 });
