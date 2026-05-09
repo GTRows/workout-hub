@@ -16,4 +16,17 @@ describe("service worker contract", () => {
     expect(raw).toMatch(/url\.pathname\.startsWith\(\s*"\/api\/"\s*\)/);
     expect(raw).toContain('caches.match("/offline")');
   });
+
+  it("registers push and notificationclick handlers", () => {
+    const raw = readFileSync(
+      join(process.cwd(), "public", "sw.js"),
+      "utf8"
+    );
+
+    expect(raw).toMatch(/self\.addEventListener\(\s*"push"/);
+    expect(raw).toMatch(/self\.addEventListener\(\s*"notificationclick"/);
+    expect(raw).toContain("self.registration.showNotification");
+    expect(raw).toContain("self.clients.matchAll");
+    expect(raw).toContain('"/icons/icon-192.png"');
+  });
 });
