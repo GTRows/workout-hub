@@ -1,14 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { loginAsAdmin } from "./fixtures/auth";
 
 /**
  * Responsive smoke at 360x800 (iPhone SE / older Android baseline).
  * Asserts no horizontal overflow on the five highest-traffic pages and
  * that the bottom tab-bar is present, since the desktop top nav is
- * hidden below sm. Requires the same env-seeded admin as critical-flow.
+ * hidden below sm. Uses the shared loginAsAdmin fixture so the login
+ * step stays i18n-immune (phase 38-01).
  */
-
-const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? "admin@workouthub.local";
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "ChangeMe-Admin-1!";
 
 const PAGES = ["/dashboard", "/plan", "/history", "/exercises", "/nutrition"];
 
@@ -16,11 +15,7 @@ test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 360, height: 800 } });
 
 test("no horizontal overflow on 5 key pages at 360px", async ({ page }) => {
-  await page.goto("/login");
-  await page.getByLabel(/email/i).fill(ADMIN_EMAIL);
-  await page.getByLabel(/secret|password/i).fill(ADMIN_PASSWORD);
-  await page.getByRole("button", { name: /log in/i }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  await loginAsAdmin(page);
 
   for (const path of PAGES) {
     await page.goto(path);
