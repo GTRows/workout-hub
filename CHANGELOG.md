@@ -17,6 +17,120 @@ and uses it as the GitHub release notes. Do not change the heading format.
 ### Fixed
 ### Security
 
+## [1.1.0] - 2026-05-09
+
+Framework-major and observability release. Closes the v1.1 deliverables across
+phases 45-49: SpringDoc 2.7+ unblock and OpenAPI workaround removal (Phase 45,
+closes i-13), Spring Boot 3 -> 4 with the full Jackson 2 -> Jackson 3 codebase
+migration consolidated into one cut (Phase 47, supersedes Phase 46 and closes
+i-8b), Next 15 -> 16 framework jump with `middleware.ts` -> `proxy.ts` rename
+and ESLint flat-config adoption (Phase 48, closes i-6b), and Lighthouse CI
+plus per-route bundle-size enforcement (Phase 49, closes i-15). Operators
+upgrade with a normal `docker compose pull && docker compose up -d`; no
+Flyway migrations, no env-var changes, no compose-topology change. Bundler
+stays on webpack via the `--webpack` flag on `next dev` and `next build`;
+the Turbopack default is deferred to v1.2+.
+
+### Added
+
+- `.github/workflows/lighthouse.yml` (new): two-job CI workflow running
+  Lighthouse CI against the production build (LCP / FCP / TBT / CLS budgets
+  mirroring `docs/PERF_BUDGETS.md`) and a per-route gzip-bundle-size check
+  via `scripts/check-bundle-size.mjs` against a 250 KB ceiling. Closes i-15
+  (Phase 49).
+- `scripts/check-bundle-size.mjs` (new): walks the Next 16 build manifest,
+  sums per-route gzip bytes for client chunks, fails CI when any route
+  crosses the 250 KB ceiling. Output mirrors the route table in
+  `docs/PERF_BUDGETS.md` (Phase 49).
+- `.lighthouserc.cjs` (new): Lighthouse CI config pointing at the routes
+  enumerated in `docs/PERF_BUDGETS.md` with assertion thresholds matching
+  the documented Core Web Vitals budgets (Phase 49).
+- `@next/bundle-analyzer` and `@lhci/cli` devDependencies on the frontend
+  package; the existing `pnpm build:analyze` script (Phase 36) is now
+  wired to the CI bundle-size gate (Phase 49).
+
+### Changed
+
+- Bumped `springdoc-openapi-starter-webmvc-ui` from `2.6.0` to `2.8.17`
+  in `backend/pom.xml`. Removed the `apiErrorSchemaCustomizer`
+  `OpenApiCustomizer` workaround from
+  `backend/src/main/java/com/workouthub/common/openapi/OpenApiConfig.java`
+  and the `springdoc.override-with-generic-response: false` line from
+  `backend/src/main/resources/application.yml`. The 2.7+ line ships against
+  Spring Boot 3.5.x with the `ControllerAdviceBean(Object)` constructor
+  restored, so the v0.4.0-era hand-disambiguation is no longer required.
+  `OpenApiSurfaceIntegrationTest` (5 tests) re-validates the document with
+  the workaround removed. Closes i-13 (Phase 45).
+- Bumped Spring Boot from `3.5.14` to `4.0.6` (parent POM); SpringDoc from
+  `2.8.17` to `3.0.3` to track the new
+  `springdoc-openapi-starter-webmvc-ui` 3.x line that ships against
+  Spring Boot 4. Migrated 36 Java source files from
+  `com.fasterxml.jackson.*` (Jackson 2) to `tools.jackson.*` (Jackson 3);
+  rewrote `JacksonConfig` from the old
+  `Jackson2ObjectMapperBuilderCustomizer` to the new
+  `JsonMapperBuilderCustomizer` shape; relocated Prometheus actuator
+  imports per the Spring Boot 4 actuator reorg. The Netty 4.2.13.Final
+  pin from v1.0 (Phase 41) is preserved through the framework jump. BOM
+  consequences: Spring Framework 7.0.7, Spring Security 7.0.5, Hibernate
+  7.2.12.Final, Jakarta EE 11, Tomcat 11. Phase 46
+  (`jackson-2-to-3-migration`) was deferred and consolidated into this
+  phase rather than landing as a separate cut, since the Jackson
+  default-classpath shift is the breaking surface that gated the Spring
+  Boot 4 jump in v1.0 (i-8b). Closes i-8b (Phase 47).
+- Bumped `next` from `^15.5.18` to `^16.2.6` and `eslint-config-next`
+  from `^15.5.15` to `^16.2.6`. Bumped `engines.node` from `>=18.18.0`
+  to `>=20.9.0`. Renamed `frontend/src/middleware.ts` to
+  `frontend/src/proxy.ts` (function rename + companion test rename) per
+  the Next 16 middleware -> proxy migration; wrapped
+  `frontend/src/app/(auth)/login/page.tsx` in `<Suspense>` to satisfy
+  the Next 16 `useSearchParams` Suspense-boundary requirement; migrated
+  the ESLint config from `.eslintrc.cjs` to flat-config
+  (`eslint.config.mjs`) per the eslint-config-next 16 default. Six
+  `react-hooks/exhaustive-deps` targeted disables added where the Next
+  16 stricter rule fired on intentional once-on-mount effects. The
+  `exercise-progress-chart` recharts adapter `renderTooltip` was
+  extracted to a top-level helper to remove the inner-component-redefine
+  pattern Next 16 dev mode warns on. Bundler stays on webpack via the
+  existing `--webpack` flag on `next dev` / `next build` /
+  `build:analyze`; the Turbopack default flip is deferred to v1.2+.
+  Closes i-6b (Phase 48).
+
+### Deprecated
+
+- N/A.
+
+### Removed
+
+- `apiErrorSchemaCustomizer` `OpenApiCustomizer` bean in `OpenApiConfig`
+  (Phase 45).
+- `springdoc.override-with-generic-response: false` line from
+  `application.yml` (Phase 45).
+- Jackson 2 (`com.fasterxml.jackson.*`) imports across 36 source files;
+  the `Jackson2ObjectMapperBuilderCustomizer` registration in
+  `JacksonConfig` (Phase 47).
+- `frontend/src/middleware.ts` (renamed to `proxy.ts`) and the legacy
+  `.eslintrc.cjs` (replaced by `eslint.config.mjs`) (Phase 48).
+
+### Fixed
+
+- N/A -- v1.1 is framework-bump and observability work; no production bug
+  closures.
+
+### Security
+
+- No backend dependency CVE bumps in v1.1.0 over v1.0.0. Netty stays at
+  4.2.13.Final (the v1.0 Phase 41 lock-in); the Spring Boot 4 jump in
+  Phase 47 carries the explicit Netty pin through unchanged.
+
+### Known Issues (carried forward)
+
+Tracked in `.planning/ISSUES.md`:
+
+- i-3: documentation note on `.gitignore` `data/` glob-form correction
+  (resolved at execution time; carried for audit).
+- i-7b: testcontainers 2.0.0 major bump deferred until upstream Maven
+  Central publishes 2.0.0 GA.
+
 ## [1.0.0] - 2026-05-09
 
 Production-ready release. Closes the v1.0 release-hardening deliverables
@@ -95,7 +209,7 @@ recommended quarterly verification cadence.
 
 ### Fixed
 
-- N/A — v1.0 is hardening + docs work; no production bug closures.
+- N/A â€” v1.0 is hardening + docs work; no production bug closures.
 
 ### Security
 
@@ -103,7 +217,7 @@ recommended quarterly verification cadence.
   `backend/pom.xml`. Closes CVE-2026-42577 (epoll RST DoS); the
   `.trivyignore` suppression block for that CVE is removed in the
   same release window. The runtime is API-stable for this codebase's
-  consumers — Spring MVC + Tomcat servlet stack with no Reactor Netty
+  consumers â€” Spring MVC + Tomcat servlet stack with no Reactor Netty
   on the request path; the only Netty consumer is
   `async-http-client:2.12.4` for outbound web push. Closes i-14
   (Phase 41).
@@ -111,7 +225,7 @@ recommended quarterly verification cadence.
   bytes via `MessageDigest.getInstance("SHA-256")` and
   `HexFormat.of().formatHex(...)`, persisted in
   `refresh_tokens.token_hash VARCHAR(128) UNIQUE` (V7 migration). The
-  2026-05-04 "refresh-token hash collisions" debt is superseded — those
+  2026-05-04 "refresh-token hash collisions" debt is superseded â€” those
   tests pass on `96d81b0`. Tightening to bcrypt or Argon2 was rejected
   because refresh tokens carry full JWT entropy at issuance and the
   hash is a fingerprint for DB lookup, not a password derivation
@@ -153,7 +267,7 @@ Tracked in `.planning/ISSUES.md`:
 - i-13: SpringDoc 2.6.0 ControllerAdviceBean workaround should be
   removed once SpringDoc 2.7+ ships against Spring Boot 3.5.x.
 - i-15: Lighthouse CI workflow + bundle-size enforcement script + the
-  `@next/bundle-analyzer` devDependency deferred — all three require
+  `@next/bundle-analyzer` devDependency deferred â€” all three require
   edits to protected paths.
 
 ## [0.6.0] - 2026-05-09
