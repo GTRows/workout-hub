@@ -318,7 +318,18 @@
     "csvButton": "sessions.csv indir (Strong)",
     "csvPending": "Hazirlaniyor...",
     "csvError": "CSV disa aktarma basarisiz.",
-    "csvHint": "Strong/Hevy uyumlu sutun sirasi, baska uygulamalara geri yukleme icin."
+    "csvHint": "Strong/Hevy uyumlu sutun sirasi, baska uygulamalara geri yukleme icin.",
+    "importConfirm": "{file} dosyasini yuklemek mevcut profil, metrik, takviye, plan ve antrenman verisinin tamamini siler. Devam etmek istiyor musun?",
+    "historyTitle": "Indirme gecmisi",
+    "historyDescription": "Bu cihazda son 10 disa aktarma kaydi. Sunucuya gonderilmez.",
+    "historyEmpty": "Henuz indirme kaydi yok.",
+    "historyClear": "Gecmisi temizle",
+    "historyKind": {
+      "claude": "Claude ozeti",
+      "full": "Tam JSON yedek",
+      "section": "Bolum",
+      "csv": "CSV"
+    }
   },
   "ai": {
     "title": "AI yuvarlak-ziyareti",

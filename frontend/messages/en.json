@@ -318,7 +318,18 @@
     "csvButton": "Download sessions.csv (Strong)",
     "csvPending": "Preparing...",
     "csvError": "CSV export failed.",
-    "csvHint": "Strong/Hevy-compatible column order for re-import into other apps."
+    "csvHint": "Strong/Hevy-compatible column order for re-import into other apps.",
+    "importConfirm": "Importing {file} will replace your profile, metrics, supplements, plans, and sessions. Continue?",
+    "historyTitle": "Download history",
+    "historyDescription": "Last 10 export actions on this device. Never sent to the server.",
+    "historyEmpty": "No previous exports yet.",
+    "historyClear": "Clear history",
+    "historyKind": {
+      "claude": "Claude summary",
+      "full": "Full JSON dump",
+      "section": "Section",
+      "csv": "CSV"
+    }
   },
   "ai": {
     "title": "AI roundtrip",
