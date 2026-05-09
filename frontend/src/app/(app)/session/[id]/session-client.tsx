@@ -297,6 +297,7 @@ function ExerciseBlock({
   const router = useRouter();
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
+  const [rpe, setRpe] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [prCelebration, setPrCelebration] = useState<string | null>(null);
   const restTimer = useRestTimer(notifyRestElapsed);
@@ -330,6 +331,7 @@ function ExerciseBlock({
       );
       setReps("");
       setWeight("");
+      setRpe("");
       if (newSet.newPr) {
         setPrCelebration(
           planItem.exerciseNameTr ?? planItem.exerciseNameEn ?? "PR"
@@ -344,6 +346,7 @@ function ExerciseBlock({
       if (err instanceof OfflineQueuedError) {
         setReps("");
         setWeight("");
+        setRpe("");
         onOfflineQueued();
         void refreshQueued();
         return;
@@ -384,6 +387,7 @@ function ExerciseBlock({
       setNumber: nextSetNumber,
       repsDone: Number(reps),
       weightKg: weight === "" ? undefined : Number(weight),
+      rpe: rpe === "" ? undefined : Number(rpe),
       completed: true,
       clientSetId: crypto.randomUUID(),
     });
@@ -446,7 +450,7 @@ function ExerciseBlock({
       )}
 
       {!locked && (
-        <div className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+        <div className="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2">
           <div>
             <Label htmlFor={`reps-${planItem.id}`}>{t("reps")}</Label>
             <Input
@@ -468,6 +472,19 @@ function ExerciseBlock({
               min={0}
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor={`rpe-${planItem.id}`}>{t("rpe")}</Label>
+            <Input
+              id={`rpe-${planItem.id}`}
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={10}
+              placeholder={t("rpeHint")}
+              value={rpe}
+              onChange={(e) => setRpe(e.target.value)}
             />
           </div>
           <Button onClick={submit} disabled={!canSubmit}>
@@ -526,10 +543,12 @@ function LastPerformanceChip({
 }
 
 function formatSetLine(s: SessionSet): string {
-  if (s.weightKg != null) {
-    return `${s.setNumber}. ${s.repsDone} x ${s.weightKg}kg`;
-  }
-  return `${s.setNumber}. ${s.repsDone} reps`;
+  const head =
+    s.weightKg != null
+      ? `${s.setNumber}. ${s.repsDone} x ${s.weightKg}kg`
+      : `${s.setNumber}. ${s.repsDone} reps`;
+  if (s.rpe != null) return `${head} · RPE ${s.rpe}`;
+  return head;
 }
 
 function formatTime(iso: string): string {
