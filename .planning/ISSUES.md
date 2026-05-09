@@ -30,12 +30,6 @@ This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) w
 
 **Trigger to reopen:** None — resolved at execution time.
 
-### i-4 — Frontend per-request HTTP metrics not yet exposed (Phase 4 follow-up)
-
-Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. Contract section 9.1 also mentions "HTTP request count and duration histogram" - that needs a Next.js App Router middleware-level instrumentation hook (or a small server-side counter store) to count fetch handler invocations and record latency histograms. Out of scope for the v0.3 contract baseline; track for v0.6 (Operational Maturity).
-
-**Trigger to reopen:** v0.6 milestone planning OR operator request for richer frontend telemetry.
-
 ### i-5 — Defer next-intl 3 -> 4 major bump (PR #2)
 
 **PR:** https://github.com/GTRows/workout-hub/pull/2
@@ -97,6 +91,12 @@ Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. C
 - **Status**: Open
 
 ## Closed
+
+### i-4 — Frontend per-request HTTP metrics not yet exposed (Phase 4 follow-up)
+
+Plan 04-01 shipped only Node process metrics (uptime, memory) on `/api/metrics`. Contract section 9.1 also calls for "HTTP request count and duration histogram", which required a Next.js middleware-level instrumentation hook to count fetch handler invocations and record latency histograms. Tracked for v0.6 (Operational Maturity).
+
+*Closed by Phase 35 Plan 01: hand-rolled `frontend/src/lib/metrics/registry.ts` (counter + histogram with Prometheus default bucket bounds) populated from `frontend/src/middleware.ts` per request, rendered on `/api/metrics` as `wh_frontend_http_requests_total` and `wh_frontend_http_request_duration_seconds_*`. Route-label cardinality bounded by `frontend/src/lib/metrics/route-label.ts`. No new runtime dependency.*
 
 ### i-1 — WorkoutDaysIntegrationTest helper NPE on response `id` (6 errors)
 
