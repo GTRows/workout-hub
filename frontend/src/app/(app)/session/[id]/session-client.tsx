@@ -595,6 +595,7 @@ function ExerciseBlock({
               min={0}
               value={reps}
               onChange={(e) => setReps(e.target.value)}
+              data-testid="set-reps-input"
             />
           </div>
           <div>
@@ -622,7 +623,11 @@ function ExerciseBlock({
               onChange={(e) => setRpe(e.target.value)}
             />
           </div>
-          <Button onClick={submit} disabled={!canSubmit}>
+          <Button
+            onClick={submit}
+            disabled={!canSubmit}
+            data-testid="set-done-button"
+          >
             {t("complete")}
           </Button>
         </div>
