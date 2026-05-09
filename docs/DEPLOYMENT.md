@@ -111,6 +111,27 @@ the cron triggers still run and emit
 `notifications.LoggingNotificationDispatcher` log lines so operators can
 confirm the schedule is firing before flipping the keys on.
 
+### Rest-timer push notifications
+
+When a user logs a set inside a session, the frontend posts a schedule row
+to `/api/sessions/{id}/rest-timer`; an in-process poller dispatches a push
+when the rest interval elapses, even if the tab is backgrounded. Two tunables
+exist (both have safe defaults; most operators will not need to change them):
+
+```
+APP_REST_TIMER_POLL_INTERVAL_MS=1000      # how often to check for due rows
+APP_REST_TIMER_CLEANUP_INTERVAL_MS=300000 # how often to prune dispatched rows
+```
+
+The corresponding Spring properties are `app.rest-timer.poll-interval-ms`
+(default `1000`) and `app.rest-timer.cleanup-interval-ms` (default
+`300000`). Schedules that have already fired are pruned after one hour to
+keep the `rest_timer_schedules` table bounded.
+
+If `APP_PUSH_VAPID_PRIVATE_KEY` is unset the dispatch path still runs - it
+just routes through `LoggingNotificationDispatcher`, so logs confirm the
+schedule fired even before VAPID keys are flipped on.
+
 ## Rate limits
 
 `/api/auth/*` is rate-limited to 10 req/min per client IP with a 5-burst tolerance (see `limit_req_zone auth_rl`). Responses beyond that return `429 Too Many Requests`.
