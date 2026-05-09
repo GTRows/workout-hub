@@ -286,14 +286,6 @@ that audit and can be reused as a starting reference.
 **Owner:** aciro
 **Status:** Open
 
-### i-13: Bump SpringDoc to >= 2.7 to remove the ControllerAdviceBean workaround
-
-- **What**: Phase 19-02 pinned SpringDoc to 2.6.0, which calls Spring 6.2's removed `new ControllerAdviceBean(Object)` constructor and crashes `GET /v3/api-docs` on Spring Boot 3.5.x. Phase 20 fix bundle (commit c1b95f7) worked around this by disabling SpringDoc's generic-response scan and registering ApiError schemas via OpenApiCustomizer.
-- **Why deferred**: A SpringDoc bump introduces a transitive dependency change shortly before release; safer to ship 0.4.0 with the targeted workaround and bump the dep in a follow-up patch (0.4.1 or 0.5.0).
-- **Trigger**: Plan a backend dependency review phase. Bump `springdoc.version` from 2.6.0 to 2.7+ (whatever is latest stable on Spring Boot 3.5.x), revert the OpenApiCustomizer workaround, and re-run the OpenApi integration tests.
-- **Owner**: aciro
-- **Status**: Open
-
 ### i-15: Lighthouse CI workflow + bundle-size enforcement script (perf-budget gating)
 
 - **What**: Phase 36-03 ships `docs/PERF_BUDGETS.md` with written Core Web Vitals targets and per-route bundle ceilings, plus a runtime collector that emits the five Core Web Vitals to the existing `/api/metrics` Prometheus scrape. CI gating is NOT yet wired: there is no Lighthouse CI workflow, no `scripts/check-bundle-size.mjs`, and no `@next/bundle-analyzer` devDependency. Operators must measure manually per the doc's "How to measure" section.
@@ -314,6 +306,16 @@ that audit and can be reused as a starting reference.
 - **Status**: Closed
 
 *Closed by Phase 41 Plan 01: bumped `<netty.version>` from `4.1.133.Final` to `4.2.13.Final` in `backend/pom.xml` (commit 99f0fb4), removed the `CVE-2026-42577` suppression block (lines 12-27) from `.trivyignore` (commit 5c1cd42). Spring Boot 3.5.14 + Netty 4.2.x runtime compatibility validated on the servlet stack (no Reactor Netty / WebFlux on the request path; the only Netty consumer is `async-http-client:2.12.4` for outbound web push). Locks the v1.0 Phase 41 security-hardening scope: refresh-token SHA-256 hashing posture, brute-force lockout (10 failures / 15-min window / 60-min lockout HTTP 423), and rate-limit posture (operator-layer responsibility per Self-Hosted Contract; in-process `BruteForceGuard` for password-grant) all audited and recorded in `.planning/STATE.md` Locked-in Decisions. CI gate is the authoritative validator for the runtime bump; the local Maven gap on the dev host means `mvn verify` runs on GitHub Actions only.*
+
+### i-13: Bump SpringDoc to >= 2.7 to remove the ControllerAdviceBean workaround
+
+- **What**: Phase 19-02 pinned SpringDoc to 2.6.0, which calls Spring 6.2's removed `new ControllerAdviceBean(Object)` constructor and crashes `GET /v3/api-docs` on Spring Boot 3.5.x. Phase 20 fix bundle (commit c1b95f7) worked around this by disabling SpringDoc's generic-response scan and registering ApiError schemas via OpenApiCustomizer.
+- **Why deferred**: A SpringDoc bump introduces a transitive dependency change shortly before release; safer to ship 0.4.0 with the targeted workaround and bump the dep in a follow-up patch (0.4.1 or 0.5.0).
+- **Trigger**: Plan a backend dependency review phase. Bump `springdoc.version` from 2.6.0 to 2.7+ (whatever is latest stable on Spring Boot 3.5.x), revert the OpenApiCustomizer workaround, and re-run the OpenApi integration tests.
+- **Owner**: aciro
+- **Status**: Closed
+
+*Closed by Phase 45 Plan 01: bumped `<springdoc.version>` from `2.6.0` to `2.8.17` in `backend/pom.xml` (commit 4889375); deleted the `apiErrorSchemaCustomizer` `OpenApiCustomizer` `@Bean` (33 lines including Javadoc) plus its 6 now-orphan imports from `backend/src/main/java/com/workouthub/common/config/OpenApiConfig.java` (commit 1140faa); deleted the `springdoc.override-with-generic-response: false` line plus its 6-line explanatory comment block from `backend/src/main/resources/application.yml` (commit f3be469). CI run pending validation that backend `mvn verify` is green and `OpenApiSurfaceIntegrationTest` (5 tests) is green: `/v3/api-docs` returns 200 without auth, `swagger-ui.html` returns 3xx redirection, `components.securitySchemes` declares both `bearerAuth` and `forwardAuth`, all 28 hand-curated tags surface, `components.schemas.ApiError` declares the four-value code enum + `ApiError.FieldError` sub-schema. The framework default path (`GenericResponseService` scan of `@RestControllerAdvice`) now surfaces ApiError schemas without the manual customizer; the SpringDoc 2.7.0 fix for the removed Spring Framework 6.2 `ControllerAdviceBean(Object)` constructor closes the v0.4 fix bundle workaround. Final `## Status:` line of the moved block updated from `Open` to `Closed`.*
 
 ### i-5 — Defer next-intl 3 -> 4 major bump (PR #2)
 

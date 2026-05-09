@@ -3,13 +3,13 @@
 ## Current Position
 
 Milestone: v1.1 Deferred Debt Closure (ACTIVE)
-Phase: 45 of 50 (springdoc-2.7-bump) - not started
-Plan: 45-01 springdoc-2.7-bump - not started
-Status: v1.1 milestone opened to close the four remaining v1.0 carry-forward issues (i-13 SpringDoc 2.7+, i-8b Spring Boot 4 via Jackson 2 -> 3 migration first, i-6b Next 16, i-15 Lighthouse CI + bundle-size + bundle-analyzer). Six phases scoped: 45 springdoc-2.7 (closes i-13), 46 jackson-2-to-3-migration (preparatory for SB4), 47 spring-boot-4 (closes i-8b), 48 next-16 (closes i-6b), 49 lighthouse-ci (closes i-15; user pre-approved the protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits), 50 release-v1-1 (cut v1.1.0). Phase 45 is the next phase to plan via `/gsd:plan-phase 45`.
-Last activity: 2026-05-09 - v1.1 milestone-opening bookkeeping commit. Re-opened ROADMAP.md with v1.1 as the Active section (kept v0.3..v1.0 archived `<details>` blocks); added the 6 phase outlines (45 springdoc-2.7, 46 jackson-2-to-3-migration, 47 spring-boot-4, 48 next-16, 49 lighthouse-ci, 50 release-v1-1); appended the v1.1 entry to PROJECT.md Active list (mirroring the v0.5/v0.6/v1.0 pattern); advanced this STATE.md cursor from project-complete to v1.1 Phase 45 not-started. No source code edits, no protected-file edits in this bookkeeping commit; the Phase 49 protected-path edits and the Phase 50 IDENTITY/CHANGELOG/package.json/pom.xml lockstep edits land at execution time.
+Phase: 45 of 50 (springdoc-2.7-bump) - SHIPPED 2026-05-09
+Plan: 45-01 springdoc-2.7-bump - shipped 2026-05-09
+Status: v1.1 Phase 45 shipped: bumped SpringDoc 2.6.0 -> 2.8.17 and removed the v0.4 `ControllerAdviceBean` workaround (deleted `apiErrorSchemaCustomizer` `@Bean` from `OpenApiConfig.java` and `springdoc.override-with-generic-response: false` from `application.yml`). i-13 closed. Phase 46 (jackson-2-to-3-migration) is the next phase to plan via `/gsd:plan-phase 46`. Five remaining phases scoped: 46 jackson-2-to-3-migration (preparatory for SB4), 47 spring-boot-4 (closes i-8b), 48 next-16 (closes i-6b), 49 lighthouse-ci (closes i-15), 50 release-v1-1 (cut v1.1.0).
+Last activity: 2026-05-09 - Phase 45 Plan 01 shipped (i-13 closed). Three atomic commits per GSD protocol: `4889375` chore(deps) bump springdoc to 2.8.17; `1140faa` refactor(api) remove ControllerAdviceBean OpenApiCustomizer; `f3be469` refactor(api) drop override-with-generic-response. ISSUES.md moves i-13 from Open to Closed with a citation block; STATE.md Project Reference bullet, Issue-to-Phase Mapping, and Locked-in Decisions all updated to reflect the post-bump posture; SpringDoc 2.6.0 lock-in replaced with the 2.8.17 lock-in. CI is the authoritative gate (local Maven gap on the Windows dev host); `OpenApiSurfaceIntegrationTest` (5 tests) is the regression gate.
 
-Progress: v1.1 ____________________    0% (0/? plans complete; 0/6 phases shipped)
-          v1.1 - Phase 45 (springdoc-2.7-bump) NOT STARTED
+Progress: v1.1 ###_________________   16% (1/6 plans complete; 1/6 phases shipped)
+          v1.1 - Phase 46 (jackson-2-to-3-migration) NEXT
 
 ## Project Reference
 
@@ -20,7 +20,7 @@ Progress: v1.1 ____________________    0% (0/? plans complete; 0/6 phases shippe
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/milestones/v1.0-ROADMAP.md` for full v1.0 archive
 - See: `.planning/ROADMAP.md` for the active roadmap (v0.3 through v1.0 shipped and archived; v1.1 active with Phases 45-50 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-13, i-15 open; i-6b/i-8b/i-13/i-15 scheduled for v1.1; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12, i-14 closed)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-15 open; i-6b/i-8b/i-15 scheduled for v1.1; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12, i-13, i-14 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
 **Current focus:** v1.1 Deferred Debt Closure active. The milestone closes the four open carry-forward issues from v1.0: i-13 (Phase 45 springdoc-2.7), i-8b (Phase 46 jackson-2-to-3-migration preparatory + Phase 47 spring-boot-4), i-6b (Phase 48 next-16), i-15 (Phase 49 lighthouse-ci; protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits user-pre-approved). Phase 50 cuts v1.1.0. The two remaining open issues NOT in v1.1 scope are i-3 (`.gitignore` `data/` glob audit reference; documentation note only) and i-7b (Testcontainers 2.0.0 jump; trigger blocked on upstream Maven Central GA). Phase 45 is the next-up phase to plan via `/gsd:plan-phase 45`.
@@ -43,7 +43,7 @@ Full decision logs live in `.planning/milestones/v0.3-ROADMAP.md`, `.planning/mi
 - PR durability: persisted via V27 `is_pr` column with ROW_NUMBER backfill; the wire field round-trips via `FullExportDto.SetRow.isPr` (9th component) with a recompute safety net per touched exercise on import.
 - Body-metrics status code: `MetricsService.UpsertResult` wrapper drives `wasCreated ? 201 : 200`; date-keyed identity (V6 UNIQUE-by-`(user, date)`) is the design.
 - ApiError.code typed-values catalog: 4 values from Phase 15-04 (`SESSION_ALREADY_ACTIVE`, `SESSION_ALREADY_FINISHED`, `SESSION_FINISHED`, `SET_NUMBER_DUPLICATE`). Frontend branches on typed `code` (Phase 22.5 helper); tooling should branch on `status` and `code`, not `message`.
-- SpringDoc artifact: 2.6.0 starter-webmvc-ui with the `ControllerAdviceBean` workaround in `OpenApiConfig`; bump to 2.7+ deferred per i-13.
+- SpringDoc artifact (v1.1 Phase 45 lock-in): `2.8.17` starter-webmvc-ui. The `ControllerAdviceBean(Object)` workaround was removed when 2.7+ landed (`apiErrorSchemaCustomizer` `@Bean` and `springdoc.override-with-generic-response: false` both deleted). Schemas surface via the framework default path; `OpenApiSurfaceIntegrationTest` (5 tests) is the regression gate. SpringDoc 3.x intentionally deferred (targets Spring Boot 4 / Jakarta EE 11; sequenced behind Phase 47 spring-boot-4 in v1.1).
 - Frontend offline-first: Dexie IndexedDB queue scoped to session-execution; drains on `online` event via `clientSetId` UUID idempotency key (Phase 25 contract).
 - Frontend route protection: `frontend/src/middleware.ts` enumerates 12 (app)-group segments in both `PROTECTED_PREFIXES` (runtime) and `config.matcher` (compile-time) arrays; the middleware test scaffold (Phase 29.5) gates future drift.
 - Zod schema parity: backend DTO surfaces (ImportResult, FullExport, vapid, push subscribe, rest-timer schedule request/response) round-trip via shared Zod schemas in the frontend (Phase 25.5 + Phase 34); future endpoint additions should mirror this pattern.
@@ -125,7 +125,7 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
   path reopens, also applies trivial Jackson2-module + Prometheus-actuator
   package-relocation import fixes.
 - i-9: closed by v0.6 Phase 37 (structured-logging-test-fix).
-- i-13 (carried from v0.4): bump SpringDoc to >= 2.7 to remove the ControllerAdviceBean workaround. Trigger: backend dependency review phase post-v0.6 (likely v1.0 Phase 41 or 42).
+- i-13: closed by v1.1 Phase 45 Plan 01 (springdoc-2.7-bump). Bumped `<springdoc.version>` from `2.6.0` to `2.8.17` in `backend/pom.xml` (commit 4889375); deleted the `apiErrorSchemaCustomizer` `OpenApiCustomizer` `@Bean` from `OpenApiConfig.java` (33 lines + 6 orphan imports; commit 1140faa); deleted the `springdoc.override-with-generic-response: false` line + comment block from `application.yml` (commit f3be469). SpringDoc 2.7.0 patches the removed Spring Framework 6.2 `ControllerAdviceBean(Object)` constructor; the framework default `GenericResponseService` scan now surfaces ApiError schemas without the manual customizer. CI gate validates `mvn verify` green and `OpenApiSurfaceIntegrationTest` (5 tests) green. Closes the v0.4 fix bundle (commit `c1b95f7`) workaround.
 - i-14: closed by v1.0 Phase 41 Plan 01 (security-hardening). Bumped `<netty.version>` from `4.1.133.Final` to `4.2.13.Final` in `backend/pom.xml` (commit 99f0fb4); removed `CVE-2026-42577` suppression block from `.trivyignore` (commit 5c1cd42). Static audit at HEAD confirmed zero `WebFlux` / `reactor.netty` / `spring-boot-starter-webflux` matches under `backend/`; the only Netty consumer is `async-http-client:2.12.4` for outbound web push (not on the request-handling path). CI is the authoritative gate (local Maven unavailable on the dev host); `mvn verify` and the trivy image-scan job validate Spring Boot 3.5.14 + Netty 4.2.x runtime compatibility on push. Concludes the trivy-suppression carry-forward debt from v0.5.0 + v0.6.0.
 - i-15 (NEW in v0.6): Lighthouse CI workflow + `scripts/check-bundle-size.mjs` + `@next/bundle-analyzer` dev dep for perf-budget gating. Trigger: operator approves at least one protected-file edit, OR Phase 38+ (v1.0 hardening) explicitly takes ownership of CI perf gating.
 
