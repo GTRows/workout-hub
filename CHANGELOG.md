@@ -93,6 +93,13 @@ baseline) to 263. Backend is unchanged from v0.4.0; pull and restart.
   CVE-2026-42577 (epoll RST DoS) deferred -- only fixed in Netty
   4.2.13.Final, not yet backported to 4.1.x line; will revisit if
   trivy still reports it after this bump.
+- Suppress CVE-2026-42577 (Netty epoll transport RST DoS) in trivy
+  via `.trivyignore`. The fix is only in Netty 4.2.x; 4.1.x has no
+  backport. This app uses Spring MVC + Tomcat (servlet stack), not
+  Reactor Netty / WebFlux, so `netty-transport-native-epoll` is on
+  the classpath but never touched by request-handling code. Tracked
+  for v0.6 Phase 41 (security-hardening) Netty 4.2 bump as
+  ISSUES.md i-14.
 
 ## [0.4.0] - 2026-05-07
 
