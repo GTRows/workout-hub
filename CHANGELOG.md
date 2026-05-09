@@ -17,6 +17,117 @@ and uses it as the GitHub release notes. Do not change the heading format.
 ### Fixed
 ### Security
 
+## [0.6.0] - 2026-05-09
+
+Operational maturity release. Closes the v0.6 deliverables across phases
+31-37: insights charts and stats (weight trend + PR teaser + range toggle
++ locale-aware tooltips), PWA polish (offline route + install-prompt card
++ service-worker v3 cache + scope), web-push notifications (sw push
+handler + NotificationsSection + `/api/push/test` + VAPID docs),
+rest-timer push notifications (V28 migration + scheduler + endpoint +
+frontend `useRestTimer` push wiring), frontend HTTP metrics (registry +
+middleware instrumentation + `/api/metrics` extension; closes i-4),
+route-level error states and perf budgets (RouteSkeleton + RouteError +
+WebVitalsReporter + `/api/vitals` + `docs/PERF_BUDGETS.md`), and a
+structured-logging test fix that boots the full application under the
+prod profile (closes i-9). Operators upgrade with a normal
+`docker compose pull && docker compose up -d`; one new Flyway migration
+(V28 rest-timer schedule columns) auto-applies on backend start.
+
+### Added
+
+- Insights charts and stats: weight-trend chart with locale-aware tooltips,
+  personal-record teaser card surfacing latest PR per exercise, and a
+  range toggle (1W / 1M / 3M / All) bound to the metrics range query
+  (Phase 31).
+- PWA polish: dedicated `/offline` route with retry CTA,
+  `InstallPromptCard` driven by `beforeinstallprompt`, service-worker v3
+  cache strategy (network-first navigation, stale-while-revalidate
+  static), and explicit `scope: '/'` registration so the SW controls the
+  full app shell (Phase 32).
+- Web-push notifications: service-worker `push` event handler rendering
+  notifications via `self.registration.showNotification`, profile
+  `NotificationsSection` with subscribe / unsubscribe + permission state
+  surfacing, `POST /api/push/test` developer self-send endpoint, and
+  `docs/VAPID.md` operator guide for generating and rotating VAPID keys
+  (Phase 33).
+- Rest-timer push notifications: V28 migration adds
+  `rest_timer_scheduled_at` and `rest_timer_duration_seconds` columns on
+  `workout_sessions`; `RestTimerScheduler` spring component schedules a
+  push at the requested wall-clock instant; new
+  `POST /api/sessions/{id}/rest-timer` endpoint accepts duration; the
+  frontend `useRestTimer` hook drives the schedule call and falls back
+  to in-app countdown when push is unavailable (Phase 34).
+- Frontend HTTP metrics: hand-rolled
+  `frontend/src/lib/metrics/registry.ts` (counter + Prometheus default-
+  bucket histogram) populated from `frontend/src/middleware.ts` per
+  request and rendered on `/api/metrics` as
+  `wh_frontend_http_requests_total` and
+  `wh_frontend_http_request_duration_seconds_*`. Route-label
+  cardinality bounded by `frontend/src/lib/metrics/route-label.ts`. No
+  new runtime dependency. Closes i-4 (Phase 35).
+- Route-level error states and perf budgets: `RouteSkeleton` shared
+  component adopted via `loading.tsx` per `(app)` segment (dashboard,
+  plan, session, history, exercises, metrics, profile, insights, prs,
+  achievements); `RouteError` component wired via `error.tsx` per
+  segment plus `global-error.tsx` for app-shell crashes;
+  `WebVitalsReporter` client component mounted in the root layout posts
+  CLS / FID / LCP / FCP / TTFB / INP to the new `POST /api/vitals`
+  ingest, which records into the metrics registry; `docs/PERF_BUDGETS.md`
+  documents Core Web Vitals targets and per-route bundle ceilings; new
+  i18n keys `common.error`, `common.errorHint`, `common.tryAgain`,
+  `common.goHome` (Phase 36).
+
+### Changed
+
+- `StructuredLoggingTest` now extends `AbstractIntegrationTest` and boots
+  the full `WorkoutHubApplication` under `@ActiveProfiles("prod")` with
+  Testcontainers Postgres so `LoggingApplicationListener` reconfigures
+  the logging system to ECS-format JSON. `@Disabled` removed; both
+  contract assertions (JSON shape with `@timestamp` + `message`;
+  deny-listed `authorization` MDC value masked from stdout) run on
+  every CI build. Closes i-9 (Phase 37).
+
+### Fixed
+
+- i-4 (frontend per-request HTTP histogram) closed by Phase 35 -- the
+  metric series were missing on `/api/metrics` since v0.3 contract
+  alignment.
+- i-9 (`StructuredLoggingTest` cannot capture ECS JSON under
+  `@SpringBootTest`) closed by Phase 37.
+
+### Security
+
+- No backend dependency changes in v0.6.0 over v0.5.0. Netty stays at
+  4.1.133.Final; CVE-2026-42577 (epoll RST DoS) remains suppressed in
+  `.trivyignore` pending the deferred Netty 4.2 bump in i-14.
+
+### Known Issues (carried forward)
+
+Tracked in `.planning/ISSUES.md`:
+- i-3: documentation note on `.gitignore` `data/` glob-form correction
+  (resolved at execution time; carried for audit).
+- i-5: next-intl 3 -> 4 major bump deferred (open-redirect mitigated
+  via reverse-proxy header rewrite).
+- i-6: Next 15 -> 16 major framework bump deferred.
+- i-7: testcontainers 1.x -> 2.x major bump deferred to next test-infra
+  session (likely v1.0 Phase 39).
+- i-8: Spring Boot 3.5 -> 4.0 major framework bump deferred to v1.0.
+- i-12: `FullExportImportIntegrationTest.importRoundTripPreservesPlans
+  FromExport` returns 500 on a freshly-seeded user; CI is the
+  authoritative gate.
+- i-13: SpringDoc 2.6.0 ControllerAdviceBean workaround should be
+  removed once SpringDoc 2.7+ ships against Spring Boot 3.5.x.
+- i-14: Netty 4.1.x -> 4.2.13.Final bump deferred to a v1.0 security-
+  hardening phase; mitigated for v0.6 by trivy suppression and the
+  servlet-stack architecture (no Reactor Netty in the request path).
+- i-15: Lighthouse CI workflow + bundle-size enforcement script + the
+  `@next/bundle-analyzer` devDependency deferred -- all three require
+  edits to protected paths (`.github/workflows/**`, `scripts/**`,
+  `frontend/package.json`). Perf-budget doc shipped 2026-05-09 in
+  Phase 36-03; CI gating awaits operator approval or the v1.0
+  hardening phase.
+
 ## [0.5.0] - 2026-05-09
 
 Frontend feature completion release. Closes the v0.5 UI deliverables across
