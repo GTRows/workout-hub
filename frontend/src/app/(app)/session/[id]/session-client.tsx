@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   addSet,
+  deleteSet,
   fetchLastPerformance,
   fetchSession,
   fetchWorkoutDay,
   finishSession,
+  updateSet,
   type AddSetPayload,
+  type UpdateSetPayload,
 } from "@/lib/api/endpoints";
 import {
   ApiErrorCode,
@@ -300,6 +303,7 @@ function ExerciseBlock({
   const [rpe, setRpe] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [prCelebration, setPrCelebration] = useState<string | null>(null);
+  const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const restTimer = useRestTimer(notifyRestElapsed);
 
   const lastPerfQuery = useQuery({
@@ -362,6 +366,84 @@ function ExerciseBlock({
         setApiErrorToast(
           tFull(apiErrorCodeMessageKey(ApiErrorCode.SET_NUMBER_DUPLICATE))
         );
+        void qc.invalidateQueries({ queryKey: ["sessions", sessionId] });
+        return;
+      }
+      if (isApiError(err)) {
+        setApiErrorToast(tFull(apiErrorCodeMessageKey(err.code)));
+        return;
+      }
+      setApiErrorToast(tFull(apiErrorCodeMessageKey(undefined)));
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      setId,
+      payload,
+    }: {
+      setId: string;
+      payload: UpdateSetPayload;
+    }) => updateSet(sessionId, setId, payload),
+    onSuccess: (updatedSet) => {
+      qc.setQueryData<SessionDetail | undefined>(
+        ["sessions", sessionId],
+        (prev) =>
+          prev
+            ? {
+                ...prev,
+                sets: prev.sets.map((s) =>
+                  s.id === updatedSet.id ? updatedSet : s
+                ),
+              }
+            : prev
+      );
+      setEditingSetId(null);
+    },
+    onError: (err: unknown) => {
+      if (isApiErrorWithCode(err, ApiErrorCode.SESSION_FINISHED)) {
+        setApiErrorToast(
+          tFull(apiErrorCodeMessageKey(ApiErrorCode.SESSION_FINISHED))
+        );
+        router.push("/dashboard");
+        return;
+      }
+      if (isApiError(err) && err.status === 404) {
+        void qc.invalidateQueries({ queryKey: ["sessions", sessionId] });
+        setEditingSetId(null);
+        return;
+      }
+      if (isApiError(err)) {
+        setApiErrorToast(tFull(apiErrorCodeMessageKey(err.code)));
+        return;
+      }
+      setApiErrorToast(tFull(apiErrorCodeMessageKey(undefined)));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (setId: string) => {
+      await deleteSet(sessionId, setId);
+      return setId;
+    },
+    onSuccess: (deletedId) => {
+      qc.setQueryData<SessionDetail | undefined>(
+        ["sessions", sessionId],
+        (prev) =>
+          prev
+            ? { ...prev, sets: prev.sets.filter((s) => s.id !== deletedId) }
+            : prev
+      );
+    },
+    onError: (err: unknown) => {
+      if (isApiErrorWithCode(err, ApiErrorCode.SESSION_FINISHED)) {
+        setApiErrorToast(
+          tFull(apiErrorCodeMessageKey(ApiErrorCode.SESSION_FINISHED))
+        );
+        router.push("/dashboard");
+        return;
+      }
+      if (isApiError(err) && err.status === 404) {
         void qc.invalidateQueries({ queryKey: ["sessions", sessionId] });
         return;
       }
@@ -438,7 +520,50 @@ function ExerciseBlock({
       {existingSets.length > 0 && (
         <ul className="space-y-1 text-sm">
           {existingSets.map((s) => (
-            <li key={s.id}>{formatSetLine(s)}</li>
+            <li
+              key={s.id}
+              className="flex items-center justify-between gap-2"
+            >
+              {editingSetId === s.id ? (
+                <EditSetRow
+                  set={s}
+                  pending={updateMutation.isPending}
+                  onSave={(payload) =>
+                    updateMutation.mutate({ setId: s.id, payload })
+                  }
+                  onCancel={() => setEditingSetId(null)}
+                />
+              ) : (
+                <>
+                  <span>{formatSetLine(s)}</span>
+                  {!locked && (
+                    <span className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingSetId(s.id)}
+                        data-testid={`edit-set-${s.id}`}
+                      >
+                        {t("editAction")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (window.confirm(t("deleteConfirm"))) {
+                            deleteMutation.mutate(s.id);
+                          }
+                        }}
+                        disabled={deleteMutation.isPending}
+                        data-testid={`delete-set-${s.id}`}
+                      >
+                        {t("deleteAction")}
+                      </Button>
+                    </span>
+                  )}
+                </>
+              )}
+            </li>
           ))}
         </ul>
       )}
@@ -539,6 +664,94 @@ function LastPerformanceChip({
     <p className="text-xs text-muted-foreground">
       {t("lastPerformance")}: {summary}
     </p>
+  );
+}
+
+function EditSetRow({
+  set,
+  pending,
+  onSave,
+  onCancel,
+}: {
+  set: SessionSet;
+  pending: boolean;
+  onSave: (payload: UpdateSetPayload) => void;
+  onCancel: () => void;
+}) {
+  const t = useTranslations("session");
+  const [reps, setReps] = useState(String(set.repsDone));
+  const [weight, setWeight] = useState(
+    set.weightKg != null ? String(set.weightKg) : ""
+  );
+  const [rpe, setRpe] = useState(set.rpe != null ? String(set.rpe) : "");
+
+  const submit = () => {
+    const payload: UpdateSetPayload = {};
+    if (reps !== String(set.repsDone)) payload.repsDone = Number(reps);
+    if (weight !== "") {
+      if (set.weightKg == null || Number(weight) !== set.weightKg) {
+        payload.weightKg = Number(weight);
+      }
+    }
+    if (rpe !== "") {
+      if (set.rpe == null || Number(rpe) !== set.rpe) {
+        payload.rpe = Number(rpe);
+      }
+    }
+    onSave(payload);
+  };
+
+  return (
+    <div className="flex w-full flex-wrap items-end gap-2">
+      <div>
+        <Label htmlFor={`edit-reps-${set.id}`}>{t("reps")}</Label>
+        <Input
+          id={`edit-reps-${set.id}`}
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={reps}
+          onChange={(e) => setReps(e.target.value)}
+        />
+      </div>
+      <div>
+        <Label htmlFor={`edit-weight-${set.id}`}>{t("weightKg")}</Label>
+        <Input
+          id={`edit-weight-${set.id}`}
+          type="number"
+          inputMode="decimal"
+          step="0.5"
+          min={0}
+          value={weight}
+          onChange={(e) => setWeight(e.target.value)}
+        />
+      </div>
+      <div>
+        <Label htmlFor={`edit-rpe-${set.id}`}>{t("rpe")}</Label>
+        <Input
+          id={`edit-rpe-${set.id}`}
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={10}
+          value={rpe}
+          onChange={(e) => setRpe(e.target.value)}
+        />
+      </div>
+      <span className="flex gap-1">
+        <Button size="sm" onClick={submit} disabled={pending}>
+          {t("saveAction")}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onCancel}
+          disabled={pending}
+        >
+          {t("cancelAction")}
+        </Button>
+      </span>
+    </div>
   );
 }
 
