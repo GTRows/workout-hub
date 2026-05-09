@@ -19,7 +19,7 @@ Progress: v1.0 ____________________  0% (0/7 phases planned)
 - See: `.planning/milestones/v0.5-ROADMAP.md` for full v0.5 archive
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/ROADMAP.md` for current roadmap (v1.0 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-5, i-6, i-7b, i-8b, i-13, i-14, i-15 open; i-1, i-2, i-4, i-7, i-8, i-9, i-10, i-12 closed)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-5, i-6b, i-7b, i-8b, i-13, i-14, i-15 open; i-1, i-2, i-4, i-6, i-7, i-8, i-9, i-10, i-12 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
 **Current focus:** v1.0 release hardening - Playwright e2e tests (Phase 38), testcontainers 1.x -> 2.x major bump (Phase 39, i-7), framework majors (Phase 40, i-5 next-intl 4 + i-6 Next 16 + i-8 Spring Boot 4), security hardening (Phase 41, refresh-token hash collisions + brute-force lockout finalization + Netty 4.2 bump per i-14), docs completion (Phase 42), backup/restore drill (Phase 43), v1.0.0 release (Phase 44).
@@ -62,7 +62,31 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
 - i-3: documentation note on `.gitignore` `data/` glob-form correction. Stays carried as audit reference.
 - i-4: closed by v0.6 Phase 35 (frontend-http-metrics).
 - i-5: closed by v1.0 Phase 40 (framework-majors).
-- i-6: closed by v1.0 Phase 40 (framework-majors); v0.5 + v0.6 stayed on Next 15.
+- i-6: closed by v1.0 Phase 40 Plan 02 (framework-majors) re-defer
+  playbook. Plan-author audited `https://registry.npmjs.org/next-intl` on
+  2026-05-09 and confirmed zero `next-intl@3.x` versions list
+  `next ^16.0.0` in their peer range; the 3.26.x line tail (3.26.5) tops
+  out at `next ^15.0.0`. Only `next-intl@4.x` peers `^16.0.0`. Bumping
+  Next past 15.x while keeping next-intl 3.x in the same lockfile would
+  break `pnpm install` peer-check or require a `pnpm.overrides` hack;
+  the roadmap's "in sequence (each its own commit and test pass)" rule
+  forbids bundling Next 16 with next-intl 4 in one commit. Frontend
+  runtime stays pinned within the existing `^15.1.0` caret (latest 15.x
+  backport `15.5.18` per the npm `backport` dist-tag). Successor work
+  tracked as i-6b. v0.5 + v0.6 stayed on Next 15.
+- i-6b (NEW in v1.0 Phase 40 Plan 02): residual Next.js 16.x major bump
+  deferred until Phase 40-03 (i-5 next-intl 3 -> 4 migration) ships
+  green. Closure plan must (a) probe the lockfile resolution with
+  co-installed next@^16 and next-intl@^4, (b) rename
+  `frontend/src/middleware.ts` -> `proxy.ts` (or accept the deprecation
+  warning), (c) wrap `frontend/src/app/(auth)/login/page.tsx` in a
+  `<Suspense>` boundary so `useSearchParams` does not error at build
+  time, (d) bump `engines.node: ">=20.0.0"` -> `">=20.9.0"`, (e) audit
+  `next/image` callers for query-string `src` values that the new
+  `images.localPatterns` enforcement gates, and (f) decide on Turbopack
+  vs `--webpack`. Closure plan must also exercise the protected-file
+  pre-authorisation flow because `frontend/package.json` and
+  `frontend/pnpm-lock.yaml` are both protected.
 - i-7: closed by v1.0 Phase 39 (testcontainers-major).
 - i-7b (NEW in v1.0 Phase 39): residual 2.x major bump, deferred until
   upstream `org.testcontainers:testcontainers:2.0.0` GA on Maven Central.
