@@ -90,6 +90,15 @@ This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) w
 - **Owner**: aciro
 - **Status**: Open
 
+### i-15: Lighthouse CI workflow + bundle-size enforcement script (perf-budget gating)
+
+- **What**: Phase 36-03 ships `docs/PERF_BUDGETS.md` with written Core Web Vitals targets and per-route bundle ceilings, plus a runtime collector that emits the five Core Web Vitals to the existing `/api/metrics` Prometheus scrape. CI gating is NOT yet wired: there is no Lighthouse CI workflow, no `scripts/check-bundle-size.mjs`, and no `@next/bundle-analyzer` devDependency. Operators must measure manually per the doc's "How to measure" section.
+- **Why deferred**: All three add-ons require edits to protected paths. `.github/workflows/lighthouse.yml` would touch `.github/workflows/**` (protected). `scripts/check-bundle-size.mjs` would touch `scripts/**` (protected). `@next/bundle-analyzer` would mutate `frontend/package.json` (protected). Phase 36-03 stayed protected-file-clean by scope.
+- **Trigger**: Operator approves at least one protected-file edit, OR Phase 38+ (v1.0 hardening) explicitly takes ownership of CI perf gating. Perf-budget doc shipped 2026-05-09 in 36-03.
+- **Owner**: aciro
+- **Related files**: `docs/PERF_BUDGETS.md`, `frontend/src/components/web-vitals-reporter.tsx`, `frontend/src/app/api/vitals/route.ts`, `frontend/src/lib/metrics/registry.ts`.
+- **Status**: Open
+
 ## Closed
 
 ### i-4 — Frontend per-request HTTP metrics not yet exposed (Phase 4 follow-up)
