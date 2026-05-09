@@ -49,7 +49,7 @@ self.addEventListener("push", (event) => {
   if (event.data) {
     try {
       payload = { ...payload, ...event.data.json() };
-    } catch (_err) {
+    } catch {
       payload.body = event.data.text();
     }
   }
@@ -77,7 +77,7 @@ self.addEventListener("notificationclick", (event) => {
             c.navigate(target).catch(() => {});
             return;
           }
-        } catch (_err) {
+        } catch {
           /* ignore non-URL clients */
         }
       }
