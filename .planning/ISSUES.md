@@ -201,6 +201,17 @@ suite in CI.
 **Owner:** aciro
 **Status:** Open
 
+### i-15: Lighthouse CI workflow + bundle-size enforcement script (perf-budget gating)
+
+- **What**: Phase 36-03 ships `docs/PERF_BUDGETS.md` with written Core Web Vitals targets and per-route bundle ceilings, plus a runtime collector that emits the five Core Web Vitals to the existing `/api/metrics` Prometheus scrape. CI gating is NOT yet wired: there is no Lighthouse CI workflow, no `scripts/check-bundle-size.mjs`, and no `@next/bundle-analyzer` devDependency. Operators must measure manually per the doc's "How to measure" section.
+- **Why deferred**: All three add-ons require edits to protected paths. `.github/workflows/lighthouse.yml` would touch `.github/workflows/**` (protected). `scripts/check-bundle-size.mjs` would touch `scripts/**` (protected). `@next/bundle-analyzer` would mutate `frontend/package.json` (protected). Phase 36-03 stayed protected-file-clean by scope.
+- **Trigger**: Operator approves at least one protected-file edit, OR Phase 38+ (v1.0 hardening) explicitly takes ownership of CI perf gating. Perf-budget doc shipped 2026-05-09 in 36-03.
+- **Owner**: aciro
+- **Related files**: `docs/PERF_BUDGETS.md`, `frontend/src/components/web-vitals-reporter.tsx`, `frontend/src/app/api/vitals/route.ts`, `frontend/src/lib/metrics/registry.ts`.
+- **Status**: Open
+
+## Closed
+
 ### i-8b — Defer Spring Boot 4.0.x major bump (successor to i-8)
 
 **Context:** i-8 was named "3.4 -> 4.0" but the v1.0 release-hardening
@@ -299,18 +310,9 @@ rewrite consolidates into Phase 47 in a single commit alongside the
 is foreclosed; Path B (full Jackson 3 migration) is the closure path.
 
 **Owner:** aciro
-**Status:** Open (consolidated into Phase 47, renamed spring-boot-4-with-jackson-3)
+**Status:** Closed
 
-### i-15: Lighthouse CI workflow + bundle-size enforcement script (perf-budget gating)
-
-- **What**: Phase 36-03 ships `docs/PERF_BUDGETS.md` with written Core Web Vitals targets and per-route bundle ceilings, plus a runtime collector that emits the five Core Web Vitals to the existing `/api/metrics` Prometheus scrape. CI gating is NOT yet wired: there is no Lighthouse CI workflow, no `scripts/check-bundle-size.mjs`, and no `@next/bundle-analyzer` devDependency. Operators must measure manually per the doc's "How to measure" section.
-- **Why deferred**: All three add-ons require edits to protected paths. `.github/workflows/lighthouse.yml` would touch `.github/workflows/**` (protected). `scripts/check-bundle-size.mjs` would touch `scripts/**` (protected). `@next/bundle-analyzer` would mutate `frontend/package.json` (protected). Phase 36-03 stayed protected-file-clean by scope.
-- **Trigger**: Operator approves at least one protected-file edit, OR Phase 38+ (v1.0 hardening) explicitly takes ownership of CI perf gating. Perf-budget doc shipped 2026-05-09 in 36-03.
-- **Owner**: aciro
-- **Related files**: `docs/PERF_BUDGETS.md`, `frontend/src/components/web-vitals-reporter.tsx`, `frontend/src/app/api/vitals/route.ts`, `frontend/src/lib/metrics/registry.ts`.
-- **Status**: Open
-
-## Closed
+*Closed by Phase 47 Plan 01: bumped `<spring-boot-starter-parent>` from `3.5.14` to `4.0.6` and `<springdoc.version>` from `2.8.17` to `3.0.3` in `backend/pom.xml`; preserved `<netty.version>4.2.13.Final</netty.version>` property override (i-14 closure forward-carry; the SB4 BOM ships Netty 4.2.12.Final by default and the property override resolves to 4.2.13.Final to retain the CVE-2026-42577 patch posture). Migrated 36 Jackson 2 source files (`com.fasterxml.jackson.*` -> `tools.jackson.*`): 7 main-source files (`JacksonConfig.java` rewritten to declare a Jackson 3 `JsonMapperBuilderCustomizer @Bean` from `org.springframework.boot.jackson.autoconfigure` registering `JavaTimeModule`, disabling `WRITE_DATES_AS_TIMESTAMPS`, setting `JsonInclude.Include.NON_NULL`; `ClaudeSummaryDto`, `AuditLogService`, `WebPushNotificationDispatcher`, `GoogleFitParser`, `ScalePayload`, `SupplementTiming`) plus 29 test-source files (28 `@Autowired ObjectMapper` integration tests + the standalone `WebPushNotificationDispatcherTest`). Renamed `JsonProcessingException` catch sites to `JacksonException` (Jackson 3 unified exception hierarchy) in `AuditLogService.toJson` and `WebPushNotificationDispatcher.buildPayload`. Flipped `PrometheusMetricsController` actuator imports from `org.springframework.boot.actuate.metrics.export.prometheus.*` to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.*`. Path B (full Jackson 3 migration) confirmed; Path A (`spring-boot-jackson2` compat module) foreclosed per the v1.1 Phase 46 lock-in. BOM transitives carried forward by the bump: Spring Framework 7.0.7, Spring Security 7.0.5, Hibernate 7.2.12.Final, Jakarta EE 11 (Servlet 6.1.0, Persistence 3.2.0, Validation 3.1.1, Annotation 3.0), Tomcat 11, Micrometer 1.15.x, Jackson 3.0.x. CI is the authoritative gate (local Maven gap; Windows host); on push the GitHub Actions backend `mvn verify` matrix run + Testcontainers integration test suite + `OpenApiSurfaceIntegrationTest` (5 tests) + `MetricsIntegrationTest` + `ExportIntegrationTest` + `FullExportImportIntegrationTest` + `AuditLogIntegrationTest` + `WebPushNotificationDispatcherTest` + `StructuredLoggingTest` + `GrafanaDashboardTest` + the trivy image-scan job + the jacoco >= 70% coverage gate validate the migration. Concludes the largest open carry-forward debt from v1.0 and unblocks v1.1 Phase 48 (next-16) and Phase 49 (lighthouse-ci). Phase 50 cuts v1.1.0 once 47 + 48 + 49 all green.*
 
 ### i-14: Bump Netty to 4.2.13.Final to close CVE-2026-42577
 
