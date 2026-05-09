@@ -19,6 +19,7 @@ import type { SessionDetail, SessionSummary } from "@/lib/api/schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { PrToast } from "@/components/pr-toast";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { cn } from "@/lib/utils";
 
 type MonthKey = { year: number; monthIndex: number };
@@ -148,7 +149,7 @@ export function HistoryClient() {
           <CardDescription>{t("noSession")}</CardDescription>
         </Card>
       ) : historyQuery.isLoading ? (
-        <p className="text-muted-foreground">{t("loading")}</p>
+        <RouteSkeleton variant="history" />
       ) : (
         <Card>
           <CardDescription>{t("selectDayHint")}</CardDescription>

@@ -72,6 +72,9 @@ const messages = {
     dayDragHandle: "Drag day",
     dayMoveError: "Could not move day. Try again.",
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement) {

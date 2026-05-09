@@ -54,6 +54,9 @@ const messages = {
         "Set number conflict, list refreshed. Please try again.",
     },
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement) {

@@ -24,6 +24,7 @@ import { PrToast } from "@/components/pr-toast";
 import { PushPermissionCard } from "@/components/push-permission-card";
 import { WeeklySummaryCard } from "@/components/dashboard/weekly-summary-card";
 import { LastWeightCard } from "@/components/dashboard/last-weight-card";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
@@ -60,7 +61,7 @@ export default function DashboardPage() {
   });
 
   if (planQuery.isLoading || sessionQuery.isLoading) {
-    return <p className="text-muted-foreground">{t("loading")}</p>;
+    return <RouteSkeleton variant="dashboard" />;
   }
 
   const apiErrorToastNode = apiErrorToast ? (

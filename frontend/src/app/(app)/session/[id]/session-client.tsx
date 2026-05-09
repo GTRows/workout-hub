@@ -40,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { notifyRestElapsed, useRestTimer } from "@/lib/push/rest-timer";
 import { PrToast } from "@/components/pr-toast";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { ExerciseDetailModal } from "./exercise-detail-modal";
 
 class OfflineQueuedError extends Error {
@@ -182,7 +183,7 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
   }, [sessionId, qc, t]);
 
   if (sessionQuery.isLoading) {
-    return <p className="text-muted-foreground">{t("loading")}</p>;
+    return <RouteSkeleton variant="session" />;
   }
   if (sessionQuery.isError || !session) {
     return <p className="text-destructive">{t("notFound")}</p>;

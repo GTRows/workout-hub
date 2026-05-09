@@ -33,6 +33,7 @@ import type {
 import { pickLocaleField } from "@/lib/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "@/components/ui/card";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { PlanList } from "./plan-list";
 import { SortableDayGrid } from "./sortable-day-grid";
 
@@ -44,7 +45,7 @@ export function PlanClient() {
   });
 
   if (planQuery.isLoading) {
-    return <p className="text-muted-foreground">{t("loading")}</p>;
+    return <RouteSkeleton variant="plan" />;
   }
   if (!planQuery.data) {
     return (
