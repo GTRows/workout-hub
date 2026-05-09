@@ -232,7 +232,17 @@ describe("ExportClient", () => {
     const fullBody = {
       schemaVersion: 1,
       exportedAt: "2026-04-23T00:00:00Z",
-      user: null,
+      user: {
+        id: "11111111-1111-4111-8111-111111111111",
+        email: "u@e.com",
+        displayName: "Tester",
+        heightCm: null,
+        weightKg: null,
+        birthDate: null,
+        gender: null,
+        healthNotes: null,
+        goals: null,
+      },
       plans: [],
       sessions: [],
       bodyMetrics: [],
