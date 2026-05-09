@@ -105,7 +105,9 @@
     "dailyProteinGGoal": "Protein (g/day)",
     "dailyCarbsGGoal": "Carbs (g/day)",
     "dailyFatGGoal": "Fat (g/day)",
-    "logoutHeading": "Account"
+    "logoutHeading": "Account",
+    "loadError": "Could not load your profile.",
+    "retry": "Retry"
   },
   "nutrition": {
     "title": "Nutrition",
@@ -199,7 +201,10 @@
       "evening": "Evening",
       "with_meal": "With meal",
       "other": "Other"
-    }
+    },
+    "loadError": "Could not load supplements.",
+    "toastCreateError": "Could not add supplement.",
+    "toastDeleteError": "Could not delete supplement."
   },
   "plan": {
     "title": "Weekly plan",
@@ -470,7 +475,10 @@
     "revoke": "Revoke",
     "revokeConfirm": "Revoke this webhook URL? Anything still using it will stop working.",
     "lastUsed": "Last ping: {time}",
-    "never": "Never used"
+    "never": "Never used",
+    "loadError": "Could not load tokens.",
+    "toastMintError": "Could not mint token.",
+    "toastRevokeError": "Could not revoke token."
   },
   "health": {
     "title": "Health imports",

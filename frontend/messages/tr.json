@@ -105,7 +105,9 @@
     "dailyProteinGGoal": "Protein (g/gun)",
     "dailyCarbsGGoal": "Karbonhidrat (g/gun)",
     "dailyFatGGoal": "Yag (g/gun)",
-    "logoutHeading": "Hesap"
+    "logoutHeading": "Hesap",
+    "loadError": "Profil bilgisi yuklenemedi.",
+    "retry": "Tekrar dene"
   },
   "nutrition": {
     "title": "Beslenme",
@@ -199,7 +201,10 @@
       "evening": "Aksam",
       "with_meal": "Yemekle",
       "other": "Diger"
-    }
+    },
+    "loadError": "Takviye listesi yuklenemedi.",
+    "toastCreateError": "Takviye eklenemedi.",
+    "toastDeleteError": "Takviye silinemedi."
   },
   "plan": {
     "title": "Haftalik plan",
@@ -470,7 +475,10 @@
     "revoke": "Iptal et",
     "revokeConfirm": "Bu webhook URL'sini iptal et? Hala kullanan bir sey varsa calismayi durdurur.",
     "lastUsed": "Son istek: {time}",
-    "never": "Hic kullanilmadi"
+    "never": "Hic kullanilmadi",
+    "loadError": "Token listesi yuklenemedi.",
+    "toastMintError": "URL uretilemedi.",
+    "toastRevokeError": "Token iptal edilemedi."
   },
   "health": {
     "title": "Saglik iceri aktarma",
