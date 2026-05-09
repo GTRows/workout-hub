@@ -58,6 +58,17 @@ Plans:
 - Phase 23: dashboard - today's workout card, weekly summary, last weight, quick actions.
 - Phase 24: plan-editor - weekly view, drag-drop reorder (days + exercises), exercise CRUD modal.
 - Phase 25: session-execution - set logging UI, rest timer, last-performance display, IndexedDB offline queue and sync.
+
+#### Phase 25.5: zod-schemas (INSERTED)
+
+**Goal:** Extract reusable Zod response/request schemas for the v0.4 backend API contract surfaces still using `unknown`/loose typing in the frontend (notably ImportResult, FullExport, ExportSummary, and any other endpoint wrappers that bypass Zod validation), so consumers get type-safe payloads with the same idempotency/contract guarantees that 25-01 brought to addSet.
+**Depends on:** Phase 25
+**Research:** Unlikely (v0.4 backend OpenAPI doc is the contract source)
+**Plans:** 1
+
+Plans:
+- [ ] 25.5-01: zod-schemas
+
 - Phase 26: exercise-catalog - filters (muscle/equipment/difficulty), search, detail modal (how-to, tips, mistakes, PR, progress chart).
 - Phase 27: history-view - calendar with completed days marked, per-session detail page.
 - Phase 28: metrics-ui - weight chart (weekly/monthly/all-time), measurement form, optional progress photo upload.
@@ -101,5 +112,6 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | 13-20 (v0.4 scope)          | v0.4      | 25/25 | Complete    | 2026-05-07 |
 | 21-30 (v0.5 scope)          | v0.5      | 0/?   | Active      | -          |
 | 22.5 typed-apierror-helper  | v0.5      | 0/1   | Not started | -          |
+| 25.5 zod-schemas            | v0.5      | 0/1   | Not started | -          |
 | 31-37 (v0.6 scope)          | v0.6      | 0/?   | Planned     | -          |
 | 38-44 (v1.0 scope)          | v1.0      | 0/?   | Planned     | -          |

@@ -3,12 +3,12 @@
 ## Current Position
 
 Milestone: v0.5 Frontend Completion (active)
-Phase: 22 of 30 (auth-pages) - complete; next is inserted Phase 22.5 (typed-apierror-helper)
-Plan: 22.5-01 typed-apierror-helper - not started
-Status: Phase 22 closed at bbd231e. Inserted Phase 22.5 (typed-apierror-helper) per 21-01-AUDIT Section 6. Next: 22.5-01 plan.
-Last activity: 2026-05-07 - v0.4 milestone archive complete; v0.4.0 tag at c8fab14
+Phase: 25 of 30 (session-execution) - complete; next is inserted Phase 25.5 (zod-schemas)
+Plan: 25.5-01 zod-schemas - not started
+Status: Phase 25 closed (4/4 sub-plans) at a3bbb7f. Inserted Phase 25.5 (zod-schemas) per 21-01-AUDIT Section 6. Next: 25.5-01 plan.
+Last activity: 2026-05-09 - inserted Phase 25.5 (zod-schemas) bookkeeping commit
 
-Progress: v0.5 ____________________ 20% (2/10 phases; 1 decimal phase inserted)
+Progress: v0.5 ____________________ 50% (5/10 phases; 2 decimal phases inserted)
           v0.6 (planned) - Phases 31-37
           v1.0 (planned) - Phases 38-44
 
