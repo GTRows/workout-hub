@@ -4,7 +4,7 @@
 
 WorkoutHub is a self-hosted multi-user fitness tracker with a Java 21 + Spring Boot 3 backend and a Next.js 15 + React 19 frontend, packaged as Docker images for operators to run on their own infrastructure. The project ships against a portable contract documented at `docs/SELF_HOSTED_CONTRACT.md`; the maintainer's reference deployment lives separately at `GTRows/homelab` and is not part of this repository.
 
-Pre-GSD work (informally tracked in `.planning/HANDOFF.md`) delivered the application surface area through v0.2: 23 backend feature packages, 25 Flyway migrations, the offline session queue, OIDC controller, push notifications, smart-scale webhook, and JSON export. Formal GSD planning starts at v0.3. The full path from v0.4 through v1.0 is scoped below (32 phases, Phase 13-44); v0.3, v0.4, v0.5, v0.6, and v1.0 are shipped. v1.1 (Phases 45-50) is now active to close the four open carry-forward issues from v1.0 (i-13, i-8b, i-6b, i-15).
+Pre-GSD work (informally tracked in `.planning/HANDOFF.md`) delivered the application surface area through v0.2: 23 backend feature packages, 25 Flyway migrations, the offline session queue, OIDC controller, push notifications, smart-scale webhook, and JSON export. Formal GSD planning starts at v0.3. The full path from v0.4 through v1.1 is shipped (38 phases, Phase 13-50); v0.3, v0.4, v0.5, v0.6, v1.0, and v1.1 are shipped. The v1.1 milestone closed the four open carry-forward issues from v1.0 (i-13, i-8b, i-6b, i-15) and cut `v1.1.0`.
 
 ## Domain Expertise
 
@@ -18,7 +18,7 @@ None - project is application code; planning draws from `docs/SELF_HOSTED_CONTRA
 - (Shipped) [**v0.5 Frontend Completion**](milestones/v0.5-ROADMAP.md) - Phases 21-30 (shipped 2026-05-09; v0.5.0)
 - (Shipped) [**v0.6 Operational Maturity**](milestones/v0.6-ROADMAP.md) - Phases 31-37 (shipped 2026-05-09; v0.6.0)
 - (Shipped) [**v1.0 Release Hardening**](milestones/v1.0-ROADMAP.md) - Phases 38-44 (shipped 2026-05-09; v1.0.0)
-- (Active) **v1.1 Deferred Debt Closure** - Phases 45-50
+- (Shipped) [**v1.1 Deferred Debt Closure**](milestones/v1.1-ROADMAP.md) - Phases 45-50 (shipped 2026-05-09; v1.1.0)
 
 ## Phases
 
@@ -89,22 +89,24 @@ Full archive: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md).
 
 </details>
 
-### v1.1 Deferred Debt Closure (Active)
+<details>
+<summary>v1.1 Deferred Debt Closure (Phases 45-50) - SHIPPED 2026-05-09</summary>
 
-**Milestone Goal:** Close the four open carry-forward issues from v1.0 (i-13 SpringDoc 2.7+, i-8b Spring Boot 4 via Jackson 2 -> 3 migration, i-6b Next 16, i-15 Lighthouse CI + bundle-size + bundle-analyzer) and cut `v1.1.0`. The protected `.github/workflows/**` and `scripts/**` edits required by Phase 49 are pre-approved by the user as part of opening this milestone.
+Full archive: [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md).
 
-Phase outline:
-- Phase 45: springdoc-2.7 - i-13: bump SpringDoc to 2.7+ in `backend/pom.xml`; remove the `OpenApiConfig` `ControllerAdviceBean` workaround; re-run the OpenApi integration tests.
-- Phase 46: jackson-2-to-3-migration - DEFERRED into Phase 47. Static audit at HEAD found four blockers that prevent a Spring Boot 3.5-compatible Jackson 3 source-only intermediate state (no Jackson 3 ObjectMapperBuilderCustomizer in Spring Boot 3.5; no Jackson 3 HttpMessageConverter in Spring Framework 6.2; auto-configured ObjectMapper bean is Jackson 2; 28 integration tests inject the auto-wired Jackson 2 ObjectMapper). The 36-file rewrite moves into Phase 47 (renamed spring-boot-4-with-jackson-3) and lands in the same commit as the Spring Boot 4 BOM bump.
-- Phase 47: spring-boot-4-with-jackson-3 - i-8b (Path B): bump `<spring-boot-starter-parent>` from 3.5.14 to the latest stable 4.x; rewrite all 36 Jackson 2 files (`com.fasterxml.jackson.*` -> `tools.jackson.*`) and the JacksonConfig customizer surface; flip the Prometheus-actuator package import to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus`; audit the Spring Framework 7 / Spring Security 7 / Hibernate 7 / Jakarta EE 11 BOM transitives; pin Netty to 4.2.13.Final via the Spring Boot 4 `<netty.version>` property override (the SB4 BOM ships 4.2.12; this preserves the v1.0 Phase 41 i-14 closure); CI-validate.
-- Phase 48: next-16 - i-6b: bump `next` from `^15.x` to `^16.x` in `frontend/package.json`; rename `frontend/src/middleware.ts` -> `proxy.ts` (or accept the deprecation warning); wrap `frontend/src/app/(auth)/login/page.tsx` in `<Suspense>`; bump `engines.node` to `>=20.9.0`; audit `images.localPatterns` for query-string `src` callers; decide Turbopack vs `--webpack`; regenerate `frontend/pnpm-lock.yaml`.
-- Phase 49: lighthouse-ci - i-15: add `.github/workflows/lighthouse.yml` (protected `.github/workflows/**` edit, user pre-approved); add `scripts/check-bundle-size.mjs` (protected `scripts/**` edit, user pre-approved); add `@next/bundle-analyzer` devDependency to `frontend/package.json`.
-- Phase 50: release-v1-1 - bump `IDENTITY.yaml` to 1.1.0 (lockstep `package.json` + derived manifests); rotate `CHANGELOG.md` `## [Unreleased]` -> `## [1.1.0] - <date>`; commit; tag `v1.1.0` (no push).
+- [x] Phase 45: springdoc-2.7-bump (1/1 plan) - completed 2026-05-09
+- [x] Phase 46: jackson-2-to-3-migration (1/1 plan, DEFERRED-INTO-47) - completed 2026-05-09
+- [x] Phase 47: spring-boot-4-with-jackson-3 (1/1 plan) - completed 2026-05-09
+- [x] Phase 48: next-16 (1/1 plan) - completed 2026-05-09
+- [x] Phase 49: lighthouse-ci (1/1 plan) - completed 2026-05-09
+- [x] Phase 50: release-v1-1 (1/1 plan) - completed 2026-05-09
+
+</details>
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order. v1.1 starts at Phase 45.
+Phases execute in numeric order. v1.1 closed at Phase 50.
 
 | Phase                       | Milestone | Plans | Status      | Completed  |
 | --------------------------- | --------- | ----- | ----------- | ---------- |
@@ -113,4 +115,4 @@ Phases execute in numeric order. v1.1 starts at Phase 45.
 | 21-30 (v0.5 scope)          | v0.5      | 19/19 | Complete    | 2026-05-09 |
 | 31-37 (v0.6 scope)          | v0.6      | 11/11 | Complete    | 2026-05-09 |
 | 38-44 (v1.0 scope)          | v1.0      | 9/9   | Complete    | 2026-05-09 |
-| 45-50 (v1.1 scope)          | v1.1      | 0/?   | Active      | -          |
+| 45-50 (v1.1 scope)          | v1.1      | 6/6   | Complete    | 2026-05-09 |
