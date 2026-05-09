@@ -206,6 +206,8 @@ delegates:
 
 - **Backup setup details (restic, offsite responsibility):**
   [`BACKUP.md`](BACKUP.md).
+- **Backup-restore drill (operator-runnable verification):**
+  [`BACKUP_RESTORE_DRILL.md`](BACKUP_RESTORE_DRILL.md).
 - **Health endpoints, structured logs, Prometheus metrics:**
   [`OBSERVABILITY.md`](OBSERVABILITY.md).
 - **Per-version operator upgrade steps:** [`MIGRATION.md`](MIGRATION.md).
