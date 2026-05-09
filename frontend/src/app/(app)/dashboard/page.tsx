@@ -19,6 +19,7 @@ import type { SessionDetail, WorkoutDay } from "@/lib/api/schemas";
 import { getTodayIsoDayOfWeek } from "@/lib/time/today";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { InstallPromptCard } from "@/components/install-prompt-card";
 import { PrToast } from "@/components/pr-toast";
 import { PushPermissionCard } from "@/components/push-permission-card";
 import { WeeklySummaryCard } from "@/components/dashboard/weekly-summary-card";
@@ -73,6 +74,7 @@ export default function DashboardPage() {
   if (active) {
     return (
       <div className="space-y-4">
+        <InstallPromptCard />
         <Card className="space-y-4">
           <div className="space-y-1">
             <CardTitle>{t("resumeTitle")}</CardTitle>
@@ -104,6 +106,7 @@ export default function DashboardPage() {
   if (plan && todayDay) {
     return (
       <div className="space-y-4">
+        <InstallPromptCard />
         <Card className="space-y-4">
           <div className="space-y-1">
             <CardDescription>{t("todayLabel")}</CardDescription>
@@ -133,6 +136,7 @@ export default function DashboardPage() {
   if (plan) {
     return (
       <div className="space-y-4">
+        <InstallPromptCard />
         <Card>
           <CardTitle>{t("restDay")}</CardTitle>
         </Card>
@@ -147,6 +151,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4">
+      <InstallPromptCard />
       <Card className="space-y-3">
         <CardDescription>{t("noPlan")}</CardDescription>
         <Button asChild variant="outline">
