@@ -8,20 +8,3 @@
 # pnpm overrides because Next compiles its own copy at npm-publish time.
 # Tracked: ISSUES.md i-6 (next 15 -> 16 bump deferred to v0.5).
 CVE-2026-33671
-
-# CVE-2026-42577: Netty epoll transport RST denial of service
-#
-# Affected artifact: io.netty:netty-transport-native-epoll
-# Current version: 4.1.133.Final (via Spring Boot 3.5.x BOM)
-# Fix version: 4.2.13.Final (no 4.1.x backport published)
-#
-# Justification:
-# - This application uses Spring MVC on Tomcat (servlet stack), not WebFlux / Reactor Netty.
-# - The netty-transport-native-epoll artifact is on the classpath transitively but never
-#   touched by request-handling or outbound HTTP code paths in this app.
-# - Bumping Netty to the 4.2.x major line creates Spring Boot 3.5.x compatibility risk
-#   that is out of scope for a v0.5.0 hotfix.
-# - Tracked for follow-up bump in v0.6 Phase 41 (security-hardening) as ISSUES.md i-14.
-#
-# Suppression entered: 2026-05-09 with v0.5.0 release.
-CVE-2026-42577
