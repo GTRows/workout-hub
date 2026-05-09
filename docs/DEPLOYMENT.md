@@ -74,6 +74,43 @@ curl -k https://localhost/actuator/health
 
 Browsers will flag the cert as untrusted; that is expected.
 
+## Web Push & Reminders
+
+WorkoutHub ships a server-side reminder pipeline (workout, weight, supplement)
+that delivers Web Push notifications to subscribed devices. To enable it:
+
+1. Generate a VAPID keypair (Node 22 is already available as a build-time dep):
+
+   ```sh
+   npx web-push generate-vapid-keys
+   ```
+
+2. Set the resulting keys in your `.env`:
+
+   ```
+   APP_PUSH_VAPID_PUBLIC_KEY=<public key>
+   APP_PUSH_VAPID_PRIVATE_KEY=<private key>
+   APP_PUSH_VAPID_SUBJECT=mailto:you@example.com
+   ```
+
+3. Pick the reminder cron expressions (Spring 6-field, second-precision):
+
+   ```
+   APP_REMINDERS_WORKOUT_CRON=0 0 8 * * *
+   APP_REMINDERS_WEIGHT_CRON=0 0 7 * * *
+   APP_REMINDERS_SUPPLEMENT_CRON=0 * * * * *
+   ```
+
+   Use a single dash `-` to disable any trigger.
+
+4. Restart the backend. Each authenticated user can verify their device is
+   wired by visiting `/profile -> Notifications -> Send test notification`.
+
+Without VAPID keys configured the system falls back to a logging dispatcher:
+the cron triggers still run and emit
+`notifications.LoggingNotificationDispatcher` log lines so operators can
+confirm the schedule is firing before flipping the keys on.
+
 ## Rate limits
 
 `/api/auth/*` is rate-limited to 10 req/min per client IP with a 5-burst tolerance (see `limit_req_zone auth_rl`). Responses beyond that return `429 Too Many Requests`.
