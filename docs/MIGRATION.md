@@ -262,6 +262,75 @@ schema-additive-only and reversible without data loss.
 
 ---
 
+## v1.0.0
+
+v1.0 release-hardening cycle. Phases 38-44 deliver e2e tests (38),
+testcontainers 1.x -> 2.x (39, closes i-7), framework-majors re-deferral
+(40, i-5 next-intl 4 shipped; i-6 / i-8 deferred as i-6b / i-8b), security
+hardening (41, Netty 4.2.13.Final closing i-14 plus refresh-token /
+brute-force / rate-limit audit lock-in), documentation completion (42,
+DATA_SCHEMA.md plus API / DEPLOYMENT / README refresh), the backup-restore
+drill runbook (43, BACKUP_RESTORE_DRILL.md), and the v1.0.0 release cut
+(44). Operator-visible surface is limited to a single runtime-dependency
+bump (Netty 4.1.133.Final -> 4.2.13.Final) and a new documentation
+deliverable. No env vars, no schema migrations, no compose-topology
+changes.
+
+### Required env var changes
+
+No new env vars. No removed env vars. No env-default changes. The v0.4.0 env surface carries forward through v0.5.0, v0.6.0, and v1.0.0.
+
+### Schema and data migration
+
+No new schema. The Flyway migration set ends at V28 (`rest_timer_schedules`,
+shipped in v0.4.0). `spring.jpa.hibernate.ddl-auto: validate` continues to
+gate schema drift.
+
+### Compose / runtime changes
+
+- Netty bumped from `4.1.133.Final` (v0.5.0 / v0.6.0) to `4.2.13.Final`
+  via the `<netty.version>` override in `backend/pom.xml`. Closes
+  CVE-2026-42577 (epoll RST DoS). API-stable for this codebase's
+  consumers (Spring MVC + Tomcat; the only Netty consumer is
+  `async-http-client:2.12.4` for outbound web push). The `.trivyignore`
+  suppression for CVE-2026-42577 is removed in the same commit.
+- No compose-topology change. The opt-in `pg_dump` sidecar profile
+  (introduced in v0.3.0) is unchanged.
+- No image registry change. Multi-arch publish to
+  `ghcr.io/gtrows/workouthub-{backend,frontend}:1.0.0` (amd64 + arm64).
+
+### One-shot commands
+
+No one-shot commands required. Standard two-step upgrade:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+After upgrade, run the backup-restore drill
+([`BACKUP_RESTORE_DRILL.md`](BACKUP_RESTORE_DRILL.md)) to confirm your
+backup posture survived. Recommended cadence is quarterly; post-upgrade
+is a natural drill trigger.
+
+### Rollback
+
+```bash
+# Revert the merge in your deployment repo, then redeploy v0.6.0.
+git revert <merge-sha>
+
+# Optional: take a fresh pg_dump after rollback.
+docker compose exec db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+    --format=custom > ./data/backups/post-rollback-v0.6.0.dump
+```
+
+No data conversion landed; the bind-mount cluster at `./data/postgres/`
+is unchanged. Netty 4.2.x is forward-compatible with 4.1.x consumers, so
+rolling back to a v0.6.x backend image (which uses `4.1.133.Final`) does
+NOT require any classpath fix.
+
+---
+
 ## vNext
 
 `No migration steps.` (or replace with the structure above when the next release lands.)
