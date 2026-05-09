@@ -366,6 +366,102 @@ export const importResultSchema = z.object({
 
 export type ImportResult = z.infer<typeof importResultSchema>;
 
+export const fullExportUserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string(),
+  displayName: z.string(),
+  heightCm: z.number().int().nullable(),
+  weightKg: z.number().nullable(),
+  birthDate: z.string().nullable(),
+  gender: z.string().nullable(),
+  healthNotes: z.string().nullable(),
+  goals: z.string().nullable(),
+});
+
+export const fullExportDayExerciseSchema = z.object({
+  id: z.string().uuid(),
+  exerciseId: z.string().uuid().nullable(),
+  orderIndex: z.number().int(),
+  targetSets: z.number().int(),
+  targetRepsMin: z.number().int().nullable(),
+  targetRepsMax: z.number().int().nullable(),
+  targetWeightKg: z.number().nullable(),
+  restSeconds: z.number().int().nullable(),
+  notes: z.string().nullable(),
+});
+
+export const fullExportDaySchema = z.object({
+  id: z.string().uuid(),
+  dayOfWeek: z.number().int(),
+  name: z.string(),
+  focus: z.string(),
+  estimatedDurationMin: z.number().int().nullable(),
+  exercises: z.array(fullExportDayExerciseSchema),
+});
+
+export const fullExportPlanSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  active: z.boolean(),
+  days: z.array(fullExportDaySchema),
+});
+
+export const fullExportSetSchema = z.object({
+  id: z.string().uuid(),
+  exerciseId: z.string().uuid().nullable(),
+  setNumber: z.number().int(),
+  repsDone: z.number().int(),
+  weightKg: z.number().nullable(),
+  rpe: z.number().int().nullable(),
+  completed: z.boolean(),
+  notes: z.string().nullable(),
+  isPr: z.boolean().nullable(),
+});
+
+export const fullExportSessionSchema = z.object({
+  id: z.string().uuid(),
+  workoutDayId: z.string().uuid().nullable(),
+  startedAt: z.string(),
+  endedAt: z.string().nullable(),
+  notes: z.string().nullable(),
+  mood: z.number().int().nullable(),
+  energyLevel: z.number().int().nullable(),
+  sets: z.array(fullExportSetSchema),
+});
+
+export const fullExportMetricSchema = z.object({
+  id: z.string().uuid(),
+  recordedDate: z.string(),
+  weightKg: z.number().nullable(),
+  bodyFatPercent: z.number().nullable(),
+  waistCm: z.number().nullable(),
+  chestCm: z.number().nullable(),
+  armCm: z.number().nullable(),
+  thighCm: z.number().nullable(),
+  photoUrl: z.string().nullable(),
+  notes: z.string().nullable(),
+});
+
+export const fullExportSupplementSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  dosage: z.string().nullable(),
+  timing: z.string(),
+  active: z.boolean(),
+});
+
+export const fullExportSchema = z.object({
+  schemaVersion: z.number().int(),
+  exportedAt: z.string(),
+  user: fullExportUserSchema,
+  plans: z.array(fullExportPlanSchema),
+  sessions: z.array(fullExportSessionSchema),
+  bodyMetrics: z.array(fullExportMetricSchema),
+  supplements: z.array(fullExportSupplementSchema),
+});
+
+export type FullExport = z.infer<typeof fullExportSchema>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;
