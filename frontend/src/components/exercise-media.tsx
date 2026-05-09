@@ -16,6 +16,11 @@ export function ExerciseMedia({ videoUrl, imageUrl, alt }: Props) {
     const el = ref.current;
     if (!el) return;
     if (typeof IntersectionObserver === "undefined") {
+      // Fallback when the platform IntersectionObserver is unavailable
+      // (test envs, older browsers). External-sync from a platform-feature
+      // probe; eslint-plugin-react-hooks@7's set-state-in-effect rule does
+      // not model this pattern.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
       return;
     }

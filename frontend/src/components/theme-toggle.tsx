@@ -25,6 +25,9 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const stored = readStored();
+    // Reads platform localStorage (browser-only). External-sync pattern
+    // that eslint-plugin-react-hooks@7's set-state-in-effect does not model.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(stored);
     applyTheme(stored);
   }, []);

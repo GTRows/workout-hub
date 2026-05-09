@@ -3,17 +3,18 @@ import { getRegistry } from "@/lib/metrics/registry";
 import { normalizeRoute } from "@/lib/metrics/route-label";
 
 /**
- * Protected-route guard. Any path under the (app) group (dashboard, plan,
+ * Protected-route guard (Next 16 proxy; renamed from middleware in v1.1
+ * Phase 48 to close i-6b). Any path under the (app) group (dashboard, plan,
  * history, exercises, metrics, profile, export, session) is gated: a
  * missing refresh-token cookie sends the caller to /login with a ?next=
  * redirect preserved.
  *
  * We check a cookie (set by the client after login) rather than reading
- * localStorage because middleware runs on the edge and has no DOM access.
+ * localStorage because the proxy runs on the edge and has no DOM access.
  * The client mirrors the refresh token into a cookie on login; the
  * in-memory access token continues to drive actual API calls.
  *
- * Per Phase 35, the middleware is also the recording point for the
+ * Per Phase 35, the proxy is also the recording point for the
  * frontend HTTP metrics registry. Every matched request is timed and
  * counted; `/api/metrics` is excluded so the scrape itself does not
  * pollute the histogram.
@@ -52,7 +53,7 @@ function inferStatus(res: NextResponse): number {
   return 200;
 }
 
-export function middleware(req: NextRequest): NextResponse {
+export function proxy(req: NextRequest): NextResponse {
   const start = Date.now();
   const res = guardOrPassThrough(req);
   const duration = Date.now() - start;

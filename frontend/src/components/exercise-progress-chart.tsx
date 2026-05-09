@@ -91,7 +91,7 @@ export function ExerciseProgressChart({ exerciseId }: { exerciseId: string }) {
       day: "numeric",
     }).format(new Date(value));
 
-  const TooltipContent = ({ active, label, payload }: CustomTooltipProps) => {
+  const renderTooltip = ({ active, label, payload }: CustomTooltipProps) => {
     if (!active || !payload || payload.length === 0) return null;
     const point = payload[0]?.payload;
     if (!point) return null;
@@ -126,7 +126,7 @@ export function ExerciseProgressChart({ exerciseId }: { exerciseId: string }) {
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis dataKey="x" tickFormatter={tickFormatter} />
             <YAxis domain={["auto", "auto"]} />
-            <Tooltip content={<TooltipContent />} />
+            <Tooltip content={renderTooltip} />
             <Line
               type="monotone"
               dataKey="oneRm"

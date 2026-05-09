@@ -20,6 +20,10 @@ export function PushPermissionCard() {
   const [status, setStatus] = useState<Status>("unsupported");
 
   useEffect(() => {
+    // Reads platform `Notification.permission` (browser-only). External-sync
+    // pattern that eslint-plugin-react-hooks@7's set-state-in-effect does
+    // not model.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus(readPermission());
   }, []);
 

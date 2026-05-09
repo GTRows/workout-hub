@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
 import { login as loginEndpoint } from "@/lib/api/endpoints";
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function LoginPage() {
+function LoginForm() {
   const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -110,5 +110,26 @@ export default function LoginPage() {
         {t("submit")}
       </Button>
     </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          role="status"
+          aria-busy="true"
+          className="space-y-3 rounded-lg border border-border bg-background p-6 shadow-sm"
+        >
+          <div className="h-7 w-1/3 animate-pulse rounded bg-muted" />
+          <div className="h-10 w-full animate-pulse rounded bg-muted" />
+          <div className="h-10 w-full animate-pulse rounded bg-muted" />
+          <div className="h-10 w-full animate-pulse rounded bg-muted" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

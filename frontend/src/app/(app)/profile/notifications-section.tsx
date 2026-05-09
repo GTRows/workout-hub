@@ -27,6 +27,10 @@ export function NotificationsSection() {
 
   useEffect(() => {
     const initial = readStatus();
+    // Reads platform `Notification.permission` (browser-only). External-sync
+    // pattern that eslint-plugin-react-hooks@7's set-state-in-effect rule
+    // does not model.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus(initial);
     if (initial !== "granted") return;
     let cancelled = false;

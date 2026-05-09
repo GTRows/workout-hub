@@ -56,6 +56,11 @@ export function ProfileClient() {
 
   useEffect(() => {
     if (!meQuery.data) return;
+    // Initializes the editable form snapshot from the server-fetched
+    // identity once it lands. External-sync (TanStack Query cache ->
+    // local form draft); eslint-plugin-react-hooks@7's
+    // set-state-in-effect rule does not model this pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm(toForm(meQuery.data));
   }, [meQuery.data]);
 

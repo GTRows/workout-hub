@@ -38,6 +38,10 @@ export function InstallPromptCard() {
   const [dismissed, setDismissed] = useState<boolean>(true);
 
   useEffect(() => {
+    // Reads platform state (localStorage + standalone display mode) the
+    // server cannot know. eslint-plugin-react-hooks@7's set-state-in-effect
+    // rule does not match this external-sync pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDismissed(isDismissed() || isStandalone());
 
     const onBeforeInstall = (e: Event) => {
