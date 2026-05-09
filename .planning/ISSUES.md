@@ -64,66 +64,90 @@ suite in CI.
 **Owner:** aciro
 **Status:** Open
 
-### i-8 — Defer Spring Boot 3.4 -> 4.0 major framework bump (PR #8)
+### i-8b — Defer Spring Boot 4.0.x major bump (successor to i-8)
 
-**PR:** https://github.com/GTRows/workout-hub/pull/8
-**Reason for defer:** Spring Boot 4 brings Servlet 6 / Hibernate 7 / Spring Framework 7 changes. Cannot land in v0.3 self-hosted-contract scope. The Spring Boot 3.4.x line is still actively patched.
+**Context:** i-8 was named "3.4 -> 4.0" but the v1.0 release-hardening
+milestone could not absorb the actual major migration within the original
+single-line-bump budget. The rolled-back 40-01 attempt (commits
+75c3ea1..e49e1dc on 2026-05-09) confirmed three breaking-change surfaces
+that were not foreseen in the original plan: (1) `Jackson2ObjectMapperBuilderCustomizer`
+package relocation from `org.springframework.boot.autoconfigure.jackson` to
+`org.springframework.boot.jackson2.autoconfigure` (trivial import edit;
+affects `JacksonConfig.java`); (2) `PrometheusScrapeEndpoint` +
+`PrometheusOutputFormat` package relocation from
+`org.springframework.boot.actuate.metrics.export.prometheus` to
+`org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus`
+(trivial import edits; affects `PrometheusMetricsController.java`); and
+(3) BLOCKING — Jackson 2 (`com.fasterxml.jackson.*`) is no longer the
+default transitive of `spring-boot-starter-web` under Spring Boot 4 (the
+default is Jackson 3 / `tools.jackson.*` via `spring-boot-jackson`). The
+codebase has 36 files referencing Jackson 2 (`JacksonConfig`,
+`ClaudeSummaryDto.@JsonNaming(SnakeCaseStrategy)`, `AuditLogService`,
+all DTO `@JsonInclude(NON_NULL)` annotations, `WebPushNotificationDispatcher`,
+`GoogleFitParser`, `AppleHealthParser`, etc.). Restoring Jackson 2 compat
+under Spring Boot 4 requires either (a) adding `spring-boot-jackson2` as
+an explicit dependency AND verifying Spring MVC's `HttpMessageConverter`
+selection picks the Jackson 2 `ObjectMapper` (with both Jackson 2 and
+Jackson 3 simultaneously on the classpath), OR (b) migrating all 36
+Jackson 2 usages to Jackson 3 (`tools.jackson.*`). Both paths exceed the
+v1.0 release-hardening single-commit cadence and depend on runtime
+behaviour the local-Maven-gap cannot validate without per-attempt CI
+round-trips. Spring Boot 4.0.6 BOM also ships Spring Framework 7.0.7 /
+Spring Security 7.0.5 / Hibernate 7.2.12.Final / Jakarta EE 11 (Servlet
+6.1.0, Persistence 3.2.0, Validation 3.1.1) and Netty 4.2.12.Final (the
+Netty pin drop side-effect would narrow i-14 to a 4.2.12 -> 4.2.13 micro
+bump, but only when i-8b closes for real).
 
-**Trigger to reopen:** Spring Boot 3.4 EOL OR v0.6 (Operational Maturity) milestone OR a security-driven need.
+**Why deferred:** v1.0 cannot absorb the 36-file Jackson 2 -> 3 migration
+or the spring-boot-jackson2 compat-module runtime probe within the small,
+ship-able, single-commit-and-CI-pass cadence the milestone requires. The
+v1.0 milestone scope is e2e tests (Phase 38), framework patch-level
+hardening (Phase 39 testcontainers; Phase 40 frontend Next 16 +
+next-intl 4), security hardening (Phase 41 i-13 SpringDoc + i-14 Netty
+4.2), docs (Phase 42), backup/restore drill (Phase 43), and v1.0.0
+release (Phase 44). Adding a 36-file Jackson migration to that timeline
+would either compress one of the existing phases or push v1.0.0 by
+multiple working sessions; both are worse than honest deferral.
 
-**v1.0 Phase 40-01 attempt rolled back (2026-05-09):** A Spring Boot
-3.5.14 -> 4.0.6 bump was attempted at commits 75c3ea1..e49e1dc and
-reverted at the next commit. Two Spring Boot 4 surface changes broke
-compilation that the original 40-01 plan did not catch:
+**Trigger to reopen:** Author a fresh plan (likely a dedicated phase
+post-v1.0, or a v1.1 milestone-opening sub-plan) that explicitly chooses
+between the two Jackson-compat paths:
 
-1. **`Jackson2ObjectMapperBuilderCustomizer` package relocation.** Moved
-   from `org.springframework.boot.autoconfigure.jackson` (Spring Boot 3
-   `spring-boot-autoconfigure`) to
-   `org.springframework.boot.jackson2.autoconfigure` (Spring Boot 4
-   `spring-boot-jackson2`). Affects `JacksonConfig.java`. Trivial import
-   line edit.
-2. **`PrometheusScrapeEndpoint` + `PrometheusOutputFormat` package
-   relocation.** Moved from
-   `org.springframework.boot.actuate.metrics.export.prometheus` to
-   `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus`
-   (new `spring-boot-micrometer-metrics` module). Affects
-   `PrometheusMetricsController.java`. Trivial import line edits.
-3. **Jackson 2 vs Jackson 3 default-classpath shift (BLOCKING).** Spring
-   Boot 4 makes Jackson 3 (`tools.jackson.*` package family) the default
-   transitive of `spring-boot-starter-web` via `spring-boot-starter-jackson
-   -> spring-boot-jackson`. The Jackson 2 family (`com.fasterxml.jackson.*`,
-   used by 36 files in this codebase including `JacksonConfig`,
-   `ClaudeSummaryDto.@JsonNaming(SnakeCaseStrategy)`, `AuditLogService`,
-   all `@JsonInclude` annotations on DTOs, `WebPushNotificationDispatcher`,
-   `GoogleFitParser`, `AppleHealthParser`, etc.) is now opt-in via the
-   separate `spring-boot-jackson2` module. The follow-up CI showed
-   `package org.springframework.boot.jackson2.autoconfigure does not exist`
-   even after the import-path fix, because that module is not pulled in
-   transitively by any of the starters this project uses (web, data-jpa,
-   security, validation, actuator).
+1. **Path A (Jackson 2 compat module):** Add `org.springframework.boot:spring-boot-jackson2`
+   to `backend/pom.xml` `<dependencies>`. Bump `<spring-boot-starter-parent>`
+   to the latest stable 4.0.x (or 4.1.x at the time of plan). In a CI
+   probe, confirm Spring MVC's `HttpMessageConverter` chain
+   resolves to the Jackson 2 `ObjectMapper` for application/json
+   (the `MappingJackson2HttpMessageConverter` should still be
+   registered when both Jackson 2 and Jackson 3 are on the classpath).
+   Verify all 36 Jackson 2 callers continue to compile and behave
+   identically. Apply the trivial import-line fixes for the Jackson2-module
+   and Prometheus-actuator relocations.
 
-   Restoring Jackson 2 compatibility under Spring Boot 4 requires either
-   (a) adding `spring-boot-jackson2` as an explicit dependency AND
-   verifying that Spring MVC's `HttpMessageConverter` selection resolves
-   to the Jackson 2 `ObjectMapper` (not Jackson 3 — both will be on the
-   classpath), OR (b) migrating all 36 Jackson 2 usages to Jackson 3
-   (`tools.jackson.*`). Both paths exceed the 10-line follow-up budget
-   the 40-01 plan defined and depend on runtime behaviour that the
-   local-Maven-gap cannot validate without a CI round-trip per attempt.
+2. **Path B (full Jackson 3 migration):** Replace all 36 files'
+   `com.fasterxml.jackson.*` imports with `tools.jackson.*` equivalents.
+   Re-validate `@JsonNaming(SnakeCaseStrategy)`,
+   `@JsonInclude(NON_NULL)`, `@JsonProperty`, `@JsonIgnore`,
+   `@JsonCreator`, `@JsonValue`, custom serializers/deserializers,
+   `ObjectMapper` config under the Jackson 3 API. Re-validate the
+   ClaudeSummaryDto snake_case round-trip (Direction C lock-in) and
+   the Full-Export camelCase posture. Bump
+   `<spring-boot-starter-parent>` to the latest stable 4.0.x or 4.1.x.
+   Apply the trivial import-line fixes for the Jackson2-module
+   relocation (which is moot under Path B because Path B doesn't use
+   Jackson 2) and the Prometheus-actuator relocation.
 
-**Updated trigger to reopen:** Author a fresh 40-01-PLAN that explicitly
-chooses between Jackson-2-compat (add `spring-boot-jackson2` dep + verify
-HttpMessageConverter ObjectMapper selection) and Jackson-3-migration
-(replace 36 files' `com.fasterxml.jackson.*` imports with
-`tools.jackson.*`). The plan must also account for the
-`spring-boot-autoconfigure` -> per-feature module split (Jackson2 +
-micrometer-metrics surfaces verified above; the rest of the codebase
-should be greppable for old-package imports). Spring Boot 4.0.6 BOM
-ships Spring Framework 7.0.7 / Spring Security 7.0.5 / Hibernate
-7.2.12.Final / Jakarta EE 11 (Servlet 6.1.0, Persistence 3.2.0,
-Validation 3.1.1) and Netty 4.2.12.Final (the netty pin drop side-effect
-narrows i-14 to a 4.2.12 -> 4.2.13 micro bump, but only when i-8 closes
-for real).
+The plan author for either path must also account for the
+`spring-boot-autoconfigure` -> per-feature module split documented in
+i-8's enriched body (Jackson2 + micrometer-metrics surfaces verified
+above; the rest of the codebase should be greppable for old-package
+imports). The Spring Framework 7 / Spring Security 7 / Hibernate 7 /
+Jakarta EE 11 BOM transitives also flow in via the bump and need a
+fresh DSL audit; the original 40-01 plan (now superseded) captured
+that audit and can be reused as a starting reference.
+
+**Owner:** aciro
+**Status:** Open
 
 ### i-12: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport returns 500
 
@@ -248,3 +272,66 @@ start pattern) is compatibility-preserved across the 1.20 -> 1.21 hop. All
 inherit from AbstractIntegrationTest with zero direct Testcontainers imports
 and required no edits. The eventual 2.x major bump is re-deferred as
 follow-up issue i-7b, triggered by the upstream Testcontainers 2.0.0 GA.*
+
+### i-8 — Defer Spring Boot 3.4 -> 4.0 major framework bump (PR #8)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/8
+**Reason for defer:** Spring Boot 4 brings Servlet 6 / Hibernate 7 / Spring Framework 7 changes. Cannot land in v0.3 self-hosted-contract scope. The Spring Boot 3.4.x line is still actively patched.
+
+**Trigger to reopen:** Spring Boot 3.4 EOL OR v0.6 (Operational Maturity) milestone OR a security-driven need.
+
+**v1.0 Phase 40-01 attempt rolled back (2026-05-09):** A Spring Boot
+3.5.14 -> 4.0.6 bump was attempted at commits 75c3ea1..e49e1dc and
+reverted at the next commit. Two Spring Boot 4 surface changes broke
+compilation that the original 40-01 plan did not catch:
+
+1. **`Jackson2ObjectMapperBuilderCustomizer` package relocation.** Moved
+   from `org.springframework.boot.autoconfigure.jackson` (Spring Boot 3
+   `spring-boot-autoconfigure`) to
+   `org.springframework.boot.jackson2.autoconfigure` (Spring Boot 4
+   `spring-boot-jackson2`). Affects `JacksonConfig.java`. Trivial import
+   line edit.
+2. **`PrometheusScrapeEndpoint` + `PrometheusOutputFormat` package
+   relocation.** Moved from
+   `org.springframework.boot.actuate.metrics.export.prometheus` to
+   `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus`
+   (new `spring-boot-micrometer-metrics` module). Affects
+   `PrometheusMetricsController.java`. Trivial import line edits.
+3. **Jackson 2 vs Jackson 3 default-classpath shift (BLOCKING).** Spring
+   Boot 4 makes Jackson 3 (`tools.jackson.*` package family) the default
+   transitive of `spring-boot-starter-web` via `spring-boot-starter-jackson
+   -> spring-boot-jackson`. The Jackson 2 family (`com.fasterxml.jackson.*`,
+   used by 36 files in this codebase including `JacksonConfig`,
+   `ClaudeSummaryDto.@JsonNaming(SnakeCaseStrategy)`, `AuditLogService`,
+   all `@JsonInclude` annotations on DTOs, `WebPushNotificationDispatcher`,
+   `GoogleFitParser`, `AppleHealthParser`, etc.) is now opt-in via the
+   separate `spring-boot-jackson2` module. The follow-up CI showed
+   `package org.springframework.boot.jackson2.autoconfigure does not exist`
+   even after the import-path fix, because that module is not pulled in
+   transitively by any of the starters this project uses (web, data-jpa,
+   security, validation, actuator).
+
+   Restoring Jackson 2 compatibility under Spring Boot 4 requires either
+   (a) adding `spring-boot-jackson2` as an explicit dependency AND
+   verifying that Spring MVC's `HttpMessageConverter` selection resolves
+   to the Jackson 2 `ObjectMapper` (not Jackson 3 — both will be on the
+   classpath), OR (b) migrating all 36 Jackson 2 usages to Jackson 3
+   (`tools.jackson.*`). Both paths exceed the 10-line follow-up budget
+   the 40-01 plan defined and depend on runtime behaviour that the
+   local-Maven-gap cannot validate without a CI round-trip per attempt.
+
+**Updated trigger to reopen:** Author a fresh 40-01-PLAN that explicitly
+chooses between Jackson-2-compat (add `spring-boot-jackson2` dep + verify
+HttpMessageConverter ObjectMapper selection) and Jackson-3-migration
+(replace 36 files' `com.fasterxml.jackson.*` imports with
+`tools.jackson.*`). The plan must also account for the
+`spring-boot-autoconfigure` -> per-feature module split (Jackson2 +
+micrometer-metrics surfaces verified above; the rest of the codebase
+should be greppable for old-package imports). Spring Boot 4.0.6 BOM
+ships Spring Framework 7.0.7 / Spring Security 7.0.5 / Hibernate
+7.2.12.Final / Jakarta EE 11 (Servlet 6.1.0, Persistence 3.2.0,
+Validation 3.1.1) and Netty 4.2.12.Final (the netty pin drop side-effect
+narrows i-14 to a 4.2.12 -> 4.2.13 micro bump, but only when i-8 closes
+for real).
+
+*Closed by Phase 40 Plan 01 (replan iteration 2/2): the Spring Boot 4 single-line bump within the original i-8 budget proved infeasible after the rolled-back 3.5.14 -> 4.0.6 attempt surfaced the Jackson 2 vs Jackson 3 default-classpath shift, the Jackson2-module package relocation, and the Prometheus-actuator-endpoint package relocation. The runtime stays pinned at Spring Boot 3.5.14 (the tail of the 3.5.x patch line on Maven Central as of 2026-05-09; metadata `<lastUpdated>` `20260423155822`). The major-version jump is re-deferred as follow-up issue i-8b with the executor's enriched analysis carried forward verbatim. v1.0 ships on Spring Boot 3.5.x; no in-line CVE bump on the 3.5 line is available within this plan because 3.5.14 is the published patch tail. Mirror precedent: Phase 39-01 / i-7 -> i-7b deferral playbook.*
