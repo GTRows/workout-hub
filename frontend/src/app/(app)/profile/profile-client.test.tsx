@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactElement } from "react";
@@ -38,6 +38,13 @@ const messages = {
     dailyCarbsGGoal: "Carbs (g/day)",
     dailyFatGGoal: "Fat (g/day)",
     logoutHeading: "Account",
+    loadError: "Could not load your profile.",
+    retry: "Retry",
+  },
+  errors: {
+    api: {
+      generic: "Something went wrong. Please try again.",
+    },
   },
 };
 
@@ -100,6 +107,9 @@ describe("ProfileClient", () => {
       vi.fn(async (input: string | URL | Request) => {
         const url = typeof input === "string" ? input : input.toString();
         if (url.endsWith("/api/users/me")) return jsonResponse(200, userMe());
+        if (url.endsWith("/api/supplements")) return jsonResponse(200, []);
+        if (url.includes("/api/users/me/webhook-tokens"))
+          return jsonResponse(200, []);
         throw new Error("unexpected fetch: " + url);
       })
     );
@@ -131,6 +141,12 @@ describe("ProfileClient", () => {
             200,
             userMe({ displayName: "Fatih A", profile: { ...userMe().profile, heightCm: 182 } })
           );
+        }
+        if (url.endsWith("/api/supplements") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.includes("/api/users/me/webhook-tokens") && method === "GET") {
+          return jsonResponse(200, []);
         }
         throw new Error("unexpected fetch: " + url + " " + method);
       })
@@ -171,6 +187,12 @@ describe("ProfileClient", () => {
             path: "/api/users/me",
           });
         }
+        if (url.endsWith("/api/supplements") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.includes("/api/users/me/webhook-tokens") && method === "GET") {
+          return jsonResponse(200, []);
+        }
         throw new Error("unexpected fetch: " + url + " " + method);
       })
     );
@@ -184,6 +206,121 @@ describe("ProfileClient", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await screen.findByRole("alert");
-    expect(screen.getByRole("alert")).toHaveTextContent("Save failed");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Something went wrong. Please try again."
+    );
+  });
+
+  it("renders accessible names for every form input and the form region", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/users/me")) return jsonResponse(200, userMe());
+        if (url.endsWith("/api/supplements")) return jsonResponse(200, []);
+        if (url.includes("/api/users/me/webhook-tokens"))
+          return jsonResponse(200, []);
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<ProfileClient />);
+
+    await waitFor(() =>
+      expect(screen.getByLabelText(/display name/i)).toHaveValue("Fatih")
+    );
+
+    const form = screen.getByRole("form", { name: /profile/i });
+    expect(form).toBeInTheDocument();
+
+    const inputs = within(form).getAllByRole("textbox");
+    for (const inp of inputs) {
+      expect(inp).toHaveAccessibleName();
+    }
+    const numberInputs = within(form).getAllByRole("spinbutton");
+    for (const inp of numberInputs) {
+      expect(inp).toHaveAccessibleName();
+    }
+  });
+
+  it("shows an inline error banner with retry when fetching the profile fails", async () => {
+    let attempt = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/supplements")) return jsonResponse(200, []);
+        if (url.includes("/api/users/me/webhook-tokens"))
+          return jsonResponse(200, []);
+        attempt += 1;
+        if (attempt === 1) {
+          return jsonResponse(500, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 500,
+            error: "internal",
+            message: "boom",
+            path: "/api/users/me",
+          });
+        }
+        return jsonResponse(200, userMe());
+      })
+    );
+
+    renderClient(<ProfileClient />);
+
+    await screen.findByRole("alert");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Could not load your profile."
+    );
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() =>
+      expect(screen.getByLabelText(/display name/i)).toHaveValue("Fatih")
+    );
+  });
+
+  it("uses the typed-error helper for the save failure flash", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.endsWith("/api/users/me") && method === "GET") {
+          return jsonResponse(200, userMe());
+        }
+        if (url.endsWith("/api/users/me") && method === "PUT") {
+          return jsonResponse(400, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 400,
+            error: "bad_request",
+            message: "rejected",
+            code: "FUTURE_CODE",
+            path: "/api/users/me",
+          });
+        }
+        if (url.endsWith("/api/supplements") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.includes("/api/users/me/webhook-tokens") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<ProfileClient />);
+    await waitFor(() =>
+      expect(screen.getByLabelText(/display name/i)).toHaveValue("Fatih")
+    );
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await screen.findByRole("alert");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Something went wrong. Please try again."
+    );
   });
 });
