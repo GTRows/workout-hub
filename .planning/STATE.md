@@ -3,13 +3,14 @@
 ## Current Position
 
 Milestone: v1.1 Deferred Debt Closure (ACTIVE)
-Phase: 45 of 50 (springdoc-2.7-bump) - SHIPPED 2026-05-09
-Plan: 45-01 springdoc-2.7-bump - shipped 2026-05-09
-Status: v1.1 Phase 45 shipped: bumped SpringDoc 2.6.0 -> 2.8.17 and removed the v0.4 `ControllerAdviceBean` workaround (deleted `apiErrorSchemaCustomizer` `@Bean` from `OpenApiConfig.java` and `springdoc.override-with-generic-response: false` from `application.yml`). i-13 closed. Phase 46 (jackson-2-to-3-migration) is the next phase to plan via `/gsd:plan-phase 46`. Five remaining phases scoped: 46 jackson-2-to-3-migration (preparatory for SB4), 47 spring-boot-4 (closes i-8b), 48 next-16 (closes i-6b), 49 lighthouse-ci (closes i-15), 50 release-v1-1 (cut v1.1.0).
-Last activity: 2026-05-09 - Phase 45 Plan 01 shipped (i-13 closed). Three atomic commits per GSD protocol: `4889375` chore(deps) bump springdoc to 2.8.17; `1140faa` refactor(api) remove ControllerAdviceBean OpenApiCustomizer; `f3be469` refactor(api) drop override-with-generic-response. ISSUES.md moves i-13 from Open to Closed with a citation block; STATE.md Project Reference bullet, Issue-to-Phase Mapping, and Locked-in Decisions all updated to reflect the post-bump posture; SpringDoc 2.6.0 lock-in replaced with the 2.8.17 lock-in. CI is the authoritative gate (local Maven gap on the Windows dev host); `OpenApiSurfaceIntegrationTest` (5 tests) is the regression gate.
+Phase: 46 of 50 (jackson-2-to-3-migration) - DEFERRED 2026-05-09
+Phase: 47 of 50 (spring-boot-4-with-jackson-3) - NEXT (consolidates Phase 46 + 47 scope per Phase 46-01 deferral).
+Plan: 46-01 jackson-2-to-3-migration - shipped 2026-05-09 (deferral; no source / pom edits; consolidates 36-file Jackson rewrite into Phase 47)
+Status: v1.1 Phase 46 deferred: the 36-file Jackson 2 -> 3 source-only rewrite consolidates into Phase 47 (renamed spring-boot-4-with-jackson-3) because Spring Boot 3.5.14 has no Jackson 3 auto-configuration / HttpMessageConverter / ObjectMapper bean to host an intermediate state. i-8b updated with the consolidation note; ROADMAP.md Phase 46 + 47 lines updated; no source / pom edits in Phase 46. Phase 47 (spring-boot-4-with-jackson-3) is the next phase to plan via `/gsd:plan-phase 47`.
+Last activity: 2026-05-09 - Phase 46 Plan 01 shipped (deferral; consolidates Jackson 3 migration into Phase 47).
 
-Progress: v1.1 ###_________________   16% (1/6 plans complete; 1/6 phases shipped)
-          v1.1 - Phase 46 (jackson-2-to-3-migration) NEXT
+Progress: v1.1 ######_______________   33% (2/6 plans complete; 2/6 phases shipped)
+          v1.1 - Phase 47 (spring-boot-4-with-jackson-3) NEXT
 
 ## Project Reference
 
@@ -56,6 +57,7 @@ Full decision logs live in `.planning/milestones/v0.3-ROADMAP.md`, `.planning/mi
 - Refresh-token hashing posture (v1.0 Phase 41 lock-in): SHA-256 hex over the full JWT bytes via `MessageDigest.getInstance("SHA-256")` + `HexFormat.of().formatHex(...)`, persisted in `refresh_tokens.token_hash VARCHAR(128) UNIQUE` (V7 migration). The 2026-05-04 `pending_ci_fixes.md` "refresh-token hash collisions" entry was superseded — those tests pass on `96d81b0`. No source change needed; tightening to bcrypt/Argon2 was rejected because refresh tokens carry full JWT entropy at issuance and the hash is a fingerprint for DB lookup, not a password derivation.
 - Brute-force lockout posture (v1.0 Phase 41 lock-in): `BruteForceGuard` enforces 10 failures / 15-minute window / 60-minute lockout, throws HTTP 423 via `ResponseStatusException(HttpStatus.LOCKED, ...)`, records every login outcome in `login_attempts` (V15 migration) via `@Transactional(propagation = REQUIRES_NEW)`. `BruteForceLockoutIntegrationTest` covers under-threshold pass, at-threshold lock, post-cooldown unlock — all green on origin/main. Threshold-tightening + (email, IP)-keyed lockout were rejected as v1.0 scope creep.
 - Rate-limiting posture (v1.0 Phase 41 lock-in): zero generic in-process rate limiter; the Self-Hosted Contract delegates rate limiting to the operator's reverse proxy. The only in-process throttle is `BruteForceGuard` (per-email login throttle). Adding a generic rate limiter was rejected because it would duplicate operator-layer enforcement and contradict the contract's "never assume public exposure" posture (tailnet-only deployment is the v0.3 lock-in).
+- Jackson 3 migration posture (v1.1 Phase 46 lock-in): consolidated into Phase 47 (renamed `spring-boot-4-with-jackson-3`). Static audit at HEAD (commit `931cb69`, 2026-05-09) found four Spring Boot 3.5 blockers that prevent a Jackson 3 source-only intermediate state: (1) no `JacksonObjectMapperBuilderCustomizer` for Jackson 3 (only `Jackson2ObjectMapperBuilderCustomizer` exists in Spring Boot 3.5); (2) Spring Framework 6.2 ships only the Jackson 2 `HttpMessageConverter` family; (3) auto-configured `ObjectMapper` `@Bean` is Jackson 2 (would break `tools.jackson.databind.ObjectMapper` injection sites); (4) all 28 integration tests `@Autowired` the Jackson 2 bean. Path B (full Jackson 3 migration) is the closure path; Path A (`spring-boot-jackson2` compat module) is foreclosed. Phase 47 lands the 36-file rewrite + the SB4 BOM bump in a single commit / single CI round-trip.
 
 ### v0.6 Findings (archived)
 
@@ -118,12 +120,24 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
   default-classpath shift surfaced; runtime stays pinned at Spring Boot
   3.5.14 (tail of the 3.5.x line on Maven Central). Successor work tracked
   as i-8b. v0.6 stayed on Spring Boot 3.5.x.
-- i-8b (NEW in v1.0 Phase 40 Plan 01): residual Spring Boot 4.0.x major
-  bump deferred until either (Path A) `spring-boot-jackson2` compat-module
-  runtime probe completes successfully OR (Path B) Jackson 2 -> Jackson 3
-  codebase migration sub-plan absorbs the 36-file refactor; whichever
-  path reopens, also applies trivial Jackson2-module + Prometheus-actuator
-  package-relocation import fixes.
+- i-8b (NEW in v1.0 Phase 40 Plan 01; consolidated in v1.1 Phase 46 Plan 01):
+  residual Spring Boot 4.0.x major bump locked onto Path B (full Jackson 3
+  migration). Phase 46 (jackson-2-to-3-migration) deferred its 36-file
+  source-only rewrite into Phase 47 (renamed spring-boot-4-with-jackson-3)
+  because Spring Boot 3.5.14 has no Jackson 3 auto-configuration surface to
+  host an intermediate state (no `JacksonObjectMapperBuilderCustomizer`; no
+  Jackson 3 `HttpMessageConverter` on Spring Framework 6.2; auto-configured
+  `ObjectMapper` bean is Jackson 2; all 28 integration tests inject the
+  Jackson 2 bean). Path A (`spring-boot-jackson2` compat module) foreclosed.
+  Phase 47 closure plan must (a) bump `<spring-boot-starter-parent>` 3.5.14
+  -> 4.0.x in `backend/pom.xml`; (b) rewrite all 36 Jackson 2 files
+  (`com.fasterxml.jackson.*` -> `tools.jackson.*`); (c) flip the
+  `JacksonConfig` `Jackson2ObjectMapperBuilderCustomizer` to the Spring
+  Boot 4 Jackson 3 customizer surface; (d) flip the Prometheus-actuator
+  package import to `org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus`;
+  (e) audit Spring Framework 7 / Spring Security 7 / Hibernate 7 / Jakarta
+  EE 11 BOM transitives; (f) preserve the Netty 4.2.13.Final pin via
+  `<netty.version>` property override (the SB4 BOM ships 4.2.12).
 - i-9: closed by v0.6 Phase 37 (structured-logging-test-fix).
 - i-13: closed by v1.1 Phase 45 Plan 01 (springdoc-2.7-bump). Bumped `<springdoc.version>` from `2.6.0` to `2.8.17` in `backend/pom.xml` (commit 4889375); deleted the `apiErrorSchemaCustomizer` `OpenApiCustomizer` `@Bean` from `OpenApiConfig.java` (33 lines + 6 orphan imports; commit 1140faa); deleted the `springdoc.override-with-generic-response: false` line + comment block from `application.yml` (commit f3be469). SpringDoc 2.7.0 patches the removed Spring Framework 6.2 `ControllerAdviceBean(Object)` constructor; the framework default `GenericResponseService` scan now surfaces ApiError schemas without the manual customizer. CI gate validates `mvn verify` green and `OpenApiSurfaceIntegrationTest` (5 tests) green. Closes the v0.4 fix bundle (commit `c1b95f7`) workaround.
 - i-14: closed by v1.0 Phase 41 Plan 01 (security-hardening). Bumped `<netty.version>` from `4.1.133.Final` to `4.2.13.Final` in `backend/pom.xml` (commit 99f0fb4); removed `CVE-2026-42577` suppression block from `.trivyignore` (commit 5c1cd42). Static audit at HEAD confirmed zero `WebFlux` / `reactor.netty` / `spring-boot-starter-webflux` matches under `backend/`; the only Netty consumer is `async-http-client:2.12.4` for outbound web push (not on the request-handling path). CI is the authoritative gate (local Maven unavailable on the dev host); `mvn verify` and the trivy image-scan job validate Spring Boot 3.5.14 + Netty 4.2.x runtime compatibility on push. Concludes the trivy-suppression carry-forward debt from v0.5.0 + v0.6.0.

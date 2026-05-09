@@ -283,8 +283,23 @@ Jakarta EE 11 BOM transitives also flow in via the bump and need a
 fresh DSL audit; the original 40-01 plan (now superseded) captured
 that audit and can be reused as a starting reference.
 
+**v1.1 Phase 46 -> 47 consolidation (2026-05-09):** Phase 46 was scoped to do
+the 36-file Jackson 3 source-only rewrite as a preparatory step for Phase 47.
+Static audit at HEAD (commit 931cb69) found four blockers that prevent a
+Spring Boot 3.5-compatible Jackson 3 source-only intermediate state: (1)
+Spring Boot 3.5 has no Jackson 3 `ObjectMapperBuilderCustomizer` (the codebase
+uses `Jackson2ObjectMapperBuilderCustomizer`); (2) Spring Framework 6.2 does
+not ship a Jackson 3 `HttpMessageConverter` (lands in Spring Framework 7);
+(3) Spring Boot 3.5's auto-configured `ObjectMapper` `@Bean` is Jackson 2,
+so flipped imports would fail bean injection; (4) all 28 integration tests
+inject the auto-wired Jackson 2 `ObjectMapper`. Therefore the 36-file
+rewrite consolidates into Phase 47 in a single commit alongside the
+`<spring-boot-starter-parent>` 3.5.14 -> 4.0.x bump. Phase 47 renamed to
+`spring-boot-4-with-jackson-3`. Path A (`spring-boot-jackson2` compat module)
+is foreclosed; Path B (full Jackson 3 migration) is the closure path.
+
 **Owner:** aciro
-**Status:** Open
+**Status:** Open (consolidated into Phase 47, renamed spring-boot-4-with-jackson-3)
 
 ### i-15: Lighthouse CI workflow + bundle-size enforcement script (perf-budget gating)
 
