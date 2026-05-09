@@ -490,6 +490,26 @@ export const pushSubscribeRequestSchema = z.object({
 
 export type PushSubscribeRequest = z.infer<typeof pushSubscribeRequestSchema>;
 
+export const restTimerScheduleRequestSchema = z.object({
+  seconds: z.number().int().min(1).max(3600),
+  title: z.string().min(1).max(500),
+  body: z.string().min(1).max(500),
+  clickUrl: z.string().min(1).max(500).optional(),
+});
+
+export const restTimerScheduleResponseSchema = z.object({
+  id: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  fireAt: z.string(),
+});
+
+export type RestTimerScheduleRequest = z.infer<
+  typeof restTimerScheduleRequestSchema
+>;
+export type RestTimerScheduleResponse = z.infer<
+  typeof restTimerScheduleResponseSchema
+>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;

@@ -23,6 +23,8 @@ import {
   oneRmPointListSchema,
   personalRecordListSchema,
   progressPointListSchema,
+  restTimerScheduleRequestSchema,
+  restTimerScheduleResponseSchema,
   sessionDetailSchema,
   sessionSetSchema,
   sessionSummaryPageSchema,
@@ -56,6 +58,8 @@ import {
   type OneRmPoint,
   type PersonalRecord,
   type ProgressPoint,
+  type RestTimerScheduleRequest,
+  type RestTimerScheduleResponse,
   type SessionDetail,
   type SessionSet,
   type SessionSummaryPage,
@@ -770,6 +774,26 @@ export async function revokeWebhookToken(id: string): Promise<void> {
   await api.request({
     method: "DELETE",
     path: `/api/users/me/webhook-tokens/${id}`,
+  });
+}
+
+export async function scheduleRestTimer(
+  sessionId: string,
+  payload: RestTimerScheduleRequest
+): Promise<RestTimerScheduleResponse> {
+  const validated = restTimerScheduleRequestSchema.parse(payload);
+  return api.request({
+    method: "POST",
+    path: `/api/sessions/${sessionId}/rest-timer`,
+    body: validated,
+    schema: restTimerScheduleResponseSchema,
+  });
+}
+
+export async function cancelRestTimer(sessionId: string): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/sessions/${sessionId}/rest-timer`,
   });
 }
 
