@@ -38,6 +38,24 @@ const messages = {
     oneRmDescription: "Epley formula.",
     oneRmEmpty: "Not enough data yet.",
     exerciseLabel: "Exercise",
+    weightTitle: "Weight trend",
+    weightDescription: "Recent weight change.",
+    weightCurrent: "Current: {value} kg",
+    weightDelta: "Change: {value} kg",
+    weightDeltaEmpty: "Not enough entries yet.",
+    weightRange: { seven: "7 days", thirty: "30 days", all: "All" },
+    range: {
+      fourWeeks: "4 weeks",
+      twelveWeeks: "12 weeks",
+      twentySixWeeks: "26 weeks",
+    },
+    volumeTooltipLabel: "Total volume (kg)",
+    oneRmTooltipLabel: "1RM (kg)",
+    prTeaserTitle: "Recent PRs",
+    prTeaserViewAll: "View all",
+  },
+  prs: {
+    empty: "No records yet.",
   },
 };
 
@@ -91,6 +109,31 @@ describe("InsightsClient", () => {
       "fetch",
       vi.fn(async (input: string | URL | Request) => {
         const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/metrics")) {
+          return jsonResponse(200, [
+            {
+              id: "00000000-0000-0000-0000-000000000001",
+              recordedDate: "2026-04-01",
+              weightKg: 80.5,
+              createdAt: "2026-04-01T00:00:00Z",
+              updatedAt: "2026-04-01T00:00:00Z",
+            },
+            {
+              id: "00000000-0000-0000-0000-000000000002",
+              recordedDate: "2026-04-15",
+              weightKg: 79.8,
+              createdAt: "2026-04-15T00:00:00Z",
+              updatedAt: "2026-04-15T00:00:00Z",
+            },
+            {
+              id: "00000000-0000-0000-0000-000000000003",
+              recordedDate: "2026-04-22",
+              weightKg: 79.0,
+              createdAt: "2026-04-22T00:00:00Z",
+              updatedAt: "2026-04-22T00:00:00Z",
+            },
+          ]);
+        }
         if (url.includes("/api/analytics/volume")) {
           return jsonResponse(200, [
             { weekStart: "2026-04-13", totalVolumeKg: 500, sessionCount: 1 },
@@ -163,6 +206,7 @@ describe("InsightsClient", () => {
       "fetch",
       vi.fn(async (input: string | URL | Request) => {
         const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/metrics")) return jsonResponse(200, []);
         if (url.includes("/api/analytics/volume")) return jsonResponse(200, []);
         if (url.endsWith("/api/analytics/prs")) return jsonResponse(200, []);
         if (url.endsWith("/api/analytics/streak")) {
@@ -179,5 +223,150 @@ describe("InsightsClient", () => {
 
     renderClient(<InsightsClient />);
     await screen.findByText("Not enough data yet.");
+  });
+
+  it("renders the weight trend card with current and delta when metrics are populated", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/metrics")) {
+          const today = new Date();
+          const earlier = new Date(today.getTime() - 20 * 24 * 60 * 60 * 1000);
+          return jsonResponse(200, [
+            {
+              id: "00000000-0000-0000-0000-000000000010",
+              recordedDate: earlier.toISOString().slice(0, 10),
+              weightKg: 82.0,
+              createdAt: earlier.toISOString(),
+              updatedAt: earlier.toISOString(),
+            },
+            {
+              id: "00000000-0000-0000-0000-000000000011",
+              recordedDate: today.toISOString().slice(0, 10),
+              weightKg: 80.0,
+              createdAt: today.toISOString(),
+              updatedAt: today.toISOString(),
+            },
+          ]);
+        }
+        if (url.includes("/api/analytics/volume")) return jsonResponse(200, []);
+        if (url.endsWith("/api/analytics/prs")) return jsonResponse(200, []);
+        if (url.endsWith("/api/analytics/streak")) {
+          return jsonResponse(200, {
+            currentStreakDays: 0,
+            longestStreakDays: 0,
+            lastSessionDate: null,
+          });
+        }
+        if (url.includes("/api/analytics/heatmap")) return jsonResponse(200, []);
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<InsightsClient />);
+    expect(await screen.findByTestId("weight-current")).toHaveTextContent("80");
+    expect(screen.getByTestId("weight-delta")).toHaveTextContent("-2.0");
+  });
+
+  it("shows the weight delta empty state when there are fewer than 2 metrics", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/metrics")) return jsonResponse(200, []);
+        if (url.includes("/api/analytics/volume")) return jsonResponse(200, []);
+        if (url.endsWith("/api/analytics/prs")) return jsonResponse(200, []);
+        if (url.endsWith("/api/analytics/streak")) {
+          return jsonResponse(200, {
+            currentStreakDays: 0,
+            longestStreakDays: 0,
+            lastSessionDate: null,
+          });
+        }
+        if (url.includes("/api/analytics/heatmap")) return jsonResponse(200, []);
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<InsightsClient />);
+    expect(await screen.findByTestId("weight-delta-empty")).toBeInTheDocument();
+  });
+
+  it("renders the PR teaser card with up to 3 most-recent PRs and a view-all link", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/metrics")) return jsonResponse(200, []);
+        if (url.includes("/api/analytics/volume")) return jsonResponse(200, []);
+        if (url.endsWith("/api/analytics/prs")) {
+          return jsonResponse(200, [
+            {
+              exerciseId: "00000000-0000-0000-0000-0000000000a1",
+              exerciseNameTr: "Bench",
+              exerciseNameEn: "Bench",
+              estimatedOneRmKg: 100,
+              weightKg: 80,
+              repsDone: 5,
+              achievedAt: "2026-04-01",
+            },
+            {
+              exerciseId: "00000000-0000-0000-0000-0000000000e2",
+              exerciseNameTr: "Squat",
+              exerciseNameEn: "Squat",
+              estimatedOneRmKg: 130,
+              weightKg: 110,
+              repsDone: 5,
+              achievedAt: "2026-04-22",
+            },
+            {
+              exerciseId: "00000000-0000-0000-0000-0000000000e3",
+              exerciseNameTr: "Deadlift",
+              exerciseNameEn: "Deadlift",
+              estimatedOneRmKg: 160,
+              weightKg: 140,
+              repsDone: 5,
+              achievedAt: "2026-04-15",
+            },
+            {
+              exerciseId: "00000000-0000-0000-0000-0000000000e4",
+              exerciseNameTr: "Press",
+              exerciseNameEn: "Press",
+              estimatedOneRmKg: 70,
+              weightKg: 60,
+              repsDone: 5,
+              achievedAt: "2026-03-10",
+            },
+          ]);
+        }
+        if (url.endsWith("/api/analytics/streak")) {
+          return jsonResponse(200, {
+            currentStreakDays: 0,
+            longestStreakDays: 0,
+            lastSessionDate: null,
+          });
+        }
+        if (url.includes("/api/analytics/heatmap")) return jsonResponse(200, []);
+        if (url.includes("/api/analytics/one-rm/")) return jsonResponse(200, []);
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<InsightsClient />);
+    await screen.findByTestId(
+      "pr-teaser-row-00000000-0000-0000-0000-0000000000e2"
+    );
+    expect(
+      screen.getByTestId("pr-teaser-row-00000000-0000-0000-0000-0000000000e3")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("pr-teaser-row-00000000-0000-0000-0000-0000000000a1")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("pr-teaser-row-00000000-0000-0000-0000-0000000000e4")
+    ).toBeNull();
+    const viewAll = screen.getByTestId("pr-teaser-view-all");
+    expect(viewAll.getAttribute("href")).toBe("/prs");
   });
 });
