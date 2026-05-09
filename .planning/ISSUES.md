@@ -88,6 +88,14 @@ Plan 04-01 ships only Node process metrics (uptime, memory) on `/api/metrics`. C
 - **Owner**: aciro
 - **Status**: Open
 
+### i-14: Bump Netty to 4.2.13.Final to close CVE-2026-42577
+
+- **What**: io.netty:netty-transport-native-epoll 4.1.x line carries CVE-2026-42577 (epoll RST DoS). Fix only published in Netty 4.2.13.Final; no 4.1.x backport. Suppressed in trivy via .trivyignore for v0.5.0 release because the artifact is on the classpath but never touched by request handling (this app uses Spring MVC + Tomcat).
+- **Why deferred**: Netty 4.2 is a major-line bump and risks Spring Boot 3.5.x compatibility. Out of scope for a v0.5.0 hotfix.
+- **Trigger**: v0.6 Phase 41 (security-hardening). Bump Spring Boot's `<netty.version>` property to 4.2.13.Final or later, run full mvn verify, run e2e if available, and remove the CVE-2026-42577 entry from .trivyignore.
+- **Owner**: aciro
+- **Status**: Open
+
 ## Closed
 
 ### i-1 — WorkoutDaysIntegrationTest helper NPE on response `id` (6 errors)
