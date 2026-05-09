@@ -19,7 +19,7 @@ Progress: v1.0 ____________________  0% (0/7 phases planned)
 - See: `.planning/milestones/v0.5-ROADMAP.md` for full v0.5 archive
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/ROADMAP.md` for current roadmap (v1.0 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-5, i-6, i-7b, i-8, i-13, i-14, i-15 open; i-1, i-2, i-4, i-7, i-9, i-10, i-12 closed)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-5, i-6, i-7b, i-13, i-14, i-15 open; i-1, i-2, i-4, i-7, i-8, i-9, i-10, i-12 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
 **Current focus:** v1.0 release hardening - Playwright e2e tests (Phase 38), testcontainers 1.x -> 2.x major bump (Phase 39, i-7), framework majors (Phase 40, i-5 next-intl 4 + i-6 Next 16 + i-8 Spring Boot 4), security hardening (Phase 41, refresh-token hash collisions + brute-force lockout finalization + Netty 4.2 bump per i-14), docs completion (Phase 42), backup/restore drill (Phase 43), v1.0.0 release (Phase 44).
@@ -66,7 +66,10 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
 - i-7: closed by v1.0 Phase 39 (testcontainers-major).
 - i-7b (NEW in v1.0 Phase 39): residual 2.x major bump, deferred until
   upstream `org.testcontainers:testcontainers:2.0.0` GA on Maven Central.
-- i-8: closed by v1.0 Phase 40 (framework-majors); v0.6 stayed on Spring Boot 3.5.x.
+- i-8: closed by v1.0 Phase 40 Plan 01 (framework-majors): bumped
+  spring-boot-starter-parent from 3.5.14 to 4.0.6 (latest stable 4.0.x
+  on Maven Central as of 2026-05-09; 4.1.0-RC1 not adopted, RC posture).
+  v0.6 stayed on Spring Boot 3.5.x.
 - i-9: closed by v0.6 Phase 37 (structured-logging-test-fix).
 - i-13 (carried from v0.4): bump SpringDoc to >= 2.7 to remove the ControllerAdviceBean workaround. Trigger: backend dependency review phase post-v0.6 (likely v1.0 Phase 41 or 42).
 - i-14 (carried from v0.5): bump Netty to 4.2.13.Final to close CVE-2026-42577. Suppressed in trivy for v0.5.0 + v0.6.0 (no runtime path; Spring MVC + Tomcat). Trigger: v1.0 Phase 41 (security-hardening).
