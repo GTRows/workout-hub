@@ -2,8 +2,8 @@ package com.workouthub.common.logging;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.workouthub.WorkoutHubApplication;
 import com.workouthub.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
