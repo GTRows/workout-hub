@@ -38,12 +38,157 @@ This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) w
 
 **Trigger to reopen:** v0.4 frontend work OR a careful next-intl 4 migration session.
 
-### i-6 — Defer next 15 -> 16 major framework bump (PR #13)
+### i-6b — Defer Next.js 16.x major bump (successor to i-6)
 
-**PR:** https://github.com/GTRows/workout-hub/pull/13
-**Reason for defer:** Next.js 16 has its own migration story (App Router conventions, breaking changes in middleware, async dynamic APIs). Cannot ship in v0.3 without absorbing the migration cost. Stays on 15.x line.
+**Context:** i-6 was named "Next 15 -> 16" but the Phase 40-02 standalone
+single-commit budget could not absorb the actual major migration because the
+in-tree i18n stack (`next-intl@^3.26.0`) has no peer-dependency entry for
+`next ^16.0.0`. Plan-author audited every published 3.x version on
+`https://registry.npmjs.org/next-intl` (queried 2026-05-09) and confirmed
+zero 3.x versions list `^16.0.0` in the `next` peer range; the latest 3.x
+release `3.26.5` tops out at `next ^15.0.0`. Only the 4.x line peers
+`^16.0.0` (`next-intl@4.11.1` lists `next ^12.0.0 || ^13.0.0 || ^14.0.0 ||
+^15.0.0 || ^16.0.0`). Bumping `next` past `15.x` while keeping
+`next-intl@^3.26.0` would either break `pnpm install` peer-check (default
+behaviour) or require a `pnpm.overrides` / `--strict-peer-dependencies=false`
+hack that hides a real runtime-compatibility risk (next-intl 3.x's
+`createNextIntlPlugin` patches Next's middleware and `unstable_rootParams`
+plumbing in ways 4.x removed and 16.x deprecated).
 
-**Trigger to reopen:** v0.5 milestone (frontend completion phase) OR Next 15 LTS end-of-life signal.
+Independent of the next-intl block, Next 16 also introduces six surface
+changes that affect this codebase: (1) the `Middleware` API is renamed to
+`Proxy` (deprecation warning in 16.x; codemod available; affects
+`frontend/src/middleware.ts` plus `frontend/src/middleware.test.ts`'s
+matcher-coverage assertions and the bound metric-recording call
+`getRegistry().record(...)` from Phase 35); (2) `useSearchParams` now hard
+errors at build time when called outside a `<Suspense>` boundary instead of
+warning (affects `frontend/src/app/(auth)/login/page.tsx` which reads `next`
+and `reason` query params at the top of its client-component body without
+any wrapping Suspense); (3) `useReportWebVitals` from `next/web-vitals`
+unchanged (NON-blocker; v0.6 lock-in survives); (4) App Router `params:
+Promise<{ id: string }>` already adopted in
+`session/[id]/page.tsx` and `exercises/[id]/page.tsx` (NON-blocker); (5)
+default `images.minimumCacheTTL` bumped from 1 minute to 4 hours, default
+`images.imageSizes` loses the 16px entry, `images.domains` deprecated, and
+`next/legacy/image` deprecated (NON-blocker because `frontend/next.config.ts`
+does not set an `images` block — codebase relies on framework defaults); (6)
+TypeScript 5.1.0 minimum (already satisfied by `^5.7.2`), sass-loader v16
+(NON-blocker; codebase has no sass dep), eslint-plugin-react-hooks v7
+(transitive via `eslint-config-next` and bumps in lockstep), browserslist
+update (NON-blocker; uses framework default), and the
+`@next/eslint-plugin-next` flat-config default (NON-blocker;
+`frontend/eslint.config.mjs` is already flat). Surfaces 1 and 2 are real
+source-file mutations that exceed Phase 40-02's bookkeeping scope; the
+remaining four are NON-blockers.
+
+Other Next 16 breaking changes that the eventual closure plan must account
+for include (per the Vercel `v16.0.0` release notes): removed deprecated
+`unstable_rootParams`, removed deprecated sync access to Dynamic APIs,
+mandatory `images.localPatterns` for query strings on `<Image>` `src`,
+removed deprecated AMP support, the `experimental.cacheComponents` flag,
+Turbopack as default bundler (still opt-out via `--webpack` flag through
+the canary line), the new MCP server in dev mode, and the `proxy` codemod
+shipped via `@next/codemod` for the `middleware -> proxy` rename. Next 16
+also bumps the engines.node floor to `>=20.9.0`; the codebase's
+`engines.node: ">=20.0.0"` declaration in `frontend/package.json` will need
+a one-line bump in the closure plan (the runtime container already runs
+Node 22 per the frontend Dockerfile multi-stage builder, so this is a
+declaration alignment, not a runtime risk).
+
+**Why deferred:** Phase 40-02 cannot absorb the next-intl 4 migration plus
+the Middleware->Proxy rename plus the Suspense-boundary additions plus the
+Node-engine declaration bump plus the lockfile-resolution probe with
+co-installed `next@^16.x` and `next-intl@^4.11.x` within the small,
+ship-able, single-commit-and-CI-pass cadence the v1.0 milestone requires.
+The roadmap's "in sequence (each its own commit and test pass)" rule
+explicitly forbids combining the Next 16 jump with the next-intl 4 jump.
+The phased v1.0 scope is e2e tests (Phase 38), framework patch-level
+hardening (Phase 39 testcontainers; Phase 40-01 Spring Boot 4 deferral;
+Phase 40-02 Next 16 deferral; Phase 40-03 next-intl 4 migration), security
+hardening (Phase 41 i-13 SpringDoc + i-14 Netty 4.2), docs (Phase 42),
+backup/restore drill (Phase 43), and v1.0.0 release (Phase 44). Adding the
+Next 16 closure work to that timeline would either compress one of the
+existing phases or push v1.0.0 by multiple working sessions; both are
+worse than honest deferral.
+
+**Trigger to reopen:** Phase 40-03 (i-5 next-intl 3 -> 4 migration) ships
+green AND the maintainer chooses to absorb Next 16 inside the v1.0
+remaining phase budget OR the v1.1 milestone-opening sub-plan picks it up.
+Either path requires a fresh sub-plan (likely 40-04 inside v1.0 OR a
+v1.1.0 first sub-plan) that explicitly:
+
+1. **Probes the lockfile resolution** by running `pnpm install` with
+   `next@^16.2.6` (or whatever is current latest stable at probe time)
+   AND `next-intl@^4.x` (already on the lockfile after 40-03) AND
+   `eslint-config-next@^16.x` AND `@types/node@^25.x` (or current). Reads
+   the resulting `pnpm-lock.yaml` and confirms no peer-dependency
+   warnings, no `--strict-peer-dependencies=false` requirement, no
+   `pnpm.overrides` block needed.
+
+2. **Renames `frontend/src/middleware.ts` -> `frontend/src/proxy.ts`** OR
+   keeps `middleware.ts` and accepts the deprecation warning in CI logs.
+   The codemod from Vercel (`@next/codemod middleware-to-proxy`) is the
+   preferred mechanism. Updates `frontend/src/middleware.test.ts`
+   accordingly (or splits it into `frontend/src/proxy.test.ts`).
+   Preserves the Phase 29.5 matcher-coverage contract (12
+   `(app)`-group route segments + three operator paths) AND the Phase 35
+   bound `getRegistry().record(...)` per-request metric call.
+
+3. **Wraps `frontend/src/app/(auth)/login/page.tsx` in a `<Suspense>`
+   boundary** so the `useSearchParams()` calls do not break the now-fatal
+   build error. The simplest fix is to lift the `useSearchParams`-reading
+   body into a child client component and wrap the parent in
+   `<Suspense fallback={<RouteSkeleton variant="auth" />}>` (the
+   `RouteSkeleton` primitive already exists from Phase 36). Alternative:
+   `export const dynamic = "force-dynamic"` on the page module to opt out
+   of static prerender entirely. Either path requires source mutation;
+   re-validates `frontend/src/app/(auth)/login/page.test.tsx` and the
+   middleware redirect test that constructs a `?next=...` query param.
+
+4. **Bumps `engines.node: ">=20.0.0"` -> `">=20.9.0"`** in
+   `frontend/package.json` to match Next 16's published floor.
+
+5. **Re-runs `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`,
+   AND `pnpm test:e2e`** locally (the Windows host CAN run all five for
+   the frontend; only the Maven backend has the local-mvn-gap). The
+   `pnpm build` standalone-trace-copy EPERM noted in the spawn prompt is
+   a known host-only issue; the compile-success criterion is the gate,
+   not the trace-copy step.
+
+6. **Validates the `next/image` default-cache-TTL bump** from 1 minute to
+   4 hours does not regress any operator-facing CDN posture. Self-hosted
+   contract does not constrain image cache TTL, so this is expected to
+   be a NON-issue, but the closure plan should explicitly assert it.
+
+7. **Validates that `images.localPatterns` enforcement does not break
+   `next/image` callers with query-string `src` values.** Plan-author did
+   NOT audit every `next/image` caller for query-string `src` patterns
+   (out of bookkeeping scope); the closure plan must enumerate them. As
+   of plan-author time, `frontend/src/components/exercise-media.test.tsx`
+   is the most likely surface to hit this constraint and should be
+   audited first.
+
+8. **Drops the deprecated AMP, `images.domains`, and `next/legacy/image`
+   surfaces** if any are in use (none audited at plan time; closure plan
+   must confirm).
+
+9. **Decides whether to enable Turbopack as the default bundler** (Next
+   16's new default) OR pass `--webpack` to keep the existing webpack
+   path. Both work; Turbopack is the recommended path going forward but
+   may surface unrelated regressions on first build.
+
+The plan author for the closure must also rebuild the lockfile from
+`frontend/pnpm-lock.yaml` (`pnpm install --frozen-lockfile=false` then
+`pnpm install`), commit the regenerated lockfile alongside the
+`package.json` edits, and ensure CI runs `pnpm install
+--frozen-lockfile=true` cleanly. Both `frontend/package.json` and
+`frontend/pnpm-lock.yaml` are protected files per `CLAUDE.md`; the
+closure plan MUST exercise the protected-file pre-authorisation flow
+(unlike this deferral plan, which deliberately does NOT touch any
+protected file).
+
+**Owner:** aciro
+**Status:** Open
 
 ### i-7b — Defer Testcontainers 2.0.0 major bump (successor to i-7)
 
@@ -254,6 +399,15 @@ LoggingApplicationListener reconfigures the logging system to ECS-format JSON.
 @Disabled removed; both contract assertions (JSON shape with @timestamp +
 message; deny-listed authorization MDC value masked from stdout) run on every
 CI build.*
+
+### i-6 — Defer next 15 -> 16 major framework bump (PR #13)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/13
+**Reason for defer:** Next.js 16 has its own migration story (App Router conventions, breaking changes in middleware, async dynamic APIs). Cannot ship in v0.3 without absorbing the migration cost. Stays on 15.x line.
+
+**Trigger to reopen:** v0.5 milestone (frontend completion phase) OR Next 15 LTS end-of-life signal.
+
+*Closed by Phase 40 Plan 02: the Next 15 -> 16 single-line bump within the original i-6 budget proved infeasible because next-intl 3.x's published peer range tops out at `next ^15.0.0` (verified at plan-author time against `https://registry.npmjs.org/next-intl` on 2026-05-09; every 3.x version including the 3.26.x line tail at 3.26.5 lists `next ^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0` and ZERO 3.x versions list `^16.0.0`). Only next-intl 4.x peers `^16.0.0` (4.11.1 lists `next ^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0`), so the Next 16 install requires next-intl 4 in the same lockfile — which the roadmap's "in sequence (each its own commit and test pass)" rule forbids combining into a single bump. The frontend runtime stays pinned within the existing `^15.1.0` caret (latest 15.x backport `15.5.18` per the npm `backport` dist-tag at plan-author time). The major-version jump is re-deferred as follow-up issue i-6b with the dependency-graph evidence and the App Router / middleware / Suspense / image / sass-loader / eslint surface analysis carried forward verbatim. v1.0 ships on Next 15.x; the 15.5.x backport line still receives security patches via the `^15.1.0` caret. Mirror precedent: Phase 39-01 / i-7 -> i-7b deferral playbook AND Phase 40-01 / i-8 -> i-8b deferral playbook.*
 
 ### i-7 — Defer testcontainers 1.x -> 2.x major bump (PR #11)
 
