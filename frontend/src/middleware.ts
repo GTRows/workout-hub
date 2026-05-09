@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getRegistry } from "@/lib/metrics/registry";
+import { normalizeRoute } from "@/lib/metrics/route-label";
 
 /**
  * Protected-route guard. Any path under the (app) group (dashboard, plan,
@@ -10,6 +12,11 @@ import { NextResponse, type NextRequest } from "next/server";
  * localStorage because middleware runs on the edge and has no DOM access.
  * The client mirrors the refresh token into a cookie on login; the
  * in-memory access token continues to drive actual API calls.
+ *
+ * Per Phase 35, the middleware is also the recording point for the
+ * frontend HTTP metrics registry. Every matched request is timed and
+ * counted; `/api/metrics` is excluded so the scrape itself does not
+ * pollute the histogram.
  */
 export const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -26,7 +33,7 @@ export const PROTECTED_PREFIXES = [
   "/session",
 ];
 
-export function middleware(req: NextRequest) {
+function guardOrPassThrough(req: NextRequest): NextResponse {
   const { pathname } = req.nextUrl;
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
@@ -37,6 +44,28 @@ export function middleware(req: NextRequest) {
   const loginUrl = new URL("/login", req.url);
   loginUrl.searchParams.set("next", pathname);
   return NextResponse.redirect(loginUrl);
+}
+
+function inferStatus(res: NextResponse): number {
+  const status = res.status;
+  if (status && status !== 0) return status;
+  return 200;
+}
+
+export function middleware(req: NextRequest): NextResponse {
+  const start = Date.now();
+  const res = guardOrPassThrough(req);
+  const duration = Date.now() - start;
+  const { pathname } = req.nextUrl;
+  if (pathname !== "/api/metrics") {
+    getRegistry().record(
+      req.method,
+      normalizeRoute(pathname),
+      inferStatus(res),
+      duration,
+    );
+  }
+  return res;
 }
 
 export const config = {
@@ -53,5 +82,8 @@ export const config = {
     "/profile/:path*",
     "/export/:path*",
     "/session/:path*",
+    "/api/healthz",
+    "/api/livez",
+    "/api/metrics",
   ],
 };
