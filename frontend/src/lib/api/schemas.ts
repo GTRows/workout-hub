@@ -239,6 +239,17 @@ export const personalRecordSchema = z.object({
 });
 export const personalRecordListSchema = z.array(personalRecordSchema);
 
+export const progressPointSchema = z.object({
+  sessionId: z.string().uuid(),
+  startedAt: z.string(),
+  setCount: z.number().int(),
+  totalVolumeKg: z.number(),
+  maxWeightKg: z.number().nullable(),
+  topRepsDone: z.number().int(),
+  estimatedOneRmKg: z.number().nullable(),
+});
+export const progressPointListSchema = z.array(progressPointSchema);
+
 export const heatmapDaySchema = z.object({
   date: z.string(),
   sessionCount: z.number().int(),
@@ -483,6 +494,7 @@ export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;
 export type PersonalRecord = z.infer<typeof personalRecordSchema>;
+export type ProgressPoint = z.infer<typeof progressPointSchema>;
 export type HeatmapDay = z.infer<typeof heatmapDaySchema>;
 
 export type Exercise = z.infer<typeof exerciseSchema>;

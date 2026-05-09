@@ -22,6 +22,7 @@ import {
   waterEntrySchema,
   oneRmPointListSchema,
   personalRecordListSchema,
+  progressPointListSchema,
   sessionDetailSchema,
   sessionSetSchema,
   sessionSummaryPageSchema,
@@ -54,6 +55,7 @@ import {
   type NutritionEntry,
   type OneRmPoint,
   type PersonalRecord,
+  type ProgressPoint,
   type SessionDetail,
   type SessionSet,
   type SessionSummaryPage,
@@ -251,6 +253,24 @@ export async function fetchExerciseDetail(id: string): Promise<Exercise> {
   return api.request({
     path: `/api/exercises/${id}`,
     schema: exerciseSchema,
+  });
+}
+
+export async function fetchExerciseProgress(
+  exerciseId: string,
+  limit?: number
+): Promise<ProgressPoint[]> {
+  const clampedLimit =
+    limit !== undefined &&
+    Number.isInteger(limit) &&
+    limit >= 1 &&
+    limit <= 100
+      ? limit
+      : 10;
+  return api.request({
+    path: `/api/exercises/${exerciseId}/progress`,
+    query: { limit: clampedLimit },
+    schema: progressPointListSchema,
   });
 }
 
