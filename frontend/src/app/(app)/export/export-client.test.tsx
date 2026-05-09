@@ -453,7 +453,9 @@ describe("ExportClient", () => {
 
   it("aborts the import when the user cancels the confirm prompt", async () => {
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
-    const fetchSpy = vi.fn(async () => jsonResponse(200, {}));
+    const fetchSpy = vi.fn(async (_input: string | URL | Request) =>
+      jsonResponse(200, {}),
+    );
     vi.stubGlobal("fetch", fetchSpy);
 
     renderClient(<ExportClient />);
@@ -476,8 +478,8 @@ describe("ExportClient", () => {
     const args = confirmSpy.mock.calls[0]?.[0] ?? "";
     expect(args).toContain("rejected-dump.json");
     const importCalls = fetchSpy.mock.calls.filter((c) => {
-      const url =
-        typeof c[0] === "string" ? c[0] : (c[0] as URL | Request).toString();
+      const first = c[0];
+      const url = typeof first === "string" ? first : first.toString();
       return url.endsWith("/api/export/import");
     });
     expect(importCalls).toHaveLength(0);
