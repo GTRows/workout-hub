@@ -23,7 +23,20 @@ import {
 } from "@/lib/api/endpoints";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Heatmap } from "@/components/heatmap";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+
+const VOLUME_RANGE_TO_WEEKS = {
+  fourWeeks: 4,
+  twelveWeeks: 12,
+  twentySixWeeks: 26,
+} as const;
+type VolumeRange = keyof typeof VOLUME_RANGE_TO_WEEKS;
+const VOLUME_RANGE_KEYS: VolumeRange[] = [
+  "fourWeeks",
+  "twelveWeeks",
+  "twentySixWeeks",
+];
 
 type ChartTooltipProps = {
   active?: boolean;
@@ -59,9 +72,12 @@ export function InsightsClient() {
   const t = useTranslations("insights");
   const locale = useLocale();
 
+  const [volumeRange, setVolumeRange] = useState<VolumeRange>("twelveWeeks");
+  const volumeWeeks = VOLUME_RANGE_TO_WEEKS[volumeRange];
+
   const volumeQuery = useQuery({
-    queryKey: ["analytics", "volume", 12],
-    queryFn: () => fetchWeeklyVolume(12),
+    queryKey: ["analytics", "volume", volumeWeeks],
+    queryFn: () => fetchWeeklyVolume(volumeWeeks),
   });
 
   const prsQuery = useQuery({
@@ -75,8 +91,8 @@ export function InsightsClient() {
   });
 
   const heatmapQuery = useQuery({
-    queryKey: ["analytics", "heatmap", 12],
-    queryFn: () => fetchHeatmap(12),
+    queryKey: ["analytics", "heatmap", volumeWeeks],
+    queryFn: () => fetchHeatmap(volumeWeeks),
   });
 
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
@@ -123,6 +139,19 @@ export function InsightsClient() {
       <Card className="space-y-3">
         <CardTitle>{t("volumeTitle")}</CardTitle>
         <CardDescription>{t("volumeDescription")}</CardDescription>
+        <div className="flex flex-wrap gap-2" data-testid="insights-volume-range">
+          {VOLUME_RANGE_KEYS.map((r) => (
+            <Button
+              key={r}
+              size="sm"
+              variant={r === volumeRange ? "default" : "outline"}
+              onClick={() => setVolumeRange(r)}
+              aria-pressed={r === volumeRange}
+            >
+              {t(`range.${r}` as "range.fourWeeks")}
+            </Button>
+          ))}
+        </div>
         {volumeQuery.isLoading ? (
           <p className="text-muted-foreground">{t("loading")}</p>
         ) : (
