@@ -80,6 +80,8 @@
     "setLine": "{n}. {reps} x {weight}kg",
     "setLineNoWeight": "{n}. {reps} tekrar",
     "restTimer": "Dinlenme: {seconds}s",
+    "restPushTitle": "Dinlenme bitti",
+    "restPushBody": "{seconds}s dinlenme tamam - sonraki set zamani",
     "finishButton": "Antrenmani bitir",
     "finishConfirm": "Bu antrenmani bitirmek istiyor musun?",
     "finished": "Tamamlandi",

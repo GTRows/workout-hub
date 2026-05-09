@@ -37,6 +37,8 @@ const messages = {
     setLine: "{n}. {reps} x {weight}kg",
     setLineNoWeight: "{n}. {reps} reps",
     restTimer: "Rest: {seconds}s",
+    restPushTitle: "Rest over",
+    restPushBody: "{seconds}s rest complete - time for the next set",
     finishButton: "Finish workout",
     finishConfirm: "Finish?",
     finished: "Finished",
@@ -789,6 +791,169 @@ describe("SessionClient typed error UX", () => {
     await waitFor(() =>
       expect(pushMock).toHaveBeenCalledWith("/dashboard")
     );
+  });
+});
+
+describe("SessionClient rest-timer push wiring", () => {
+  function dayWithRestSeconds() {
+    return {
+      id: dayId,
+      dayOfWeek: 3,
+      name: "Push Day",
+      focus: "PUSH",
+      estimatedDurationMin: 45,
+      exercises: [
+        {
+          id: planItemId,
+          exerciseId,
+          exerciseNameTr: "Sinav",
+          exerciseNameEn: "Push-up",
+          orderIndex: 1,
+          targetSets: 3,
+          targetRepsMin: 8,
+          targetRepsMax: 12,
+          restSeconds: 60,
+        },
+      ],
+    };
+  }
+
+  beforeEach(() => {
+    clearTokens();
+    window.localStorage.clear();
+    pushMock.mockReset();
+    Object.defineProperty(navigator, "onLine", {
+      value: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("posts a rest-timer schedule with the localised body when a set is logged with restSeconds > 0", async () => {
+    const user = userEvent.setup();
+    const newSet = {
+      id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      exerciseId,
+      exerciseNameTr: "Sinav",
+      exerciseNameEn: "Push-up",
+      setNumber: 1,
+      repsDone: 10,
+      weightKg: 20,
+      rpe: null,
+      completed: true,
+      notes: null,
+    };
+
+    let scheduleInit: RequestInit | undefined;
+    let scheduleCount = 0;
+    let cancelCount = 0;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith(`/api/sessions/${sessionId}`)) {
+          return jsonResponse(200, baseSession());
+        }
+        if (url.endsWith(`/api/workout-days/${dayId}`)) {
+          return jsonResponse(200, dayWithRestSeconds());
+        }
+        if (url.endsWith(`/api/exercises/${exerciseId}/last-performance`)) {
+          return noContent();
+        }
+        if (url.endsWith(`/api/sessions/${sessionId}/sets`)) {
+          return jsonResponse(201, newSet);
+        }
+        if (url.endsWith(`/api/sessions/${sessionId}/rest-timer`)) {
+          if ((init?.method ?? "GET") === "POST") {
+            scheduleInit = init;
+            scheduleCount++;
+            return jsonResponse(201, {
+              id: "11111111-1111-1111-1111-111111111111",
+              sessionId,
+              fireAt: "2026-05-09T10:01:00Z",
+            });
+          }
+          if ((init?.method ?? "GET") === "DELETE") {
+            cancelCount++;
+            return noContent();
+          }
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.type(screen.getByLabelText("Reps"), "10");
+    await user.type(screen.getByLabelText("Weight"), "20");
+    await user.click(screen.getByRole("button", { name: "Done" }));
+
+    await waitFor(() => expect(scheduleCount).toBeGreaterThanOrEqual(1));
+
+    expect(scheduleInit).toBeDefined();
+    expect(scheduleInit?.method).toBe("POST");
+    const body = JSON.parse(scheduleInit!.body as string) as {
+      seconds: number;
+      title: string;
+      body: string;
+    };
+    expect(body.seconds).toBe(60);
+    expect(body.title).toBe("Rest over");
+    expect(body.body).toBe(
+      "60s rest complete - time for the next set"
+    );
+    // The hook also issues a cancel before scheduling to clear any prior row.
+    expect(cancelCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it("DELETEs the rest-timer schedule when the session is finished", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    let cancelCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith(`/api/sessions/${sessionId}`)) {
+          return jsonResponse(200, baseSession());
+        }
+        if (url.endsWith(`/api/workout-days/${dayId}`)) {
+          return jsonResponse(200, dayWithRestSeconds());
+        }
+        if (url.endsWith(`/api/exercises/${exerciseId}/last-performance`)) {
+          return noContent();
+        }
+        if (url.endsWith(`/api/sessions/${sessionId}/finish`)) {
+          return jsonResponse(200, {
+            ...baseSession(),
+            endedAt: "2026-04-23T11:00:00Z",
+            finished: true,
+          });
+        }
+        if (
+          url.endsWith(`/api/sessions/${sessionId}/rest-timer`) &&
+          (init?.method ?? "GET") === "DELETE"
+        ) {
+          cancelCount++;
+          return noContent();
+        }
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.click(screen.getByRole("button", { name: /finish workout/i }));
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/dashboard"));
+    await waitFor(() => expect(cancelCount).toBeGreaterThanOrEqual(1));
   });
 });
 

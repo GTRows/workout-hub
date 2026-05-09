@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   addSet,
+  cancelRestTimer,
   deleteSet,
   fetchLastPerformance,
   fetchSession,
@@ -119,6 +120,9 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
     onSuccess: (finished) => {
       qc.setQueryData(["sessions", sessionId], finished);
       qc.setQueryData(["sessions", "active"], null);
+      // Cancel any pending rest-timer schedule so a stale push is not
+      // delivered after the session is over.
+      cancelRestTimer(sessionId).catch(() => {});
       router.push("/dashboard");
     },
     onError: (err: unknown) => {
@@ -133,6 +137,7 @@ export function SessionClient({ sessionId }: { sessionId: string }) {
           ? ApiErrorCode.SESSION_ALREADY_FINISHED
           : ApiErrorCode.SESSION_FINISHED;
         setApiErrorToast(tFull(apiErrorCodeMessageKey(code)));
+        cancelRestTimer(sessionId).catch(() => {});
         router.push("/dashboard");
         return;
       }
@@ -304,7 +309,11 @@ function ExerciseBlock({
   const [detailOpen, setDetailOpen] = useState(false);
   const [prCelebration, setPrCelebration] = useState<string | null>(null);
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
-  const restTimer = useRestTimer(notifyRestElapsed);
+  const restTimer = useRestTimer(notifyRestElapsed, {
+    sessionId,
+    title: t("restPushTitle"),
+    body: (seconds: number) => t("restPushBody", { seconds }),
+  });
 
   const lastPerfQuery = useQuery({
     queryKey: ["last-performance", planItem.exerciseId],

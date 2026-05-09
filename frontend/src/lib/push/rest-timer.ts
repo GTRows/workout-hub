@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cancelRestTimer, scheduleRestTimer } from "@/lib/api/endpoints";
 
 type RestTimer = {
   start: (seconds: number) => void;
@@ -8,8 +9,17 @@ type RestTimer = {
   secondsRemaining: number | null;
 };
 
+type PushWiring = {
+  sessionId: string;
+  title: string;
+  body: (seconds: number) => string;
+};
+
+const noop = () => {};
+
 export function useRestTimer(
-  onElapsed?: (seconds: number) => void
+  onElapsed?: (seconds: number) => void,
+  push?: PushWiring
 ): RestTimer {
   const [remaining, setRemaining] = useState<number | null>(null);
   const intervalRef = useRef<number | null>(null);
@@ -22,10 +32,19 @@ export function useRestTimer(
     }
   }, []);
 
+  const cancelServerSchedule = useCallback(() => {
+    if (!push) return;
+    // Fire-and-forget: a failed cancel must not block the UI. The server
+    // will still dispatch the row when it elapses, but the foreground
+    // notification path is the one the user sees in the visible-tab case.
+    cancelRestTimer(push.sessionId).catch(noop);
+  }, [push]);
+
   const stop = useCallback(() => {
     clearInterval();
     setRemaining(null);
-  }, [clearInterval]);
+    cancelServerSchedule();
+  }, [clearInterval, cancelServerSchedule]);
 
   const start = useCallback(
     (seconds: number) => {
@@ -33,6 +52,19 @@ export function useRestTimer(
       if (seconds <= 0) return;
       durationRef.current = seconds;
       setRemaining(seconds);
+      if (push) {
+        // Cancel any prior schedule for this session, then post the new one.
+        // Both calls are best-effort: a failed POST does not block the UI.
+        cancelRestTimer(push.sessionId)
+          .catch(noop)
+          .then(() =>
+            scheduleRestTimer(push.sessionId, {
+              seconds,
+              title: push.title,
+              body: push.body(seconds),
+            }).catch(noop)
+          );
+      }
       intervalRef.current = window.setInterval(() => {
         setRemaining((prev) => {
           if (prev === null) return null;
@@ -45,7 +77,7 @@ export function useRestTimer(
         });
       }, 1000);
     },
-    [clearInterval, onElapsed]
+    [clearInterval, onElapsed, push]
   );
 
   useEffect(() => () => clearInterval(), [clearInterval]);

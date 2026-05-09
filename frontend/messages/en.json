@@ -80,6 +80,8 @@
     "setLine": "{n}. {reps} x {weight}kg",
     "setLineNoWeight": "{n}. {reps} reps",
     "restTimer": "Rest: {seconds}s",
+    "restPushTitle": "Rest over",
+    "restPushBody": "{seconds}s rest complete - time for the next set",
     "finishButton": "Finish workout",
     "finishConfirm": "Finish this workout?",
     "finished": "Finished",
