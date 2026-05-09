@@ -2,14 +2,14 @@
 
 ## Current Position
 
-Milestone: v1.0 Release Hardening (planned)
-Phase: 38 of 44 (e2e-tests) - not started
-Plan: 38-01 e2e-tests - not started
-Status: v0.6 closed at v0.6.0 (tag 08cc968; 11/11 plans across Phases 31-37). Phase 41 + 42 + 43 closed via docs/security passes (out-of-order from numeric phase order, 41+42+43 docs/security work landed before Phase 38-40 test/framework work begins). Next: `/gsd:plan-phase 38-01` (e2e-tests) when v1.0 work resumes.
-Last activity: 2026-05-09 - Phase 43 Plan 01 (backup-restore-drill) authored docs/BACKUP_RESTORE_DRILL.md operator runbook; refreshed BACKUP.md to document both backup-cron primitives plus a Verify-your-backups cross-link; replaced MIGRATION.md `## vNext` placeholder with a populated `## v1.0.0` section preserving the template; cross-linked the drill from DEPLOYMENT.md What's-not-here and the README Documentation map. Five atomic commits 60b1a56..0dd179e under `docs(43-01)` scope, zero protected-file edits.
+Milestone: v1.0 Release Hardening (SHIPPED)
+Phase: 44 of 44 (release-v1-0) - complete
+Plan: 44-01 release-v1-0 - complete
+Status: v1.0 closed at v1.0.0 (tag cac37c1; 9/9 plans across Phases 38-44). Annotated tag `v1.0.0` created locally pointing at cac37c1; tag push to fire `.github/workflows/release.yml` queued for maintainer-side execution per `IDENTITY.yaml#release.draft_first: true`. Project-complete state: v1.0 was the final planned milestone in the GSD roadmap. v1.1+ scope is not yet opened.
+Last activity: 2026-05-09 - v1.0 milestone bookkeeping commit close. Marked Phases 38-44 as complete in ROADMAP.md (collapsed to `<details>` archive block mirroring v0.4 / v0.5 / v0.6 pattern); archived v1.0 to `.planning/milestones/v1.0-ROADMAP.md` mirroring the v0.6 archive structure; prepended the v1.0 shipped entry to MILESTONES.md (date 2026-05-09, tag v1.0.0 at cac37c1); resolved the i-12 STATE.md / ISSUES.md drift in favour of the v0.4 archive (i-12 closed during v0.4 by post-tag hotfix d3d83d8 dropping ID preservation in full-export import to avoid the Hibernate detached-entity trap); advanced this STATE.md cursor to project-complete.
 
-Progress: v1.0 ########____________  43% (3/7 phases planned)
-          v1.0 - Phases 38-44
+Progress: v1.0 ####################  100% (9/9 plans complete; 7/7 phases shipped)
+          v1.0 - Phases 38-44 SHIPPED
 
 ## Project Reference
 
@@ -18,11 +18,12 @@ Progress: v1.0 ########____________  43% (3/7 phases planned)
 - See: `.planning/milestones/v0.4-ROADMAP.md` for full v0.4 archive
 - See: `.planning/milestones/v0.5-ROADMAP.md` for full v0.5 archive
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
-- See: `.planning/ROADMAP.md` for current roadmap (v1.0 outlined)
+- See: `.planning/milestones/v1.0-ROADMAP.md` for full v1.0 archive
+- See: `.planning/ROADMAP.md` for archived roadmap (all milestones v0.3 through v1.0 shipped)
 - See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-13, i-15 open; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12, i-14 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
-**Current focus:** v1.0 release hardening - Playwright e2e tests (Phase 38), testcontainers 1.x -> 2.x major bump (Phase 39, i-7), framework majors (Phase 40, i-5 next-intl 4 + i-6 Next 16 + i-8 Spring Boot 4), security hardening (Phase 41, refresh-token hash collisions + brute-force lockout finalization + Netty 4.2 bump per i-14), docs completion (Phase 42), backup/restore drill (Phase 43), v1.0.0 release (Phase 44).
+**Current focus:** Project-complete at v1.0.0. Future work (if opened as v1.1+) would address the carried-forward open issues: i-3 (`.gitignore` `data/` glob audit reference), i-6b (Next 16 jump; closure plan must rename middleware->proxy + Suspense-wrap login + bump engines.node + audit images.localPatterns + decide Turbopack vs --webpack), i-7b (Testcontainers 2.0.0 jump on upstream GA), i-8b (Spring Boot 4.0.x jump via either Path A `spring-boot-jackson2` compat module + HttpMessageConverter probe or Path B Jackson 2 -> Jackson 3 codebase migration across 36 files), i-13 (SpringDoc >= 2.7 to remove the ControllerAdviceBean workaround in OpenApiConfig), i-15 (Lighthouse CI workflow + scripts/check-bundle-size.mjs + @next/bundle-analyzer dev dep for perf-budget gating).
 
 ## Accumulated Context
 
@@ -130,8 +131,8 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
 
 ## Session Continuity
 
-Last session: 2026-05-09 - v0.6 milestone archived; v0.6.0 tag at 08cc968.
-Stopped at: v0.6 close complete; next action: `/gsd:plan-phase 38-01` (e2e-tests) once v1.0 work begins.
+Last session: 2026-05-09 - v1.0 milestone archived; v1.0.0 tag at cac37c1.
+Stopped at: v1.0 close complete; project at the GSD-roadmap end state. Maintainer to push the local annotated tag `v1.0.0` to fire `.github/workflows/release.yml` for the multi-arch GHCR publish; the resulting draft GitHub Release is published manually per `IDENTITY.yaml#release.draft_first: true`.
 Resume file: None.
 
 ## Reference Documents
@@ -141,7 +142,8 @@ Resume file: None.
 - `.planning/milestones/v0.4-ROADMAP.md` (full v0.4 archive)
 - `.planning/milestones/v0.5-ROADMAP.md` (full v0.5 archive)
 - `.planning/milestones/v0.6-ROADMAP.md` (full v0.6 archive)
-- `.planning/ROADMAP.md` (current; v1.0 outlined)
+- `.planning/milestones/v1.0-ROADMAP.md` (full v1.0 archive)
+- `.planning/ROADMAP.md` (archived; all milestones v0.3 through v1.0 shipped)
 - `.planning/ISSUES.md` (open deferred issues)
 - `.planning/HANDOFF.md` (pre-GSD v0.2 snapshot)
 - `.planning/codebase/STACK.md`

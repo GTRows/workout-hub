@@ -4,7 +4,7 @@
 
 WorkoutHub is a self-hosted multi-user fitness tracker with a Java 21 + Spring Boot 3 backend and a Next.js 15 + React 19 frontend, packaged as Docker images for operators to run on their own infrastructure. The project ships against a portable contract documented at `docs/SELF_HOSTED_CONTRACT.md`; the maintainer's reference deployment lives separately at `GTRows/homelab` and is not part of this repository.
 
-Pre-GSD work (informally tracked in `.planning/HANDOFF.md`) delivered the application surface area through v0.2: 23 backend feature packages, 25 Flyway migrations, the offline session queue, OIDC controller, push notifications, smart-scale webhook, and JSON export. Formal GSD planning starts at v0.3. The full path from v0.4 through v1.0 is scoped below (32 phases, Phase 13-44); v0.3, v0.4, v0.5, and v0.6 are shipped, v1.0 is planned.
+Pre-GSD work (informally tracked in `.planning/HANDOFF.md`) delivered the application surface area through v0.2: 23 backend feature packages, 25 Flyway migrations, the offline session queue, OIDC controller, push notifications, smart-scale webhook, and JSON export. Formal GSD planning starts at v0.3. The full path from v0.4 through v1.0 is scoped below (32 phases, Phase 13-44); v0.3, v0.4, v0.5, v0.6, and v1.0 are shipped.
 
 ## Domain Expertise
 
@@ -17,7 +17,7 @@ None - project is application code; planning draws from `docs/SELF_HOSTED_CONTRA
 - (Shipped) [**v0.4 Backend Feature Completion**](milestones/v0.4-ROADMAP.md) - Phases 13-20 (shipped 2026-05-07; v0.4.0)
 - (Shipped) [**v0.5 Frontend Completion**](milestones/v0.5-ROADMAP.md) - Phases 21-30 (shipped 2026-05-09; v0.5.0)
 - (Shipped) [**v0.6 Operational Maturity**](milestones/v0.6-ROADMAP.md) - Phases 31-37 (shipped 2026-05-09; v0.6.0)
-- (Planned) **v1.0 Release Hardening** - Phases 38-44
+- (Shipped) [**v1.0 Release Hardening**](milestones/v1.0-ROADMAP.md) - Phases 38-44 (shipped 2026-05-09; v1.0.0)
 
 ## Phases
 
@@ -73,23 +73,25 @@ Full archive: [milestones/v0.6-ROADMAP.md](milestones/v0.6-ROADMAP.md).
 
 </details>
 
-### v1.0 Release Hardening (Planned)
+<details>
+<summary>v1.0 Release Hardening (Phases 38-44) - SHIPPED 2026-05-09</summary>
 
-**Milestone Goal:** Production-ready cut - end-to-end tests, framework major bumps, security hardening, full documentation, backup/restore drill, `v1.0.0` release.
+Full archive: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md).
 
-Phase outline:
-- Phase 38: e2e-tests - Playwright critical flows: register -> login -> workout -> session save.
-- Phase 39: testcontainers-major - i-7: testcontainers 1.x -> 2.x with AbstractIntegrationTest and migration test updates.
-- Phase 40: framework-majors - i-8 Spring Boot 4, i-6 Next 16, i-5 next-intl 4 in sequence (each its own commit and test pass).
-- Phase 41: security-hardening - rate limiting review, brute-force lockout finalization, refresh-token hash collision fix from pending CI memory.
-- Phase 42: docs-completion - `docs/API.md`, `docs/DEPLOYMENT.md`, `docs/DATA_SCHEMA.md`, README user-facing rewrite.
-- Phase 43: backup-restore-drill - pg_dump sidecar restore drill, backup cron example, MIGRATION updates.
-- Phase 44: release-v1-0 - final CHANGELOG, RELEASE notes, GitHub release, multi-arch GHCR `v1.0.0` cut, deploy validation.
+- [x] Phase 38: e2e-tests (1/1 plan) - completed 2026-05-09
+- [x] Phase 39: testcontainers-major (1/1 plan) - completed 2026-05-09
+- [x] Phase 40: framework-majors (3/3 plans) - completed 2026-05-09
+- [x] Phase 41: security-hardening (1/1 plan) - completed 2026-05-09
+- [x] Phase 42: docs-completion (1/1 plan) - completed 2026-05-09
+- [x] Phase 43: backup-restore-drill (1/1 plan) - completed 2026-05-09
+- [x] Phase 44: release-v1-0 (1/1 plan) - completed 2026-05-09
+
+</details>
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order. v1.0 starts at Phase 38.
+Phases execute in numeric order. v1.0 was the final planned milestone; future work begins at Phase 45 if a v1.1+ scope is opened.
 
 | Phase                       | Milestone | Plans | Status      | Completed  |
 | --------------------------- | --------- | ----- | ----------- | ---------- |
@@ -97,4 +99,4 @@ Phases execute in numeric order. v1.0 starts at Phase 38.
 | 13-20 (v0.4 scope)          | v0.4      | 25/25 | Complete    | 2026-05-07 |
 | 21-30 (v0.5 scope)          | v0.5      | 19/19 | Complete    | 2026-05-09 |
 | 31-37 (v0.6 scope)          | v0.6      | 11/11 | Complete    | 2026-05-09 |
-| 38-44 (v1.0 scope)          | v1.0      | 3/?   | In progress | 2026-05-09 |
+| 38-44 (v1.0 scope)          | v1.0      | 9/9   | Complete    | 2026-05-09 |

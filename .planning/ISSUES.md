@@ -286,14 +286,6 @@ that audit and can be reused as a starting reference.
 **Owner:** aciro
 **Status:** Open
 
-### i-12: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport returns 500
-
-- **What**: GET /api/export/full returns HTTP 500 when called for a freshly-seeded user with one day-less plan, no sessions, no metrics. Test asserts 200 at line 134 of FullExportImportIntegrationTest.java.
-- **Why deferred**: Static causal trace at commit 96d81b0 found no deterministic 500 path in FullExportService for this specific fixture (TestAuthHelpers.seed bypasses DefaultPlanSeeder, so user has zero plans before the test creates one day-less plan via POST /api/workout-plans). Phase 18-04's export-path changes (Boolean isPr in SetRow, recompute safety net, validateSessionDayIds) are orthogonal to this failure. Likely transient or a yet-undiagnosed export-side defect not visible in static analysis. Local mvn unavailable on dev host (local-maven-gap), CI is the authoritative gate.
-- **Trigger**: Push v0.4 commits and observe CI run. If FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport still fails, capture the Surefire stack trace and isolate the exception class + line.
-- **Owner**: aciro
-- **Status**: Open
-
 ### i-13: Bump SpringDoc to >= 2.7 to remove the ControllerAdviceBean workaround
 
 - **What**: Phase 19-02 pinned SpringDoc to 2.6.0, which calls Spring 6.2's removed `new ControllerAdviceBean(Object)` constructor and crashes `GET /v3/api-docs` on Spring Boot 3.5.x. Phase 20 fix bundle (commit c1b95f7) worked around this by disabling SpringDoc's generic-response scan and registering ApiError schemas via OpenApiCustomizer.
@@ -388,6 +380,25 @@ populates from entity; `FullImportService.insertSessions` reads null-safely;
 `SessionSetsService.recomputePrForExerciseHistory` is invoked once per
 distinct touched (user, exerciseId) pair after the insert loop as a
 safety net for legacy payloads.*
+
+### i-12: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport returns 500
+
+- **What**: GET /api/export/full returns HTTP 500 when called for a freshly-seeded user with one day-less plan, no sessions, no metrics. Test asserts 200 at line 134 of FullExportImportIntegrationTest.java.
+- **Why deferred**: Static causal trace at commit 96d81b0 found no deterministic 500 path in FullExportService for this specific fixture (TestAuthHelpers.seed bypasses DefaultPlanSeeder, so user has zero plans before the test creates one day-less plan via POST /api/workout-plans). Phase 18-04's export-path changes (Boolean isPr in SetRow, recompute safety net, validateSessionDayIds) are orthogonal to this failure. Likely transient or a yet-undiagnosed export-side defect not visible in static analysis. Local mvn unavailable on dev host (local-maven-gap), CI is the authoritative gate.
+- **Trigger**: Push v0.4 commits and observe CI run. If FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport still fails, capture the Surefire stack trace and isolate the exception class + line.
+- **Owner**: aciro
+- **Status**: Closed
+
+*Closed by v0.4 post-tag hotfix commit `d3d83d8` (`fix(export)`): dropped ID
+preservation in full-export import to avoid the Hibernate detached-entity
+trap when re-inserting plans/days with assigned UUIDs; rewrites
+`session.workoutDayId` references via a payload-to-DB UUID map to keep
+round-trip referential integrity. Confirmed authoritative in the v0.4
+milestone archive (`.planning/milestones/v0.4-ROADMAP.md` "Issues Resolved
+(in milestone)" line 150). The original "Open" status in this file was
+stale drift; STATE.md "Issue-to-Phase Mapping" was correct (i-12 closed).
+This entry was moved from Open to Closed during the v1.0 milestone close
+bookkeeping commit (2026-05-09).*
 
 ### i-9 — StructuredLoggingTest cannot capture ECS JSON under @SpringBootTest
 
