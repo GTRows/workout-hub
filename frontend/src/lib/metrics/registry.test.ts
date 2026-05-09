@@ -102,4 +102,90 @@ describe("metrics registry", () => {
       0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
     ]);
   });
+
+  it("recordWebVital LCP places the value in the seconds histogram", () => {
+    const r = getRegistry();
+    r.recordWebVital("LCP", "/dashboard", 1.2);
+    const out = r.renderProm();
+    expect(out).toContain(
+      'wh_frontend_web_vital_seconds_bucket{name="LCP",route="/dashboard",le="2.5"} 1',
+    );
+    expect(out).toContain(
+      'wh_frontend_web_vital_seconds_bucket{name="LCP",route="/dashboard",le="1"} 0',
+    );
+    expect(out).toContain(
+      'wh_frontend_web_vital_seconds_count{name="LCP",route="/dashboard"} 1',
+    );
+  });
+
+  it("recordWebVital CLS places the value in the score histogram", () => {
+    const r = getRegistry();
+    r.recordWebVital("CLS", "/dashboard", 0.08);
+    const out = r.renderProm();
+    expect(out).toContain(
+      'wh_frontend_web_vital_score_bucket{name="CLS",route="/dashboard",le="0.1"} 1',
+    );
+    expect(out).toContain(
+      'wh_frontend_web_vital_score_bucket{name="CLS",route="/dashboard",le="0.05"} 0',
+    );
+    expect(out).toContain(
+      'wh_frontend_web_vital_score_count{name="CLS",route="/dashboard"} 1',
+    );
+  });
+
+  it("recordWebVital INP uses the seconds family, not the score family", () => {
+    const r = getRegistry();
+    r.recordWebVital("INP", "/plan", 0.15);
+    const out = r.renderProm();
+    expect(out).toContain(
+      'wh_frontend_web_vital_seconds_bucket{name="INP",route="/plan",le="0.25"} 1',
+    );
+    expect(out).not.toContain(
+      'wh_frontend_web_vital_score_bucket{name="INP"',
+    );
+  });
+
+  it("reset() clears web vital histograms alongside http metrics", () => {
+    const r = getRegistry();
+    r.recordWebVital("LCP", "/dashboard", 1.2);
+    expect(r.renderProm()).toContain(
+      'wh_frontend_web_vital_seconds_count{name="LCP",route="/dashboard"} 1',
+    );
+    r.reset();
+    const out = r.renderProm();
+    expect(out).not.toContain(
+      'wh_frontend_web_vital_seconds_count{name="LCP",route="/dashboard"} 1',
+    );
+  });
+
+  it("two distinct routes produce distinct web vital series", () => {
+    const r = getRegistry();
+    r.recordWebVital("LCP", "/dashboard", 1.2);
+    r.recordWebVital("LCP", "/plan", 1.2);
+    const out = r.renderProm();
+    expect(out).toContain(
+      'wh_frontend_web_vital_seconds_count{name="LCP",route="/dashboard"} 1',
+    );
+    expect(out).toContain(
+      'wh_frontend_web_vital_seconds_count{name="LCP",route="/plan"} 1',
+    );
+  });
+
+  it("multiple records for the same (name, route) aggregate", () => {
+    const r = getRegistry();
+    r.recordWebVital("LCP", "/dashboard", 1.0);
+    r.recordWebVital("LCP", "/dashboard", 2.0);
+    const out = r.renderProm();
+    expect(out).toContain(
+      'wh_frontend_web_vital_seconds_count{name="LCP",route="/dashboard"} 2',
+    );
+    const labelPrefix = 'name="LCP",route="/dashboard"';
+    const sumMatch = out.match(
+      new RegExp(
+        `wh_frontend_web_vital_seconds_sum\\{${labelPrefix.replace(/[/]/g, "\\/")}\\} (\\S+)`,
+      ),
+    );
+    expect(sumMatch).not.toBeNull();
+    expect(Number(sumMatch?.[1])).toBeCloseTo(3.0, 5);
+  });
 });

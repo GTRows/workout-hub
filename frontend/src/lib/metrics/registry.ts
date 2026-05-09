@@ -9,17 +9,26 @@
  * Prometheus contract; the operator scrape sees a fresh `process_start_time`.
  */
 
+import { HISTOGRAM_BUCKETS_SECONDS } from "./registry-buckets";
+import {
+  recordWebVitalInto,
+  renderWebVitals,
+  type WebVitalHistogramData,
+  type WebVitalName,
+} from "./web-vital-histogram";
+
+export { HISTOGRAM_BUCKETS_SECONDS } from "./registry-buckets";
+export { CLS_BUCKETS } from "./web-vital-histogram";
+export type { WebVitalName } from "./web-vital-histogram";
+
 export type StatusClass = "1xx" | "2xx" | "3xx" | "4xx" | "5xx";
 
 export interface MetricsRegistry {
   record(method: string, route: string, status: number, durationMs: number): void;
+  recordWebVital(name: WebVitalName, route: string, value: number): void;
   renderProm(): string;
   reset(): void;
 }
-
-export const HISTOGRAM_BUCKETS_SECONDS = [
-  0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
-] as const;
 
 interface HistogramData {
   buckets: number[];
@@ -30,6 +39,7 @@ interface HistogramData {
 interface RegistryState {
   counters: Map<string, number>;
   histograms: Map<string, HistogramData>;
+  webVitalHistograms: Map<string, WebVitalHistogramData>;
 }
 
 const COUNTER_HELP =
@@ -74,6 +84,7 @@ function createRegistry(): MetricsRegistry {
   const state: RegistryState = {
     counters: new Map(),
     histograms: new Map(),
+    webVitalHistograms: new Map(),
   };
 
   function record(method: string, route: string, status: number, durationMs: number): void {
@@ -95,6 +106,10 @@ function createRegistry(): MetricsRegistry {
         hist.buckets[i] += 1;
       }
     }
+  }
+
+  function recordWebVital(name: WebVitalName, route: string, value: number): void {
+    recordWebVitalInto(state.webVitalHistograms, name, route, value);
   }
 
   function renderProm(): string {
@@ -124,15 +139,18 @@ function createRegistry(): MetricsRegistry {
       out.push(`${HISTOGRAM_NAME}_count{${labelPrefix}} ${hist.count}`);
     }
 
+    out.push(...renderWebVitals(state.webVitalHistograms));
+
     return out.join("\n") + "\n";
   }
 
   function reset(): void {
     state.counters.clear();
     state.histograms.clear();
+    state.webVitalHistograms.clear();
   }
 
-  return { record, renderProm, reset };
+  return { record, recordWebVital, renderProm, reset };
 }
 
 interface GlobalWithRegistry {
