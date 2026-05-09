@@ -76,7 +76,15 @@
     "queuedOffline": "Offline - set queued, will sync when reconnected.",
     "queuedDrained": "{count} queued sets synced.",
     "queuedDropped": "Some queued sets could not be saved (session may already be finished).",
-    "queuedBadge": "{count} pending"
+    "queuedBadge": "{count} pending",
+    "rpe": "RPE",
+    "rpeHint": "1-10",
+    "editAction": "Edit",
+    "deleteAction": "Delete",
+    "deleteConfirm": "Delete this set?",
+    "saveAction": "Save",
+    "cancelAction": "Cancel",
+    "setLineRpe": "RPE {value}"
   },
   "profile": {
     "title": "Profile",

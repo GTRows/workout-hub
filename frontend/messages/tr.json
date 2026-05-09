@@ -76,7 +76,15 @@
     "queuedOffline": "Internet yok - set kaydedildi, baglandiginda gonderilecek.",
     "queuedDrained": "{count} bekleyen set gonderildi.",
     "queuedDropped": "Bazi bekleyen setler artik kaydedilemiyor (oturum kapanmis olabilir).",
-    "queuedBadge": "{count} bekleyen"
+    "queuedBadge": "{count} bekleyen",
+    "rpe": "RPE",
+    "rpeHint": "1-10",
+    "editAction": "Düzenle",
+    "deleteAction": "Sil",
+    "deleteConfirm": "Bu seti sil?",
+    "saveAction": "Kaydet",
+    "cancelAction": "Iptal",
+    "setLineRpe": "RPE {value}"
   },
   "profile": {
     "title": "Profil",
