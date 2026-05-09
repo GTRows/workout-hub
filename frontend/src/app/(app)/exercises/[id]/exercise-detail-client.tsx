@@ -7,6 +7,8 @@ import { fetchExerciseDetail } from "@/lib/api/endpoints";
 import { pickLocaleArray, pickLocaleField } from "@/lib/locale";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { ExerciseMedia } from "@/components/exercise-media";
+import { ExercisePersonalRecordCard } from "@/components/exercise-personal-record-card";
+import { ExerciseProgressChart } from "@/components/exercise-progress-chart";
 
 export function ExerciseDetailClient({ id }: { id: string }) {
   const t = useTranslations("exercises");
@@ -67,6 +69,10 @@ export function ExerciseDetailClient({ id }: { id: string }) {
           {description || t("noDescription")}
         </p>
       </Card>
+
+      <ExercisePersonalRecordCard exerciseId={ex.id} />
+
+      <ExerciseProgressChart exerciseId={ex.id} />
 
       {tips.length > 0 && (
         <Card className="space-y-2">
