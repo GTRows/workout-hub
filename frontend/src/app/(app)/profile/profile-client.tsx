@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NotificationsSection } from "./notifications-section";
 import { SupplementsSection } from "./supplements-section";
 import { WebhookTokensSection } from "./webhook-tokens-section";
 
@@ -252,6 +253,7 @@ export function ProfileClient() {
 
       <SupplementsSection />
       <WebhookTokensSection />
+      <NotificationsSection />
 
       <section className="mt-8 border-t border-border pt-6">
         <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
