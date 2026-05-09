@@ -168,7 +168,26 @@
     "oneRmTitle": "Estimated 1RM",
     "oneRmDescription": "Calculated with the Epley formula.",
     "oneRmEmpty": "Not enough data yet.",
-    "exerciseLabel": "Exercise"
+    "exerciseLabel": "Exercise",
+    "weightTitle": "Weight trend",
+    "weightDescription": "Recent weight change.",
+    "weightCurrent": "Current: {value} kg",
+    "weightDelta": "Change: {value} kg",
+    "weightDeltaEmpty": "Not enough entries yet.",
+    "weightRange": {
+      "seven": "7 days",
+      "thirty": "30 days",
+      "all": "All"
+    },
+    "range": {
+      "fourWeeks": "4 weeks",
+      "twelveWeeks": "12 weeks",
+      "twentySixWeeks": "26 weeks"
+    },
+    "volumeTooltipLabel": "Total volume (kg)",
+    "oneRmTooltipLabel": "1RM (kg)",
+    "prTeaserTitle": "Recent PRs",
+    "prTeaserViewAll": "View all"
   },
   "prs": {
     "title": "Personal records",

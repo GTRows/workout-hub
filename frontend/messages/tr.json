@@ -168,7 +168,26 @@
     "oneRmTitle": "Tahmini 1RM",
     "oneRmDescription": "Epley formulu ile hesaplanir.",
     "oneRmEmpty": "Yeterli veri yok.",
-    "exerciseLabel": "Hareket"
+    "exerciseLabel": "Hareket",
+    "weightTitle": "Kilo gidisati",
+    "weightDescription": "Son donemdeki agirlik degisimi.",
+    "weightCurrent": "Guncel: {value} kg",
+    "weightDelta": "Degisim: {value} kg",
+    "weightDeltaEmpty": "Yeterli kayit yok.",
+    "weightRange": {
+      "seven": "7 gun",
+      "thirty": "30 gun",
+      "all": "Tumu"
+    },
+    "range": {
+      "fourWeeks": "4 hafta",
+      "twelveWeeks": "12 hafta",
+      "twentySixWeeks": "26 hafta"
+    },
+    "volumeTooltipLabel": "Toplam volume (kg)",
+    "oneRmTooltipLabel": "1RM (kg)",
+    "prTeaserTitle": "Son rekorlar",
+    "prTeaserViewAll": "Tumunu gor"
   },
   "prs": {
     "title": "Rekorlar",
