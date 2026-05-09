@@ -64,13 +64,6 @@ suite in CI.
 **Owner:** aciro
 **Status:** Open
 
-### i-8 — Defer Spring Boot 3.4 -> 4.0 major framework bump (PR #8)
-
-**PR:** https://github.com/GTRows/workout-hub/pull/8
-**Reason for defer:** Spring Boot 4 brings Servlet 6 / Hibernate 7 / Spring Framework 7 changes. Cannot land in v0.3 self-hosted-contract scope. The Spring Boot 3.4.x line is still actively patched.
-
-**Trigger to reopen:** Spring Boot 3.4 EOL OR v0.6 (Operational Maturity) milestone OR a security-driven need.
-
 ### i-12: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport returns 500
 
 - **What**: GET /api/export/full returns HTTP 500 when called for a freshly-seeded user with one day-less plan, no sessions, no metrics. Test asserts 200 at line 134 of FullExportImportIntegrationTest.java.
@@ -194,3 +187,38 @@ start pattern) is compatibility-preserved across the 1.20 -> 1.21 hop. All
 inherit from AbstractIntegrationTest with zero direct Testcontainers imports
 and required no edits. The eventual 2.x major bump is re-deferred as
 follow-up issue i-7b, triggered by the upstream Testcontainers 2.0.0 GA.*
+
+### i-8 — Defer Spring Boot 3.4 -> 4.0 major framework bump (PR #8)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/8
+**Reason for defer:** Spring Boot 4 brings Servlet 6 / Hibernate 7 / Spring Framework 7 changes. Cannot land in v0.3 self-hosted-contract scope. The Spring Boot 3.4.x line is still actively patched.
+
+**Trigger to reopen:** Spring Boot 3.4 EOL OR v0.6 (Operational Maturity) milestone OR a security-driven need.
+
+*Closed by Phase 40 Plan 01: bumped `<spring-boot-starter-parent>`
+`<version>` from 3.5.14 to 4.0.6 (latest stable 4.0.x as of 2026-05-09;
+4.1.0-RC1 deliberately not adopted because it is RC, not GA). The
+project bumped through 3.5.14 in v0.3.1 and stayed there until this
+plan; the actual bump path executed was 3.5.14 -> 4.0.6. Spring
+Framework 7.0.7 / Spring Security 7.0.5 / Hibernate 7.2.12.Final /
+Jakarta EE 11 (Servlet 6.1.0, Persistence 3.2.0, Validation 3.1.1)
+transitives flow in via the BOM. SecurityConfig DSL surfaces preserved
+verbatim under Spring Security 7; all 24 Spring Data JPA repositories
+preserved; all 24 `@Entity` / `@Embeddable` classes preserved (zero
+Hibernate-6-deprecated `GenericGenerator` usage); structured-logging
+ECS customizer (`StructuredLoggingJsonMembersCustomizer` SPI) still
+resolves; SpringDoc 2.6.0 `ControllerAdviceBean(Object)` workaround
+stays valid (the constructor removal in Spring 6.2 is permanent in
+Spring 7; i-13 still open). `<netty.version>4.1.133.Final</netty.version>`
+override dropped — Spring Boot 4.0.6 BOM ships
+`<netty.version>4.2.12.Final</netty.version>` which is strictly newer
+than the v0.5.0 4.1.x CVE-pin floor; i-14 (Netty 4.2.13.Final for
+CVE-2026-42577) stays open and narrows to a 4.2.12 -> 4.2.13 micro
+bump under Phase 41. `<postgresql.version>42.7.11</postgresql.version>`
+override stays — BOM ships 42.7.10. `asynchttpclient` + `jose4j` CVE
+overrides on `nl.martijndwars:web-push` transitive stay pinned (Spring
+Boot BOM does not manage them). `jjwt`, `springdoc`, `webpush`,
+`bouncycastle`, `jacoco`, `totp` pins all unchanged (third-party, not
+BOM-managed). Java 21 LTS runtime preserved (Dockerfile build-stage
+`maven:3.9.9-eclipse-temurin-21` and runtime `eclipse-temurin:21-jre-alpine`
+unchanged). CI is the authoritative gate per the local-Maven-gap.*
