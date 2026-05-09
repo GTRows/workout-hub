@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PrToast } from "@/components/pr-toast";
 
 type Range = "week" | "month" | "all";
 
@@ -41,20 +42,31 @@ export function MetricsClient() {
     weightKg: "",
     bodyFatPercent: "",
     waistCm: "",
+    chestCm: "",
+    armCm: "",
+    thighCm: "",
     notes: "",
   });
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const saveMutation = useMutation({
     mutationFn: (payload: UpsertBodyMetricPayload) => upsertMetric(payload),
-    onSuccess: () => {
+    onSuccess: ({ created }) => {
       qc.invalidateQueries({ queryKey: ["metrics"] });
       setForm((prev) => ({
         ...prev,
         weightKg: "",
         bodyFatPercent: "",
         waistCm: "",
+        chestCm: "",
+        armCm: "",
+        thighCm: "",
         notes: "",
       }));
+      setToastMessage(created ? t("toastCreated") : t("toastUpdated"));
+    },
+    onError: () => {
+      setToastMessage(t("toastError"));
     },
   });
 
@@ -71,9 +83,16 @@ export function MetricsClient() {
     if (form.weightKg) payload.weightKg = Number(form.weightKg);
     if (form.bodyFatPercent) payload.bodyFatPercent = Number(form.bodyFatPercent);
     if (form.waistCm) payload.waistCm = Number(form.waistCm);
+    if (form.chestCm) payload.chestCm = Number(form.chestCm);
+    if (form.armCm) payload.armCm = Number(form.armCm);
+    if (form.thighCm) payload.thighCm = Number(form.thighCm);
     if (form.notes) payload.notes = form.notes;
     saveMutation.mutate(payload);
   };
+
+  const toastNode = toastMessage ? (
+    <PrToast message={toastMessage} onDismiss={() => setToastMessage(null)} />
+  ) : null;
 
   return (
     <div className="space-y-4">
@@ -173,6 +192,45 @@ export function MetricsClient() {
               }
             />
           </div>
+          <div className="space-y-1">
+            <Label htmlFor="chestCm">{t("chestCm")}</Label>
+            <Input
+              id="chestCm"
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={form.chestCm}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, chestCm: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="armCm">{t("armCm")}</Label>
+            <Input
+              id="armCm"
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={form.armCm}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, armCm: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="thighCm">{t("thighCm")}</Label>
+            <Input
+              id="thighCm"
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={form.thighCm}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, thighCm: e.target.value }))
+              }
+            />
+          </div>
           <div className="col-span-2 space-y-1">
             <Label htmlFor="notes">{t("notes")}</Label>
             <Input
@@ -205,6 +263,10 @@ export function MetricsClient() {
                 <p className="text-muted-foreground">
                   {m.weightKg != null ? `${m.weightKg}kg` : "-"}
                   {m.bodyFatPercent != null ? ` · ${m.bodyFatPercent}%` : ""}
+                  {m.waistCm != null ? ` · ${m.waistCm}cm` : ""}
+                  {m.chestCm != null ? ` · ${m.chestCm}cm` : ""}
+                  {m.armCm != null ? ` · ${m.armCm}cm` : ""}
+                  {m.thighCm != null ? ` · ${m.thighCm}cm` : ""}
                   {m.notes ? ` · ${m.notes}` : ""}
                 </p>
               </div>
@@ -224,6 +286,8 @@ export function MetricsClient() {
           ))}
         </ul>
       )}
+
+      {toastNode}
     </div>
   );
 }

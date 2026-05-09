@@ -47,6 +47,9 @@ const messages = {
     chartTitle: "Weight chart",
     range: { week: "7 days", month: "30 days", all: "All" },
     saveSuccess: "Saved",
+    toastCreated: "Measurement saved",
+    toastUpdated: "Measurement updated",
+    toastError: "Could not save measurement",
     deleteAction: "Delete",
     deleteConfirm: "Delete this entry?",
   },
@@ -178,5 +181,155 @@ describe("MetricsClient", () => {
       "aria-pressed",
       "true"
     );
+  });
+
+  it("renders chest, arm, thigh inputs and submits them when filled", async () => {
+    let posted: unknown = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.endsWith("/api/metrics") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.endsWith("/api/metrics") && method === "POST") {
+          posted = JSON.parse(init!.body as string);
+          return jsonResponse(
+            201,
+            metric("ffffffff-4444-4444-4444-444444444444", "2026-04-23", 78)
+          );
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<MetricsClient />);
+    await screen.findByText(/no entries yet/i);
+
+    fireEvent.change(screen.getByLabelText(/Weight \(kg\)/i), {
+      target: { value: "78" },
+    });
+    fireEvent.change(screen.getByLabelText(/Chest/i), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText(/Arm/i), {
+      target: { value: "35" },
+    });
+    fireEvent.change(screen.getByLabelText(/Thigh/i), {
+      target: { value: "58" },
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(posted).not.toBeNull());
+    const body = posted as Record<string, unknown>;
+    expect(body.weightKg).toBe(78);
+    expect(body.chestCm).toBe(100);
+    expect(body.armCm).toBe(35);
+    expect(body.thighCm).toBe(58);
+    expect(body.bodyFatPercent).toBeUndefined();
+    expect(body.waistCm).toBeUndefined();
+    expect(body.notes).toBeUndefined();
+  });
+
+  it("shows the 'created' toast on a 201 response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.endsWith("/api/metrics") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.endsWith("/api/metrics") && method === "POST") {
+          return jsonResponse(
+            201,
+            metric("ffffffff-5555-5555-5555-555555555555", "2026-04-23", 78)
+          );
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<MetricsClient />);
+    await screen.findByText(/no entries yet/i);
+
+    fireEvent.change(screen.getByLabelText(/Weight \(kg\)/i), {
+      target: { value: "78" },
+    });
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    const toast = await screen.findByTestId("pr-toast");
+    expect(toast).toHaveTextContent("Measurement saved");
+  });
+
+  it("shows the 'updated' toast on a 200 response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.endsWith("/api/metrics") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.endsWith("/api/metrics") && method === "POST") {
+          return jsonResponse(
+            200,
+            metric("ffffffff-6666-6666-6666-666666666666", "2026-04-23", 78)
+          );
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<MetricsClient />);
+    await screen.findByText(/no entries yet/i);
+
+    fireEvent.change(screen.getByLabelText(/Weight \(kg\)/i), {
+      target: { value: "78" },
+    });
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    const toast = await screen.findByTestId("pr-toast");
+    expect(toast).toHaveTextContent("Measurement updated");
+  });
+
+  it("shows an error toast when upsert fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.endsWith("/api/metrics") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.endsWith("/api/metrics") && method === "POST") {
+          return jsonResponse(500, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 500,
+            error: "Internal Server Error",
+            message: "Database busy",
+            path: "/api/metrics",
+          });
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderClient(<MetricsClient />);
+    await screen.findByText(/no entries yet/i);
+
+    fireEvent.change(screen.getByLabelText(/Weight \(kg\)/i), {
+      target: { value: "78" },
+    });
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    const toast = await screen.findByTestId("pr-toast");
+    expect(toast).toHaveTextContent("Could not save measurement");
   });
 });
