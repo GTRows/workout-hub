@@ -10,6 +10,15 @@ and uses it as the GitHub release notes. Do not change the heading format.
 
 ## [Unreleased]
 
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [0.5.0] - 2026-05-09
+
 Frontend feature completion release. Closes the v0.5 UI deliverables across
 phases 22-30: auth UX polish, dashboard cards, full plan editor, session
 execution with offline IndexedDB drain, exercise catalog detail surface,
