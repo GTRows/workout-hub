@@ -40,6 +40,23 @@ const messages = {
     logoutHeading: "Account",
     loadError: "Could not load your profile.",
     retry: "Retry",
+    notifications: {
+      title: "Notifications",
+      description: "Push reminders",
+      statusGranted: "Active on this device",
+      statusDefault: "Permission needed",
+      statusDenied: "Permission denied",
+      statusUnsupported: "Not supported on this browser",
+      disable: "Disable",
+      testButton: "Send test notification",
+    },
+  },
+  push: {
+    test: {
+      success: "Test notification sent (recipients: {count})",
+      zero: "No subscriptions yet",
+      error: "Failed to send test notification",
+    },
   },
   errors: {
     api: {
@@ -279,6 +296,26 @@ describe("ProfileClient", () => {
     await waitFor(() =>
       expect(screen.getByLabelText(/display name/i)).toHaveValue("Fatih")
     );
+  });
+
+  it("mounts the notifications section", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/users/me")) return jsonResponse(200, userMe());
+        if (url.endsWith("/api/supplements")) return jsonResponse(200, []);
+        if (url.includes("/api/users/me/webhook-tokens"))
+          return jsonResponse(200, []);
+        throw new Error("unexpected fetch: " + url);
+      })
+    );
+
+    renderClient(<ProfileClient />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("notifications-section")).toBeInTheDocument();
+    });
   });
 
   it("uses the typed-error helper for the save failure flash", async () => {
