@@ -353,6 +353,19 @@ export const healthImportResultSchema = z.object({
 
 export type HealthImportResult = z.infer<typeof healthImportResultSchema>;
 
+export const importResultSchema = z.object({
+  profileUpdated: z.number().int().nonnegative(),
+  metricsInserted: z.number().int().nonnegative(),
+  supplementsInserted: z.number().int().nonnegative(),
+  plansInserted: z.number().int().nonnegative(),
+  sessionsInserted: z.number().int().nonnegative(),
+  userEmail: z.string(),
+  warnings: z.array(z.string()).optional(),
+  suggestions: z.array(z.string()).optional(),
+});
+
+export type ImportResult = z.infer<typeof importResultSchema>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;
