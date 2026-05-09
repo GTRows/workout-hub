@@ -26,7 +26,21 @@ describe("ServiceWorkerRegistrar", () => {
 
     render(<ServiceWorkerRegistrar />);
 
-    expect(register).toHaveBeenCalledWith("/sw.js");
+    expect(register).toHaveBeenCalledWith("/sw.js", { scope: "/" });
+  });
+
+  it("registers with scope: '/' explicitly", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const register = vi.fn(() => Promise.resolve({} as ServiceWorkerRegistration));
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: { register },
+    });
+
+    render(<ServiceWorkerRegistrar />);
+
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(register).toHaveBeenCalledWith("/sw.js", { scope: "/" });
   });
 
   it("does nothing outside of production", () => {
