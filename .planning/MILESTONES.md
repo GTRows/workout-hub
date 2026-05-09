@@ -1,5 +1,44 @@
 # Project Milestones: WorkoutHub
 
+## v0.5 Frontend Completion (Shipped: 2026-05-09)
+
+**Delivered:** Frontend feature surface complete per `ProjectBrief.md` Phases 4-6 (frontend slice). Shipped the user-facing app shell across 13 phases (10 main + 3 inserted decimals): frontend audit baseline, auth pages with typed-error UX and logout/session-expired handling, typed `ApiError.code` helper wired across the app, dashboard with today-card + weekly-summary + last-weight, plan editor with workout-plan + day + day-exercise CRUD and accessible day-level drag-drop reorder, session-execution screen with `clientSetId` UUID idempotency, IndexedDB drain on online event, typed 409 UX (SESSION_ALREADY_ACTIVE / SESSION_ALREADY_FINISHED / SESSION_FINISHED), RPE input + inline set edit/delete, Zod schema parity for ImportResult / FullExport / vapid / push-subscribe surfaces, exercise-catalog detail with PR card + progress chart, history-view per-session detail + Repeat-workout CTA, metrics-ui with chest/arm/thigh inputs + 200/201 toast split, profile-settings with load-error banners + a11y polish, the middleware-matcher route-coverage gate for `/achievements`, and export-import-ui with destructive-import confirm gate + bounded export-history shim.
+
+**Phases completed:** 21-30 (19 plans total; 13 phases counting decimal phases 22.5 / 25.5 / 29.5).
+
+**Releases:** v0.5.0 (cut 2026-05-09 at sha `5efaeb5`; multi-arch GHCR images at `ghcr.io/gtrows/workouthub-{backend,frontend}:0.5.0`; draft GitHub Release published; followed by a same-day Netty CVE patch window through `931cb69`).
+
+**Key accomplishments:**
+
+- Phase 21 audit (`.planning/phases/21-frontend-audit/21-01-AUDIT.md`) catalogued the full route tree, component layers, API client coverage matrix vs. the v0.4 backend, the ProjectBrief Phase 4-6 gap matrix, and the v0.5 test gate posture; net-new phases (22.5 typed-apierror-helper, 25.5 zod-schemas, 29.5 middleware-matcher-gap) were inserted from the audit's Section 6.
+- Auth shell (Phase 22): `LogoutButton` mounted in desktop nav and profile page, `/login?reason=session-expired` redirect on token clear, session-expired alert banner, `nav.logout` + `sessionExpired` i18n keys.
+- Typed ApiError helper (Phase 22.5, INSERTED): exposed `ApiError.code` field from the backend envelope, added typed-code helpers + i18n key map, `errors.api.generic` fallback translation; wired the helper across session-client mutations and dashboard start-mutation in Phase 25-03 (`SESSION_ALREADY_ACTIVE` UX).
+- Dashboard (Phase 23): iso-week range helper, `WeeklySummaryCard` with `isInRange` aggregation, `LastWeightCard` with relative-date readout (`relative-date` helper), all mounted on the dashboard with i18n.
+- Plan editor (Phase 24, 4 plans): full `PlanList` (create/rename/activate/delete) + `PlanRenameDialog`, `DayCard` + `DayEditDialog` with day-CRUD mutations and aligned focus enum casing, `DayExercisesSection` + `ExerciseEditDialog` with day-exercise CRUD, and `SortableDayGrid` with accessible day-level drag-drop reorder; new endpoint wrappers for workout-plan / workout-day / day-exercise CRUD and the `workoutFocus` schema.
+- Session execution (Phase 25, 4 plans): added `clientSetId` UUID generation per submit and `addSetRequestSchema` with the field; wired IndexedDB drain on `online` event with offline-submit fallback and the permanent-reject branch in `drainForSession`; branched on typed ApiError codes (`SESSION_ALREADY_ACTIVE` / `SESSION_ALREADY_FINISHED` / `SESSION_FINISHED`) with i18n; added RPE input + inline edit/delete UX in `ExerciseBlock` plus `updateSet` / `deleteSet` wrappers and the `updateSetRequestSchema`.
+- Zod schema parity (Phase 25.5, INSERTED): added `importResultSchema` mirroring backend `ImportResultDto`, `fullExportSchema` family mirroring `FullExportDto`, vapid + push subscribe schemas; wired all four into endpoint wrappers; aligned the export-client full-export fixture with the new schema.
+- Exercise catalog detail (Phase 26): wrapped `GET /api/exercises/{id}/progress` with a Zod schema, added `ExerciseProgressChart` with locale-aware tooltip and `ExercisePersonalRecordCard` from last-performance bestSet; mounted both on the exercise detail page; added PR + progress-chart i18n keys.
+- History view (Phase 27): per-session card gained the Repeat-workout CTA.
+- Metrics UI (Phase 28): added `returnStatus` overload to the api request wrapper, `UpsertMetricResult` with `created` flag, chest/arm/thigh inputs and the 200/201 toast split (`toastCreated` / `toastUpdated` / `toastError`).
+- Profile settings (Phase 29): wired the typed ApiError helper and a11y form region in `profile-client`, surfaced load-error banners + toast errors in `supplements-section` and `webhook-tokens-section`, added profile / supplements / webhook a11y polish error keys.
+- Middleware matcher gate (Phase 29.5, INSERTED): closed the Next.js middleware route-coverage gap on `/achievements` (added to both `PROTECTED_PREFIXES` and `config.matcher` arrays in `frontend/src/middleware.ts`), shipped the first-ever `frontend/src/middleware.test.ts` vitest suite with 6 it-blocks asserting both arrays cover all 12 (app)-group segments and the redirect/pass-through behavior.
+- Export/import UI (Phase 30): export-history `localStorage` shim with bounded entries + `useSyncExternalStore` snapshot caching, `ExportHistoryCard` component with relative timestamps and clear button, destructive-import confirm gate, download-history append on download; added export confirm + history i18n keys.
+- Cut `v0.5.0` release at sha `5efaeb5` with multi-arch GHCR images and the `## [0.5.0] - 2026-05-09` `CHANGELOG.md` block; same-day patch window overrode Netty to `4.1.133.Final` to close CVE-2026-42583/42584/42587, and suppressed CVE-2026-42577 (Netty epoll, no 4.1.x backport, no runtime path) in trivy with the suppression noted in the changelog and tracked as i-14.
+
+**Stats:**
+
+- 19 plans across 13 phases (10 main: 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 + 3 inserted decimals: 22.5, 25.5, 29.5).
+- Files modified across the milestone: 110 across the v0.4.0 -> v0.5.0 git range (+24390 / -364 line delta).
+- Timeline: 2026-05-07 13:56 (v0.4 archive bookkeeping committed) to 2026-05-09 15:33 (v0.5.0 patch window close at 931cb69) = ~2 days, 1.5 hours including the same-day Netty CVE patch window.
+
+**Git range:** `v0.4.0..v0.5.0` (118 commits). Tag: `v0.5.0` at `5efaeb5`.
+
+**What's next:** v0.6 Operational Maturity - Phases 31-37: charts-stats (volume, 1RM Epley, weight change, frequency heatmap, PR list, streak), pwa-polish, web-push-notifications, rest-timer-notifications, frontend-http-metrics (i-4), error-states-perf-budgets, structured-logging-test-fix (i-9).
+
+**Archive:** [milestones/v0.5-ROADMAP.md](milestones/v0.5-ROADMAP.md)
+
+---
+
 ## v0.4 Backend Feature Completion (Shipped: 2026-05-07)
 
 **Delivered:** Backend feature surface complete per `ProjectBrief.md` Phases 3-5. Shipped 14 new endpoints across the analytics + body-metrics slices, persisted PR durability via the new `is_pr` column on `session_sets`, hardened the offline-first sessions sync contract with `clientSetId` idempotency + typed 409 codes, refined the LLM-paste claude-summary surface to snake_case + the ProjectBrief field set, exposed the runtime OpenAPI document at `GET /v3/api-docs` with Swagger UI at `GET /swagger-ui.html`, and closed two carried-forward disabled-test debts (i-1, i-2).

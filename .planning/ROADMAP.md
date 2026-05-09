@@ -4,7 +4,7 @@
 
 WorkoutHub is a self-hosted multi-user fitness tracker with a Java 21 + Spring Boot 3 backend and a Next.js 15 + React 19 frontend, packaged as Docker images for operators to run on their own infrastructure. The project ships against a portable contract documented at `docs/SELF_HOSTED_CONTRACT.md`; the maintainer's reference deployment lives separately at `GTRows/homelab` and is not part of this repository.
 
-Pre-GSD work (informally tracked in `.planning/HANDOFF.md`) delivered the application surface area through v0.2: 23 backend feature packages, 25 Flyway migrations, the offline session queue, OIDC controller, push notifications, smart-scale webhook, and JSON export. Formal GSD planning starts at v0.3. The full path from v0.4 through v1.0 is scoped below (32 phases, Phase 13-44) with v0.4 phases fully detailed and later milestones outlined.
+Pre-GSD work (informally tracked in `.planning/HANDOFF.md`) delivered the application surface area through v0.2: 23 backend feature packages, 25 Flyway migrations, the offline session queue, OIDC controller, push notifications, smart-scale webhook, and JSON export. Formal GSD planning starts at v0.3. The full path from v0.4 through v1.0 is scoped below (32 phases, Phase 13-44); v0.3, v0.4, and v0.5 are shipped, v0.6 is active, v1.0 is planned.
 
 ## Domain Expertise
 
@@ -15,8 +15,8 @@ None - project is application code; planning draws from `docs/SELF_HOSTED_CONTRA
 - (Pre-GSD) **v0.1 / v0.2** - shipped pre-GSD (informal); see `.planning/HANDOFF.md` for state snapshot
 - (Shipped) [**v0.3 Self-Hosted Contract Alignment**](milestones/v0.3-ROADMAP.md) - Phases 1-12 (shipped 2026-05-03; v0.3.0/v0.3.1/v0.3.2)
 - (Shipped) [**v0.4 Backend Feature Completion**](milestones/v0.4-ROADMAP.md) - Phases 13-20 (shipped 2026-05-07; v0.4.0)
-- (Active) **v0.5 Frontend Completion** - Phases 21-30
-- (Planned) **v0.6 Operational Maturity** - Phases 31-37
+- (Shipped) [**v0.5 Frontend Completion**](milestones/v0.5-ROADMAP.md) - Phases 21-30 (shipped 2026-05-09; v0.5.0)
+- (Active) **v0.6 Operational Maturity** - Phases 31-37
 - (Planned) **v1.0 Release Hardening** - Phases 38-44
 
 ## Phases
@@ -37,56 +37,28 @@ Full archive: [milestones/v0.4-ROADMAP.md](milestones/v0.4-ROADMAP.md).
 
 </details>
 
-### v0.5 Frontend Completion (Active)
+<details>
+<summary>v0.5 Frontend Completion (Phases 21-30) - SHIPPED 2026-05-09</summary>
 
-**Milestone Goal:** Ship the user-facing surfaces - auth pages, dashboard, plan editor, session-execution screen with the offline queue wired to the v0.4 sync contract, history, metrics UI, profile, export UI.
+Full archive: [milestones/v0.5-ROADMAP.md](milestones/v0.5-ROADMAP.md).
 
-Phase outline (full breakdown deferred to /gsd:new-milestone when v0.4 ships):
-- Phase 21: frontend-audit - inventory routes/components, classify stubs vs real surfaces.
-- Phase 22: auth-pages - login/register, client session, refresh token flow, error states.
+- [x] Phase 21: frontend-audit (1/1 plan) - completed 2026-05-07
+- [x] Phase 22: auth-pages (1/1 plan) - completed 2026-05-07
+- [x] Phase 22.5: typed-apierror-helper (1/1 plan, INSERTED) - completed 2026-05-08
+- [x] Phase 23: dashboard (1/1 plan) - completed 2026-05-08
+- [x] Phase 24: plan-editor (4/4 plans) - completed 2026-05-08
+- [x] Phase 25: session-execution (4/4 plans) - completed 2026-05-08
+- [x] Phase 25.5: zod-schemas (1/1 plan, INSERTED) - completed 2026-05-08
+- [x] Phase 26: exercise-catalog (1/1 plan) - completed 2026-05-08
+- [x] Phase 27: history-view (1/1 plan) - completed 2026-05-08
+- [x] Phase 28: metrics-ui (1/1 plan) - completed 2026-05-09
+- [x] Phase 29: profile-settings (1/1 plan) - completed 2026-05-09
+- [x] Phase 29.5: middleware-matcher-gap (1/1 plan, INSERTED) - completed 2026-05-09
+- [x] Phase 30: export-import-ui (1/1 plan) - completed 2026-05-09
 
-#### Phase 22.5: typed-apierror-helper (INSERTED)
+</details>
 
-**Goal:** Surface the v0.4 backend `ApiError.code` typed enum (SESSION_ALREADY_ACTIVE, SESSION_ALREADY_FINISHED, SESSION_FINISHED, SET_NUMBER_DUPLICATE, plus future codes) on the frontend so Phase 25 session-execution can branch on typed codes instead of parsing error messages.
-**Depends on:** Phase 22
-**Research:** Unlikely (v0.4 ApiError shape is documented in docs/API.md)
-**Plans:** 1
-
-Plans:
-- [ ] 22.5-01: typed-apierror-helper
-
-- Phase 23: dashboard - today's workout card, weekly summary, last weight, quick actions.
-- Phase 24: plan-editor - weekly view, drag-drop reorder (days + exercises), exercise CRUD modal.
-- Phase 25: session-execution - set logging UI, rest timer, last-performance display, IndexedDB offline queue and sync.
-
-#### Phase 25.5: zod-schemas (INSERTED)
-
-**Goal:** Extract reusable Zod response/request schemas for the v0.4 backend API contract surfaces still using `unknown`/loose typing in the frontend (notably ImportResult, FullExport, ExportSummary, and any other endpoint wrappers that bypass Zod validation), so consumers get type-safe payloads with the same idempotency/contract guarantees that 25-01 brought to addSet.
-**Depends on:** Phase 25
-**Research:** Unlikely (v0.4 backend OpenAPI doc is the contract source)
-**Plans:** 1
-
-Plans:
-- [ ] 25.5-01: zod-schemas
-
-- Phase 26: exercise-catalog - filters (muscle/equipment/difficulty), search, detail modal (how-to, tips, mistakes, PR, progress chart).
-- Phase 27: history-view - calendar with completed days marked, per-session detail page.
-- Phase 28: metrics-ui - weight chart (weekly/monthly/all-time), measurement form, optional progress photo upload.
-- Phase 29: profile-settings - user info, health notes, goals, supplements list editing.
-
-#### Phase 29.5: middleware-matcher-gap (INSERTED)
-
-**Goal:** Fix Next.js middleware matcher omission — the `/achievements/:path*` route exists and is in the top nav but is not in the auth middleware matcher list, leaving it accessible without auth.
-**Depends on:** Phase 29
-**Research:** Unlikely (matcher config is well-understood)
-**Plans:** 1
-
-Plans:
-- [ ] 29.5-01: middleware-matcher-gap
-
-- Phase 30: export-import-ui - JSON download, JSON restore, "Claude summary" action button.
-
-### v0.6 Operational Maturity (Planned)
+### v0.6 Operational Maturity (Active)
 
 **Milestone Goal:** Real-world hardening for daily use - statistics dashboards, PWA install, web push, frontend metrics, error states, perf budgets, and resolving the v0.3 logging-test debt.
 
@@ -115,15 +87,12 @@ Phase outline:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order. v0.4 starts at Phase 13.
+Phases execute in numeric order. v0.6 starts at Phase 31.
 
 | Phase                       | Milestone | Plans | Status      | Completed  |
 | --------------------------- | --------- | ----- | ----------- | ---------- |
 | 1-12 (v0.3 scope)           | v0.3      | 14/14 | Complete    | 2026-05-03 |
 | 13-20 (v0.4 scope)          | v0.4      | 25/25 | Complete    | 2026-05-07 |
-| 21-30 (v0.5 scope)          | v0.5      | 0/?   | Active      | -          |
-| 22.5 typed-apierror-helper  | v0.5      | 0/1   | Not started | -          |
-| 25.5 zod-schemas            | v0.5      | 0/1   | Not started | -          |
-| 29.5 middleware-matcher-gap | v0.5      | 0/1   | Not started | -          |
-| 31-37 (v0.6 scope)          | v0.6      | 0/?   | Planned     | -          |
+| 21-30 (v0.5 scope)          | v0.5      | 19/19 | Complete    | 2026-05-09 |
+| 31-37 (v0.6 scope)          | v0.6      | 0/?   | Active      | -          |
 | 38-44 (v1.0 scope)          | v1.0      | 0/?   | Planned     | -          |
