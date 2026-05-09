@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { fetchPersonalRecords } from "@/lib/api/endpoints";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { pickLocaleField } from "@/lib/locale";
 
 export function PrsClient() {
@@ -16,7 +17,7 @@ export function PrsClient() {
   });
 
   if (query.isLoading) {
-    return <p className="text-muted-foreground">{t("loading")}</p>;
+    return <RouteSkeleton variant="prs" />;
   }
 
   const prs = query.data ?? [];

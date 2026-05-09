@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { fetchAchievements } from "@/lib/api/endpoints";
 import type { Achievement } from "@/lib/api/schemas";
 
@@ -25,9 +26,7 @@ export function AchievementsClient() {
   });
 
   if (query.isLoading) {
-    return (
-      <p className="text-sm text-muted-foreground">{t("loading")}</p>
-    );
+    return <RouteSkeleton variant="achievements" />;
   }
   if (!query.data) {
     return (

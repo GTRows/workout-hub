@@ -32,6 +32,9 @@ const messages = {
       volume_kg: "Total volume (kg)",
     },
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement) {

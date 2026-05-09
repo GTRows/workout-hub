@@ -20,6 +20,9 @@ const messages = {
     empty: "No records yet.",
     oneRm: "1RM {value} kg",
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement) {
