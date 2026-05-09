@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { fetchMe, updateMe, type UpdateProfilePayload } from "@/lib/api/endpoints";
+import { apiErrorCodeMessageKey, isApiError } from "@/lib/api/api-error-codes";
 import type { UserMe } from "@/lib/api/schemas";
 import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
@@ -43,11 +44,13 @@ const EMPTY_FORM: FormState = {
 
 export function ProfileClient() {
   const t = useTranslations("profile");
+  const tErrors = useTranslations("errors.api");
   const qc = useQueryClient();
 
   const meQuery = useQuery({ queryKey: ["users", "me"], queryFn: fetchMe });
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [flash, setFlash] = useState<"saved" | "error" | null>(null);
+  const [flashMessage, setFlashMessage] = useState<string>("");
 
   useEffect(() => {
     if (!meQuery.data) return;
@@ -60,8 +63,24 @@ export function ProfileClient() {
       qc.setQueryData(["users", "me"], fresh);
       setFlash("saved");
     },
-    onError: () => setFlash("error"),
+    onError: (err) => {
+      setFlashMessage(resolveError(err, tErrors, t("error")));
+      setFlash("error");
+    },
   });
+
+  if (meQuery.isError) {
+    return (
+      <div className="space-y-3">
+        <p role="alert" className="text-sm text-destructive">
+          {t("loadError")}
+        </p>
+        <Button variant="outline" size="sm" onClick={() => meQuery.refetch()}>
+          {t("retry")}
+        </Button>
+      </div>
+    );
+  }
 
   if (meQuery.isLoading || !meQuery.data) {
     return <p className="text-muted-foreground">{t("loading")}</p>;
@@ -93,7 +112,17 @@ export function ProfileClient() {
         <CardDescription>{t("email")}</CardDescription>
       </Card>
 
-      <Card className="space-y-3">
+      <form
+        aria-labelledby="profile-form-heading"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit();
+        }}
+      >
+        <h2 id="profile-form-heading" className="sr-only">
+          {t("title")}
+        </h2>
+        <Card className="space-y-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field id="displayName" label={t("displayName")}>
             <Input
@@ -206,7 +235,7 @@ export function ProfileClient() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button onClick={submit} disabled={mutation.isPending}>
+          <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? t("saving") : t("save")}
           </Button>
           {flash === "saved" && (
@@ -214,11 +243,12 @@ export function ProfileClient() {
           )}
           {flash === "error" && (
             <span role="alert" className="text-sm text-destructive">
-              {t("error")}
+              {flashMessage || t("error")}
             </span>
           )}
         </div>
-      </Card>
+        </Card>
+      </form>
 
       <SupplementsSection />
       <WebhookTokensSection />
@@ -248,6 +278,17 @@ function Field({
       {children}
     </div>
   );
+}
+
+function resolveError(
+  err: unknown,
+  tErrors: (k: string) => string,
+  fallback: string
+): string {
+  if (!isApiError(err)) return fallback;
+  const keyPath = apiErrorCodeMessageKey(err.code);
+  const leaf = keyPath.split(".").pop()!;
+  return tErrors(leaf);
 }
 
 function toForm(me: UserMe): FormState {
