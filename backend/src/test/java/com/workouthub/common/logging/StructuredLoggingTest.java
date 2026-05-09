@@ -4,20 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
+import com.workouthub.WorkoutHubApplication;
+import com.workouthub.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Exercises the real Spring Boot 3.4 native ECS structured logging pipeline
+ * Exercises the real Spring Boot 3.5 native ECS structured logging pipeline
  * with the prod profile active. Two contract assertions:
  *
  * <ol>
@@ -27,26 +27,27 @@ import org.springframework.test.context.ActiveProfiles;
  *       (e.g. authorization) never leaks its value into the JSON output.</li>
  * </ol>
  *
+ * <p>Boots the full {@link WorkoutHubApplication} via Testcontainers Postgres
+ * (inherited from {@link AbstractIntegrationTest}) so Spring Boot's
+ * {@code LoggingApplicationListener} reconfigures the logging system to ECS
+ * format. The previous {@code @SpringBootConfiguration}-only minimal harness
+ * (closed-out failure path documented in {@code .planning/ISSUES.md} i-9) did
+ * not trigger that listener and therefore ran with the default human-readable
+ * Logback layout.
+ *
  * <p>Uses Spring Boot's OutputCaptureExtension so capture is wired before the
  * Logback appender starts. Setting System.out from a JUnit @BeforeEach does not
  * work because the ConsoleAppender holds the original PrintStream reference.
  */
 @SpringBootTest(
-        classes = StructuredLoggingTest.MinimalConfig.class,
-        webEnvironment = SpringBootTest.WebEnvironment.NONE)
+        classes = WorkoutHubApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        properties = {"spring.main.banner-mode=off"})
 @ActiveProfiles("prod")
 @ExtendWith(OutputCaptureExtension.class)
-@Disabled("ISSUES.md i-9: prod-profile structured logging is not activated under "
-        + "@SpringBootTest with a minimal MinimalConfig; ECS output works at real "
-        + "runtime but the test harness does not reconfigure the logging system. "
-        + "Needs a redesign that boots the full WorkoutHubApplication.")
-class StructuredLoggingTest {
+class StructuredLoggingTest extends AbstractIntegrationTest {
 
     private static final Logger log = LoggerFactory.getLogger(StructuredLoggingTest.class);
-
-    @SpringBootConfiguration
-    static class MinimalConfig {
-    }
 
     @Test
     void prodEmitsJsonWithMessageAndTimestamp(CapturedOutput output) throws Exception {
