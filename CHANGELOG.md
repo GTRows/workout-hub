@@ -84,6 +84,16 @@ baseline) to 263. Backend is unchanged from v0.4.0; pull and restart.
 - N/A -- v0.5 is feature work; backend tests remain green from the
   v0.4.0 hotfix bundle.
 
+### Security
+
+- Override io.netty to 4.1.133.Final (Spring Boot BOM brings
+  4.1.132.Final) to close CVE-2026-42583 (Lz4FrameDecoder ReDoS),
+  CVE-2026-42584 (HttpClientCodec response desync), and
+  CVE-2026-42587 (HttpContentDecompressor maxAllocation bypass).
+  CVE-2026-42577 (epoll RST DoS) deferred -- only fixed in Netty
+  4.2.13.Final, not yet backported to 4.1.x line; will revisit if
+  trivy still reports it after this bump.
+
 ## [0.4.0] - 2026-05-07
 
 Backend feature completion release. Closes the workout-plan editing,
