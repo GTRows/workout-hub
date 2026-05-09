@@ -23,6 +23,8 @@ const SECTIONS: ExportSection[] = [
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { ExportHistoryCard } from "./export-history-card";
+import { appendHistoryEntry } from "./export-history";
 
 function downloadJson(payload: unknown, filename: string) {
   const json = JSON.stringify(payload, null, 2);
@@ -50,7 +52,9 @@ export function ExportClient() {
     mutationFn: () => fetchClaudeSummary(days),
     onSuccess: (body) => {
       const iso = new Date().toISOString().slice(0, 10);
-      downloadJson(body, `workouthub-claude-${iso}.json`);
+      const filename = `workouthub-claude-${iso}.json`;
+      downloadJson(body, filename);
+      appendHistoryEntry({ kind: "claude", filename });
       setLastDownloadedAt(new Date().toLocaleString());
       setError(null);
     },
@@ -65,7 +69,9 @@ export function ExportClient() {
     mutationFn: () => fetchFullExport(),
     onSuccess: (body) => {
       const iso = new Date().toISOString().slice(0, 10);
-      downloadJson(body, `workouthub-full-${iso}.json`);
+      const filename = `workouthub-full-${iso}.json`;
+      downloadJson(body, filename);
+      appendHistoryEntry({ kind: "full", filename });
       setFullDownloadedAt(new Date().toLocaleString());
       setFullError(null);
     },
@@ -84,12 +90,14 @@ export function ExportClient() {
       const url = URL.createObjectURL(blob);
       try {
         const iso = new Date().toISOString().slice(0, 10);
+        const filename = `workouthub-sessions-${iso}.csv`;
         const a = document.createElement("a");
         a.href = url;
-        a.download = `workouthub-sessions-${iso}.csv`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
+        appendHistoryEntry({ kind: "csv", filename });
       } finally {
         URL.revokeObjectURL(url);
       }
@@ -105,7 +113,9 @@ export function ExportClient() {
     try {
       const body = await fetchSectionExport(section);
       const iso = new Date().toISOString().slice(0, 10);
-      downloadJson(body, `workouthub-${section}-${iso}.json`);
+      const filename = `workouthub-${section}-${iso}.json`;
+      downloadJson(body, filename);
+      appendHistoryEntry({ kind: "section", filename, sectionLabel: section });
     } catch {
       setSectionError(t("sectionError", { section }));
     } finally {
@@ -132,6 +142,8 @@ export function ExportClient() {
   const handleImportFile = (file: File) => {
     setImportError(null);
     setImportResult(null);
+    const ok = window.confirm(t("importConfirm", { file: file.name }));
+    if (!ok) return;
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -324,6 +336,8 @@ export function ExportClient() {
           </div>
         )}
       </Card>
+
+      <ExportHistoryCard />
     </div>
   );
 }
