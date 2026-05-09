@@ -1,6 +1,7 @@
 package com.workouthub.push;
 
 import com.workouthub.common.security.AppUserPrincipal;
+import com.workouthub.push.dto.PushTestResponse;
 import com.workouthub.push.dto.SubscribeRequest;
 import com.workouthub.push.dto.SubscriptionDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,5 +50,11 @@ public class PushController {
             @RequestParam("endpoint") String endpoint) {
         service.unsubscribe(principal.userId(), endpoint);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/test")
+    public PushTestResponse sendSelfTest(
+            @AuthenticationPrincipal AppUserPrincipal principal) {
+        return service.sendSelfTest(principal.userId());
     }
 }

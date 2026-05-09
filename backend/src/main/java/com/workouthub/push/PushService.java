@@ -1,7 +1,9 @@
 package com.workouthub.push;
 
+import com.workouthub.notifications.NotificationDispatcher;
 import com.workouthub.push.domain.PushSubscription;
 import com.workouthub.push.domain.PushSubscriptionRepository;
+import com.workouthub.push.dto.PushTestResponse;
 import com.workouthub.push.dto.SubscribeRequest;
 import com.workouthub.push.dto.SubscriptionDto;
 import java.util.UUID;
@@ -13,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class PushService {
 
     private final PushSubscriptionRepository repo;
+    private final NotificationDispatcher dispatcher;
 
-    public PushService(PushSubscriptionRepository repo) {
+    public PushService(PushSubscriptionRepository repo, NotificationDispatcher dispatcher) {
         this.repo = repo;
+        this.dispatcher = dispatcher;
     }
 
     public SubscriptionDto subscribe(UUID userId, SubscribeRequest req) {
@@ -36,5 +40,18 @@ public class PushService {
                 repo.delete(sub);
             }
         });
+    }
+
+    public PushTestResponse sendSelfTest(UUID userId) {
+        int subs = repo.findByUserId(userId).size();
+        if (subs == 0) {
+            return new PushTestResponse(0, 0);
+        }
+        dispatcher.send(
+                userId,
+                "WorkoutHub test reminder",
+                "If you can read this, push notifications are working.",
+                "/profile");
+        return new PushTestResponse(subs, subs);
     }
 }
