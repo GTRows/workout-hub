@@ -165,6 +165,7 @@ Updates flow through the operator's deployment repository (Renovate PR -> human 
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Operator deployment notes (TLS, env vars, push, rest-timer). |
 | [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) | `/livez`, `/healthz`, structured logs, Prometheus metrics. |
 | [`docs/BACKUP.md`](docs/BACKUP.md) | Reference offsite-backup setup with restic. |
+| [`docs/BACKUP_RESTORE_DRILL.md`](docs/BACKUP_RESTORE_DRILL.md) | Operator-runnable runbook for verifying backup integrity (quarterly drill cadence). |
 | [`docs/MIGRATION.md`](docs/MIGRATION.md) | Per-version operator upgrade steps. |
 | [`docs/PERF_BUDGETS.md`](docs/PERF_BUDGETS.md) | Frontend Core Web Vitals and bundle-size ceilings. |
 
