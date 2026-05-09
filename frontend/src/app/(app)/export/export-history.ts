@@ -20,18 +20,32 @@ export type NewHistoryEntry = Omit<HistoryEntry, "timestamp"> & {
   timestamp?: number;
 };
 
+const EMPTY_HISTORY: HistoryEntry[] = [];
+let cachedRaw: string | null = null;
+let cachedValue: HistoryEntry[] = EMPTY_HISTORY;
+
 export function getHistory(): HistoryEntry[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return EMPTY_HISTORY;
+  let raw: string | null;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    raw = window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return EMPTY_HISTORY;
+  }
+  if (raw === cachedRaw) return cachedValue;
+  cachedRaw = raw;
+  if (!raw) {
+    cachedValue = EMPTY_HISTORY;
+    return cachedValue;
+  }
+  try {
     const parsed = JSON.parse(raw);
     const validated = historyArraySchema.safeParse(parsed);
-    if (!validated.success) return [];
-    return validated.data;
+    cachedValue = validated.success ? validated.data : EMPTY_HISTORY;
   } catch {
-    return [];
+    cachedValue = EMPTY_HISTORY;
   }
+  return cachedValue;
 }
 
 const target = typeof window !== "undefined" ? new EventTarget() : null;
