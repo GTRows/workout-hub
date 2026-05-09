@@ -10,12 +10,70 @@ and uses it as the GitHub release notes. Do not change the heading format.
 
 ## [Unreleased]
 
+Frontend feature completion release. Closes the v0.5 UI deliverables across
+phases 22-30: auth UX polish, dashboard cards, full plan editor, session
+execution with offline IndexedDB drain, exercise catalog detail surface,
+history repeat-workout flow, body-metrics inputs and 200/201 toast split,
+profile settings polish, middleware matcher coverage gap closure, and the
+export/import UI with download history. Adds a typed `ApiError` code helper
+module shared across mutations, extends Zod schema validation to import/
+export and push surfaces, and grows the frontend test suite from 99 (v0.4
+baseline) to 263. Backend is unchanged from v0.4.0; pull and restart.
+
 ### Added
+
+- Auth UX: LogoutButton on desktop nav and profile page; SessionExpiredShell
+  auto-redirects to `/login` on token expiry with a reason banner
+  (Phase 22).
+- Typed `ApiError` code helper module (`api-error-codes.ts`) with
+  `ApiErrorCode` constants, `isApiError` / `isApiErrorWithCode` guards,
+  `apiErrorCodeMessageKey` resolver, and an i18n generic fallback
+  (Phase 22.5).
+- Dashboard cards: `WeeklySummaryCard` pulling local-week session count,
+  `LastWeightCard` with relative-date readout, and a QuickActions History
+  link; new iso-week and relative-date helpers (Phase 23).
+- Plan editor: full plan CRUD/activate, day CRUD with `WorkoutFocus` enum,
+  exercise CRUD modal with master catalog picker, and day-level
+  `dnd-kit` drag-drop reorder (Phase 24, 4 sub-plans).
+- Session execution: `addSet` payload now carries a `clientSetId` UUID for
+  backend idempotency; IndexedDB drain wired (`subscribeOnline` +
+  on-mount drain) with a permanent-reject branch on
+  `SESSION_FINISHED`; typed `ApiError` UX on dashboard start, `addSet`,
+  and finish; RPE input on the submit form; inline `EditSetRow` for
+  edit / delete on prior sets (Phase 25, 4 sub-plans).
+- Zod schemas extended to import / export and push subscribe surfaces:
+  `importResultSchema`, `fullExportSchema` family (8 nested),
+  `vapidPublicKeyResponseSchema`, `pushSubscribeRequestSchema`;
+  endpoints validate inbound and outbound payloads (Phase 25.5).
+- Exercise detail: `ExercisePersonalRecordCard` derived from
+  last-performance `newPr` filter; `ExerciseProgressChart` (recharts) on
+  the progress endpoint (Phase 26).
+- History: Repeat-workout CTA on the per-session detail card with the
+  `SESSION_ALREADY_ACTIVE` typed-error pattern (Phase 27).
+- Metrics: chest / arm / thigh form fields, 200 / 201 distinct toasts via
+  a `returnStatus` client overload (Phase 28).
+- Profile: typed `ApiError` flash on save, an a11y form region, and
+  load-error banners with retry on profile / supplements /
+  webhook-tokens; `PrToast` on mutation failures (Phase 29).
+- Middleware matcher now covers `/achievements` (was unprotected);
+  `PROTECTED_PREFIXES` exported for test introspection (Phase 29.5).
+- Export / Import UI: `window.confirm` gate before destructive import
+  (with file name); a localStorage-backed download history shim
+  (max 10) and `ExportHistoryCard` with relative timestamps
+  (Phase 30).
+
 ### Changed
-### Deprecated
-### Removed
+
+- Frontend tests grew from 99 (v0.4 baseline) to 263 in v0.5;
+  `pnpm typecheck` and `pnpm lint` clean throughout.
+- `ProgressPoint.maxWeightKg` and `estimatedOneRmKg` widened to nullable
+  in the Zod schema to match the backend's null-on-bodyweight-only sets
+  (Phase 26-01).
+
 ### Fixed
-### Security
+
+- N/A -- v0.5 is feature work; backend tests remain green from the
+  v0.4.0 hotfix bundle.
 
 ## [0.4.0] - 2026-05-07
 
