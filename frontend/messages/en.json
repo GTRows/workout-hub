@@ -415,7 +415,22 @@
     "noDescription": "No description yet.",
     "backToCatalog": "Back to catalog",
     "musclePrimary": "Primary",
-    "muscleSecondary": "Secondary"
+    "muscleSecondary": "Secondary",
+    "personalRecordTitle": "Personal record",
+    "personalRecordValue": "{weight} kg x {reps}",
+    "personalRecordAchievedDaysAgo": "{days} days ago",
+    "personalRecordAchievedToday": "Today",
+    "personalRecordAchievedAbsolute": "{date}",
+    "personalRecordEmpty": "No PR yet",
+    "personalRecordEmptyCta": "Log a set",
+    "progressChartTitle": "Progress",
+    "progressChartEmpty": "No progression yet",
+    "progressChartLoading": "Loading...",
+    "progressChartTooltipOneRm": "Estimated 1RM: {value} kg",
+    "progressChartTooltipMaxWeight": "Max weight: {value} kg",
+    "progressChartTooltipVolume": "Volume: {value} kg",
+    "progressChartTooltipSets": "Sets: {count}",
+    "progressChartTooltipReps": "Top reps: {count}"
   },
   "common": {
     "loading": "Loading...",

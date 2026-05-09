@@ -415,7 +415,22 @@
     "noDescription": "Açıklama henüz girilmemiş.",
     "backToCatalog": "Kataloğa dön",
     "musclePrimary": "Ana kas",
-    "muscleSecondary": "Yardımcı kas"
+    "muscleSecondary": "Yardımcı kas",
+    "personalRecordTitle": "Kişisel rekor",
+    "personalRecordValue": "{weight} kg x {reps}",
+    "personalRecordAchievedDaysAgo": "{days} gün önce",
+    "personalRecordAchievedToday": "Bugün",
+    "personalRecordAchievedAbsolute": "{date}",
+    "personalRecordEmpty": "Henüz rekor yok",
+    "personalRecordEmptyCta": "Bir set kaydet",
+    "progressChartTitle": "İlerleme",
+    "progressChartEmpty": "Henüz ilerleme verisi yok",
+    "progressChartLoading": "Yükleniyor...",
+    "progressChartTooltipOneRm": "Tahmini 1RM: {value} kg",
+    "progressChartTooltipMaxWeight": "En ağır: {value} kg",
+    "progressChartTooltipVolume": "Hacim: {value} kg",
+    "progressChartTooltipSets": "Set: {count}",
+    "progressChartTooltipReps": "En çok tekrar: {count}"
   },
   "common": {
     "loading": "Yukleniyor...",
