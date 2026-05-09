@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PrToast } from "@/components/pr-toast";
 
 type FormState = {
   name: string;
@@ -34,6 +35,7 @@ const EMPTY: FormState = {
 
 export function SupplementsSection() {
   const t = useTranslations("supplements");
+  const tProfile = useTranslations("profile");
   const qc = useQueryClient();
 
   const listQuery = useQuery({
@@ -42,6 +44,7 @@ export function SupplementsSection() {
   });
 
   const [form, setForm] = useState<FormState>(EMPTY);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateSupplementPayload) => createSupplement(payload),
@@ -49,11 +52,13 @@ export function SupplementsSection() {
       setForm(EMPTY);
       qc.invalidateQueries({ queryKey: ["supplements"] });
     },
+    onError: () => setToastMessage(t("toastCreateError")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteSupplement(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["supplements"] }),
+    onError: () => setToastMessage(t("toastDeleteError")),
   });
 
   const submit = () => {
@@ -72,6 +77,17 @@ export function SupplementsSection() {
     <Card className="space-y-3">
       <CardTitle>{t("title")}</CardTitle>
       <CardDescription>{t("description")}</CardDescription>
+
+      {listQuery.isError && (
+        <div className="space-y-2">
+          <p role="alert" className="text-sm text-destructive">
+            {t("loadError")}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => listQuery.refetch()}>
+            {tProfile("retry")}
+          </Button>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <p className="text-muted-foreground">{t("empty")}</p>
@@ -157,6 +173,13 @@ export function SupplementsSection() {
           </Button>
         </div>
       </div>
+
+      {toastMessage && (
+        <PrToast
+          message={toastMessage}
+          onDismiss={() => setToastMessage(null)}
+        />
+      )}
     </Card>
   );
 }
