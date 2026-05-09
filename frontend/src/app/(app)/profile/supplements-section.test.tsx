@@ -35,6 +35,12 @@ const messages = {
       with_meal: "With meal",
       other: "Other",
     },
+    loadError: "Could not load supplements.",
+    toastCreateError: "Could not add supplement.",
+    toastDeleteError: "Could not delete supplement.",
+  },
+  profile: {
+    retry: "Retry",
   },
 };
 
@@ -166,5 +172,73 @@ describe("SupplementsSection", () => {
     await waitFor(() =>
       expect(deleteCalledWithId).toBe("ffffffff-2222-2222-2222-222222222222")
     );
+  });
+
+  it("shows an inline error banner with retry when supplements fail to load", async () => {
+    let attempt = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        attempt += 1;
+        if (attempt === 1) {
+          return jsonResponse(500, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 500,
+            error: "internal",
+            message: "boom",
+            path: "/api/supplements",
+          });
+        }
+        return jsonResponse(200, []);
+      })
+    );
+
+    renderSection(<SupplementsSection />);
+
+    await screen.findByRole("alert");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Could not load supplements."
+    );
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+  });
+
+  it("shows the create-error toast when the create mutation fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const method = init?.method ?? "GET";
+        if (url.endsWith("/api/supplements") && method === "GET") {
+          return jsonResponse(200, []);
+        }
+        if (url.endsWith("/api/supplements") && method === "POST") {
+          return jsonResponse(500, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 500,
+            error: "internal",
+            message: "db busy",
+            path: "/api/supplements",
+          });
+        }
+        throw new Error("unexpected fetch: " + url + " " + method);
+      })
+    );
+
+    renderSection(<SupplementsSection />);
+    await screen.findByText("No supplements yet.");
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Vitamin D" },
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Add" }));
+
+    const toast = await screen.findByTestId("pr-toast");
+    expect(toast).toHaveTextContent("Could not add supplement.");
   });
 });
