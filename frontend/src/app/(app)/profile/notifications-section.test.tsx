@@ -59,10 +59,11 @@ function setPermission(value: NotificationPermission | undefined) {
     });
     return;
   }
+  const resolved: NotificationPermission = value;
   Object.defineProperty(window, "Notification", {
     configurable: true,
     value: class MockNotification {
-      static permission: NotificationPermission = value;
+      static permission: NotificationPermission = resolved;
       static requestPermission = vi.fn(async () => "granted" as const);
     },
   });
