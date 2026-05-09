@@ -45,12 +45,24 @@ This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) w
 
 **Trigger to reopen:** v0.5 milestone (frontend completion phase) OR Next 15 LTS end-of-life signal.
 
-### i-7 — Defer testcontainers 1.x -> 2.x major bump (PR #11)
+### i-7b — Defer Testcontainers 2.0.0 major bump (successor to i-7)
 
-**PR:** https://github.com/GTRows/workout-hub/pull/11
-**Reason for defer:** Major bump on test infrastructure. Could break the `AbstractIntegrationTest` base class and migration tests. Currently on 1.20.4 which is well-supported. Risk vs benefit not justified for v0.3.
+**Context:** i-7 was named "1.x -> 2.x" but no 2.x artifact was published by
+the v1.0 release. Phase 39-01 captured all available cumulative fixes by
+bumping 1.20.4 -> 1.21.3 (latest 1.x). The actual major-version jump remains.
 
-**Trigger to reopen:** Next time test infrastructure receives attention (likely after a CI flake batch or v0.4 backend feature work).
+**Why deferred:** Testcontainers 2.0.0 has not been released as of
+2026-05-09. There is no public RC, no published migration guide, no
+breaking-change list to plan against. A speculative plan would be wasted.
+
+**Trigger to reopen:** Maven Central publishes
+`org.testcontainers:testcontainers:2.0.0` (GA, not RC). At that point: read
+the upstream migration guide, audit `AbstractIntegrationTest` for the
+@Container-field pattern shift if required, run the full migration-test
+suite in CI.
+
+**Owner:** aciro
+**Status:** Open
 
 ### i-8 — Defer Spring Boot 3.4 -> 4.0 major framework bump (PR #8)
 
@@ -164,3 +176,21 @@ LoggingApplicationListener reconfigures the logging system to ECS-format JSON.
 @Disabled removed; both contract assertions (JSON shape with @timestamp +
 message; deny-listed authorization MDC value masked from stdout) run on every
 CI build.*
+
+### i-7 — Defer testcontainers 1.x -> 2.x major bump (PR #11)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/11
+**Reason for defer:** Major bump on test infrastructure. Could break the `AbstractIntegrationTest` base class and migration tests. Currently on 1.20.4 which is well-supported. Risk vs benefit not justified for v0.3.
+
+**Trigger to reopen:** Next time test infrastructure receives attention (likely after a CI flake batch or v0.4 backend feature work).
+
+*Closed by Phase 39 Plan 01 for the 1.x scope: bumped
+`<testcontainers.version>` from 1.20.4 to 1.21.3 (latest stable 1.x as of
+2026-05-09; Maven Central confirmed no 2.x artifact published yet).
+AbstractIntegrationTest API surface (PostgreSQLContainer constructor +
+withDatabaseName/withUsername/withPassword/withReuse, manual static-init
+start pattern) is compatibility-preserved across the 1.20 -> 1.21 hop. All
+10 migration tests under backend/src/test/java/com/workouthub/migrations/
+inherit from AbstractIntegrationTest with zero direct Testcontainers imports
+and required no edits. The eventual 2.x major bump is re-deferred as
+follow-up issue i-7b, triggered by the upstream Testcontainers 2.0.0 GA.*
