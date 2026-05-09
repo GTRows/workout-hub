@@ -53,6 +53,17 @@ const messages = {
     csvPending: "Preparing...",
     csvError: "CSV export failed.",
     csvHint: "Strong-compatible.",
+    importConfirm: "Importing {file} will replace your data. Continue?",
+    historyTitle: "Download history",
+    historyDescription: "Last 10 export actions on this device.",
+    historyEmpty: "No previous exports yet.",
+    historyClear: "Clear history",
+    historyKind: {
+      claude: "Claude summary",
+      full: "Full JSON dump",
+      section: "Section",
+      csv: "CSV",
+    },
   },
 };
 
@@ -78,6 +89,7 @@ describe("ExportClient", () => {
   beforeEach(() => {
     clearTokens();
     window.localStorage.clear();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
     // jsdom does not implement Blob URL helpers; the download flow needs
     // both so we stub them for the duration of the test.
     if (typeof URL.createObjectURL !== "function") {
@@ -437,5 +449,125 @@ describe("ExportClient", () => {
     await user.click(screen.getByRole("button", { name: /download summary/i }));
 
     await waitFor(() => expect(lastUrl).toContain("days=90"));
+  });
+
+  it("aborts the import when the user cancels the confirm prompt", async () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const fetchSpy = vi.fn(async () => jsonResponse(200, {}));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    renderClient(<ExportClient />);
+    const dump = JSON.stringify({
+      schemaVersion: 1,
+      exportedAt: "2026-04-23T00:00:00Z",
+      user: null,
+      plans: [],
+      sessions: [],
+      bodyMetrics: [],
+      supplements: [],
+    });
+    const file = new File([dump], "rejected-dump.json", {
+      type: "application/json",
+    });
+    const input = screen.getByLabelText("Pick JSON file") as HTMLInputElement;
+    await userEvent.upload(input, file);
+
+    expect(confirmSpy).toHaveBeenCalled();
+    const args = confirmSpy.mock.calls[0]?.[0] ?? "";
+    expect(args).toContain("rejected-dump.json");
+    const importCalls = fetchSpy.mock.calls.filter((c) => {
+      const url =
+        typeof c[0] === "string" ? c[0] : (c[0] as URL | Request).toString();
+      return url.endsWith("/api/export/import");
+    });
+    expect(importCalls).toHaveLength(0);
+    expect(screen.queryByTestId("import-success")).toBeNull();
+  });
+
+  it("proceeds with the import when the user confirms the prompt", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.endsWith("/api/export/import") && init?.method === "POST") {
+          return jsonResponse(200, {
+            profileUpdated: 1,
+            metricsInserted: 2,
+            supplementsInserted: 3,
+            plansInserted: 1,
+            sessionsInserted: 4,
+            userEmail: "x@test.local",
+          });
+        }
+        throw new Error("unexpected fetch: " + url);
+      }),
+    );
+
+    renderClient(<ExportClient />);
+    const dump = JSON.stringify({
+      schemaVersion: 1,
+      exportedAt: "2026-04-23T00:00:00Z",
+      user: null,
+      plans: [],
+      sessions: [],
+      bodyMetrics: [],
+      supplements: [],
+    });
+    const file = new File([dump], "ok-dump.json", {
+      type: "application/json",
+    });
+    const input = screen.getByLabelText("Pick JSON file") as HTMLInputElement;
+    await userEvent.upload(input, file);
+
+    await screen.findByTestId("import-success");
+  });
+
+  it("appends a download history entry after a successful claude summary download", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("/api/export/claude-summary")) {
+          return jsonResponse(200, {
+            user: {
+              displayName: "X",
+              email: "x@y.z",
+              heightCm: null,
+              weightKg: null,
+              healthNotes: null,
+              goals: null,
+            },
+            period: { from: "2026-03-24", to: "2026-04-23", days: 30 },
+            summary: {
+              totalWorkouts: 0,
+              totalVolumeKg: 0,
+              avgSessionDurationMin: null,
+            },
+            workouts: [],
+          });
+        }
+        throw new Error("unexpected fetch: " + url);
+      }),
+    );
+
+    const clickSpy = vi.fn();
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+      const el = origCreateElement(tag);
+      if (tag === "a") {
+        (el as HTMLAnchorElement).click = clickSpy;
+      }
+      return el;
+    });
+
+    renderClient(<ExportClient />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /download summary/i }));
+
+    await screen.findByTestId("history-list");
+    expect(screen.getByTestId("history-list")).toHaveTextContent(
+      "Claude summary",
+    );
   });
 });
