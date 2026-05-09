@@ -26,6 +26,7 @@ import {
   streakSchema,
   supplementListSchema,
   supplementSchema,
+  updateSetRequestSchema,
   userMeSchema,
   weeklyVolumeListSchema,
   workoutDayExerciseSchema,
@@ -34,6 +35,7 @@ import {
   workoutPlanListSchema,
   type Achievement,
   type AddSetRequest,
+  type UpdateSetRequest,
   type AuthResponse,
   type BodyMetric,
   type Exercise,
@@ -154,6 +156,32 @@ export async function addSet(
     path: `/api/sessions/${sessionId}/sets`,
     body: validated,
     schema: sessionSetSchema,
+  });
+}
+
+export type UpdateSetPayload = UpdateSetRequest;
+
+export async function updateSet(
+  sessionId: string,
+  setId: string,
+  payload: UpdateSetPayload
+): Promise<SessionSet> {
+  const validated = updateSetRequestSchema.parse(payload);
+  return api.request({
+    method: "PUT",
+    path: `/api/sessions/${sessionId}/sets/${setId}`,
+    body: validated,
+    schema: sessionSetSchema,
+  });
+}
+
+export async function deleteSet(
+  sessionId: string,
+  setId: string
+): Promise<void> {
+  await api.request({
+    method: "DELETE",
+    path: `/api/sessions/${sessionId}/sets/${setId}`,
   });
 }
 
