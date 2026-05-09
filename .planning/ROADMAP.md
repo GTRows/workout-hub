@@ -73,6 +73,17 @@ Plans:
 - Phase 27: history-view - calendar with completed days marked, per-session detail page.
 - Phase 28: metrics-ui - weight chart (weekly/monthly/all-time), measurement form, optional progress photo upload.
 - Phase 29: profile-settings - user info, health notes, goals, supplements list editing.
+
+#### Phase 29.5: middleware-matcher-gap (INSERTED)
+
+**Goal:** Fix Next.js middleware matcher omission — the `/achievements/:path*` route exists and is in the top nav but is not in the auth middleware matcher list, leaving it accessible without auth.
+**Depends on:** Phase 29
+**Research:** Unlikely (matcher config is well-understood)
+**Plans:** 1
+
+Plans:
+- [ ] 29.5-01: middleware-matcher-gap
+
 - Phase 30: export-import-ui - JSON download, JSON restore, "Claude summary" action button.
 
 ### v0.6 Operational Maturity (Planned)
@@ -113,5 +124,6 @@ Phases execute in numeric order. v0.4 starts at Phase 13.
 | 21-30 (v0.5 scope)          | v0.5      | 0/?   | Active      | -          |
 | 22.5 typed-apierror-helper  | v0.5      | 0/1   | Not started | -          |
 | 25.5 zod-schemas            | v0.5      | 0/1   | Not started | -          |
+| 29.5 middleware-matcher-gap | v0.5      | 0/1   | Not started | -          |
 | 31-37 (v0.6 scope)          | v0.6      | 0/?   | Planned     | -          |
 | 38-44 (v1.0 scope)          | v1.0      | 0/?   | Planned     | -          |
