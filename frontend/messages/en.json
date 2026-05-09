@@ -30,6 +30,16 @@
       "setNumberDuplicate": "Set number conflict, list refreshed. Please try again."
     }
   },
+  "pwa": {
+    "offlineTitle": "You are offline",
+    "offlineDescription": "No connection. You can resume once you are back online.",
+    "offlineRetryLink": "Back to dashboard",
+    "installTitle": "Install WorkoutHub",
+    "installDescription": "Add to your home screen for faster, offline-capable access.",
+    "installButton": "Install",
+    "installDismiss": "Not now",
+    "installInstalled": "Installed"
+  },
   "dashboard": {
     "loading": "Loading...",
     "resumeTitle": "Active session",

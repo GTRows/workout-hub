@@ -30,6 +30,16 @@
       "setNumberDuplicate": "Set numarasi cakismasi, sayfa yenilendi. Tekrar kaydet."
     }
   },
+  "pwa": {
+    "offlineTitle": "Cevrim disisin",
+    "offlineDescription": "Internet baglantiniz yok. Yeniden baglandiginizda calismaya devam edebilirsiniz.",
+    "offlineRetryLink": "Panele don",
+    "installTitle": "WorkoutHub'i yukle",
+    "installDescription": "Ana ekranina ekle, daha hizli ve cevrim disi calissin.",
+    "installButton": "Yukle",
+    "installDismiss": "Simdi degil",
+    "installInstalled": "Yuklendi"
+  },
   "dashboard": {
     "loading": "Yukleniyor...",
     "resumeTitle": "Devam eden antrenman",
