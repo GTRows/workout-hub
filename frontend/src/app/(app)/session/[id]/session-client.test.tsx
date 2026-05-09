@@ -44,6 +44,14 @@ const messages = {
     queuedDrained: "{count} queued synced",
     queuedDropped: "Some queued dropped",
     queuedBadge: "{count} pending",
+    rpe: "RPE",
+    rpeHint: "1-10",
+    editAction: "Edit",
+    deleteAction: "Delete",
+    deleteConfirm: "Delete this set?",
+    saveAction: "Save",
+    cancelAction: "Cancel",
+    setLineRpe: "RPE {value}",
   },
   errors: {
     api: {
@@ -776,6 +784,254 @@ describe("SessionClient typed error UX", () => {
     await waitFor(() =>
       expect(screen.getByTestId("pr-toast")).toHaveTextContent(
         "This session is already finished. Returning to dashboard."
+      )
+    );
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith("/dashboard")
+    );
+  });
+});
+
+describe("SessionClient set editing", () => {
+  const setIdA = "11111111-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  const setIdB = "22222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+
+  function savedSet(overrides: Partial<{
+    id: string;
+    setNumber: number;
+    repsDone: number;
+    weightKg: number | null;
+    rpe: number | null;
+  }> = {}) {
+    return {
+      id: overrides.id ?? setIdA,
+      exerciseId,
+      exerciseNameTr: "Sinav",
+      exerciseNameEn: "Push-up",
+      setNumber: overrides.setNumber ?? 1,
+      repsDone: overrides.repsDone ?? 10,
+      weightKg: overrides.weightKg === undefined ? 50 : overrides.weightKg,
+      rpe: overrides.rpe === undefined ? null : overrides.rpe,
+      completed: true,
+      notes: null,
+    };
+  }
+
+  beforeEach(async () => {
+    clearTokens();
+    window.localStorage.clear();
+    pushMock.mockReset();
+    __resetOfflineDb();
+    await getOfflineDb().queuedSets.clear();
+    Object.defineProperty(navigator, "onLine", {
+      value: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("includes rpe in the addSet body when the rpe input is filled", async () => {
+    const user = userEvent.setup();
+    const newSet = {
+      id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      exerciseId,
+      exerciseNameTr: "Sinav",
+      exerciseNameEn: "Push-up",
+      setNumber: 1,
+      repsDone: 10,
+      weightKg: 50,
+      rpe: 8,
+      completed: true,
+      notes: null,
+    };
+
+    let posted: RequestInit | undefined;
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () => jsonResponse(200, baseSession()),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets`]: (init) => {
+          posted = init;
+          return jsonResponse(201, newSet);
+        },
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.type(screen.getByLabelText("Reps"), "10");
+    await user.type(screen.getByLabelText("Weight"), "50");
+    await user.type(screen.getByLabelText("RPE"), "8");
+    await user.click(screen.getByRole("button", { name: "Done" }));
+
+    await waitFor(() => expect(posted).toBeDefined());
+    const body = JSON.parse(posted!.body as string) as { rpe?: number };
+    expect(body.rpe).toBe(8);
+  });
+
+  it("renders RPE on a saved set's display line when rpe is non-null", async () => {
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () =>
+          jsonResponse(200, baseSession([savedSet({ rpe: 8 })])),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+    expect(await screen.findByText(/RPE 8/)).toBeInTheDocument();
+  });
+
+  it("opens the inline edit form on a saved set and PUTs the patch to /sets/{setId}", async () => {
+    const user = userEvent.setup();
+    const updated = savedSet({ repsDone: 11 });
+
+    let putInit: RequestInit | undefined;
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () =>
+          jsonResponse(200, baseSession([savedSet()])),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets/${setIdA}`]: (init) => {
+          putInit = init;
+          return jsonResponse(200, updated);
+        },
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.click(screen.getByTestId(`edit-set-${setIdA}`));
+    const repsInput = screen.getByLabelText("Reps", { selector: `#edit-reps-${setIdA}` });
+    await user.clear(repsInput);
+    await user.type(repsInput, "11");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(putInit).toBeDefined());
+    expect(putInit?.method).toBe("PUT");
+    const body = JSON.parse(putInit!.body as string) as { repsDone?: number };
+    expect(body.repsDone).toBe(11);
+
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument()
+    );
+  });
+
+  it("cancels the inline edit form without firing a PUT", async () => {
+    const user = userEvent.setup();
+    let putCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () =>
+          jsonResponse(200, baseSession([savedSet()])),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets/${setIdA}`]: () => {
+          putCount++;
+          return jsonResponse(200, savedSet());
+        },
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.click(screen.getByTestId(`edit-set-${setIdA}`));
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(putCount).toBe(0);
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+  });
+
+  it("DELETEs a saved set after window.confirm and removes it from the list", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    let deleteInit: RequestInit | undefined;
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () =>
+          jsonResponse(
+            200,
+            baseSession([
+              savedSet({ id: setIdA, setNumber: 1 }),
+              savedSet({ id: setIdB, setNumber: 2 }),
+            ])
+          ),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets/${setIdA}`]: (init) => {
+          deleteInit = init;
+          return noContent();
+        },
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByTestId(`delete-set-${setIdA}`);
+
+    await user.click(screen.getByTestId(`delete-set-${setIdA}`));
+
+    await waitFor(() => expect(deleteInit).toBeDefined());
+    expect(deleteInit?.method).toBe("DELETE");
+    await waitFor(() =>
+      expect(screen.queryByTestId(`delete-set-${setIdA}`)).not.toBeInTheDocument()
+    );
+    expect(screen.getByTestId(`delete-set-${setIdB}`)).toBeInTheDocument();
+  });
+
+  it("routes to /dashboard with the SESSION_FINISHED toast when updateSet returns 409 + code SESSION_FINISHED", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      routeFetch({
+        [`/api/sessions/${sessionId}`]: () =>
+          jsonResponse(200, baseSession([savedSet()])),
+        [`/api/workout-days/${dayId}`]: () =>
+          jsonResponse(200, dayWithOneExercise()),
+        [`/api/exercises/${exerciseId}/last-performance`]: () => noContent(),
+        [`/api/sessions/${sessionId}/sets/${setIdA}`]: () =>
+          jsonResponse(409, {
+            timestamp: "2026-05-09T00:00:00Z",
+            status: 409,
+            error: "Conflict",
+            message: "Session already finished",
+            code: "SESSION_FINISHED",
+            path: `/api/sessions/${sessionId}/sets/${setIdA}`,
+          }),
+      })
+    );
+
+    renderClient(<SessionClient sessionId={sessionId} />);
+    await screen.findByText("Sinav");
+
+    await user.click(screen.getByTestId(`edit-set-${setIdA}`));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("pr-toast")).toHaveTextContent(
+        "Session was finished while you were submitting. Returning to dashboard."
       )
     );
     await waitFor(() =>
