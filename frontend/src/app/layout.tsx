@@ -3,6 +3,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import type { ReactNode } from "react";
 import { Providers } from "@/components/providers";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
+import { WebVitalsReporter } from "@/components/web-vitals-reporter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           {children}
         </Providers>
         <ServiceWorkerRegistrar />
+        <WebVitalsReporter />
       </body>
     </html>
   );
