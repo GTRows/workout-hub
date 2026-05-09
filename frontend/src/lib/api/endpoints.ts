@@ -413,6 +413,11 @@ export type UpsertBodyMetricPayload = {
   notes?: string;
 };
 
+export type UpsertMetricResult = {
+  metric: BodyMetric;
+  created: boolean;
+};
+
 export async function fetchMetrics(): Promise<BodyMetric[]> {
   return api.request({
     path: "/api/metrics",
@@ -422,13 +427,15 @@ export async function fetchMetrics(): Promise<BodyMetric[]> {
 
 export async function upsertMetric(
   payload: UpsertBodyMetricPayload
-): Promise<BodyMetric> {
-  return api.request({
+): Promise<UpsertMetricResult> {
+  const { data, status } = await api.request({
     method: "POST",
     path: "/api/metrics",
     body: payload,
     schema: bodyMetricSchema,
+    returnStatus: true,
   });
+  return { metric: data, created: status === 201 };
 }
 
 export async function deleteMetric(id: string): Promise<void> {
