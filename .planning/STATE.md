@@ -5,10 +5,10 @@
 Milestone: v1.0 Release Hardening (planned)
 Phase: 38 of 44 (e2e-tests) - not started
 Plan: 38-01 e2e-tests - not started
-Status: v0.6 closed at v0.6.0 (tag 08cc968; 11/11 plans across Phases 31-37). No post-release patch window opened. Next: `/gsd:plan-phase 38-01` (e2e-tests) when v1.0 work begins.
-Last activity: 2026-05-09 - Phase 41 Plan 01 (security-hardening) closed i-14 via Netty 4.2.13.Final bump + .trivyignore cleanup; refresh-token / brute-force / rate-limit audit findings recorded as v1.0 lock-in decisions
+Status: v0.6 closed at v0.6.0 (tag 08cc968; 11/11 plans across Phases 31-37). Phase 41 + 42 + 43 closed via docs/security passes (out-of-order from numeric phase order, 41+42+43 docs/security work landed before Phase 38-40 test/framework work begins). Next: `/gsd:plan-phase 38-01` (e2e-tests) when v1.0 work resumes.
+Last activity: 2026-05-09 - Phase 43 Plan 01 (backup-restore-drill) authored docs/BACKUP_RESTORE_DRILL.md operator runbook; refreshed BACKUP.md to document both backup-cron primitives plus a Verify-your-backups cross-link; replaced MIGRATION.md `## vNext` placeholder with a populated `## v1.0.0` section preserving the template; cross-linked the drill from DEPLOYMENT.md What's-not-here and the README Documentation map. Five atomic commits 60b1a56..0dd179e under `docs(43-01)` scope, zero protected-file edits.
 
-Progress: v1.0 ____________________  0% (0/7 phases planned)
+Progress: v1.0 ########____________  43% (3/7 phases planned)
           v1.0 - Phases 38-44
 
 ## Project Reference

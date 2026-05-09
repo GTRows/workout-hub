@@ -97,4 +97,4 @@ Phases execute in numeric order. v1.0 starts at Phase 38.
 | 13-20 (v0.4 scope)          | v0.4      | 25/25 | Complete    | 2026-05-07 |
 | 21-30 (v0.5 scope)          | v0.5      | 19/19 | Complete    | 2026-05-09 |
 | 31-37 (v0.6 scope)          | v0.6      | 11/11 | Complete    | 2026-05-09 |
-| 38-44 (v1.0 scope)          | v1.0      | 0/?   | Planned     | -          |
+| 38-44 (v1.0 scope)          | v1.0      | 3/?   | In progress | 2026-05-09 |
