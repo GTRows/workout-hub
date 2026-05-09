@@ -368,6 +368,8 @@
     "sessionFinishedAt": "Bitti: {time}",
     "setCount": "{count} set",
     "viewFullDetail": "Tum detaylar",
+    "repeatWorkout": "Antrenmani tekrarla",
+    "repeatWorkoutPending": "Baslatiliyor...",
     "weekday": {
       "mon": "Pzt",
       "tue": "Sal",

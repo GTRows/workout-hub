@@ -1,29 +1,62 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { fetchSession, fetchSessionHistory } from "@/lib/api/endpoints";
-import type { SessionSummary } from "@/lib/api/schemas";
+import {
+  fetchSession,
+  fetchSessionHistory,
+  startSession,
+} from "@/lib/api/endpoints";
+import {
+  ApiErrorCode,
+  apiErrorCodeMessageKey,
+  isApiErrorWithCode,
+} from "@/lib/api/api-error-codes";
+import type { SessionDetail, SessionSummary } from "@/lib/api/schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { PrToast } from "@/components/pr-toast";
 import { cn } from "@/lib/utils";
 
 type MonthKey = { year: number; monthIndex: number };
 
 export function HistoryClient() {
   const t = useTranslations("history");
+  const tFull = useTranslations();
   const locale = useLocale();
+  const router = useRouter();
+  const qc = useQueryClient();
   const [month, setMonth] = useState<MonthKey>(() => {
     const now = new Date();
     return { year: now.getFullYear(), monthIndex: now.getMonth() };
   });
   const [selectedIso, setSelectedIso] = useState<string | null>(null);
+  const [apiErrorToast, setApiErrorToast] = useState<string | null>(null);
 
   const historyQuery = useQuery({
     queryKey: ["sessions", "history"],
     queryFn: () => fetchSessionHistory(0, 200),
+  });
+
+  const repeatMutation = useMutation({
+    mutationFn: (workoutDayId: string) => startSession(workoutDayId),
+    onSuccess: (session: SessionDetail) => {
+      qc.setQueryData(["sessions", "active"], session);
+      router.push(`/session/${session.id}`);
+    },
+    onError: (err: unknown) => {
+      if (isApiErrorWithCode(err, ApiErrorCode.SESSION_ALREADY_ACTIVE)) {
+        setApiErrorToast(
+          tFull(apiErrorCodeMessageKey(ApiErrorCode.SESSION_ALREADY_ACTIVE))
+        );
+        void qc.invalidateQueries({ queryKey: ["sessions", "active"] });
+        return;
+      }
+      setApiErrorToast(tFull(apiErrorCodeMessageKey(undefined)));
+    },
   });
 
   const grid = useMemo(
@@ -107,6 +140,8 @@ export function HistoryClient() {
       {selectedSummary ? (
         <SelectedSessionCard
           summary={selectedSummary}
+          onRepeat={(dayId) => repeatMutation.mutate(dayId)}
+          isRepeating={repeatMutation.isPending}
         />
       ) : selectedIso ? (
         <Card>
@@ -119,16 +154,32 @@ export function HistoryClient() {
           <CardDescription>{t("selectDayHint")}</CardDescription>
         </Card>
       )}
+
+      {apiErrorToast ? (
+        <PrToast
+          message={apiErrorToast}
+          onDismiss={() => setApiErrorToast(null)}
+        />
+      ) : null}
     </div>
   );
 }
 
-function SelectedSessionCard({ summary }: { summary: SessionSummary }) {
+function SelectedSessionCard({
+  summary,
+  onRepeat,
+  isRepeating,
+}: {
+  summary: SessionSummary;
+  onRepeat: (workoutDayId: string) => void;
+  isRepeating: boolean;
+}) {
   const t = useTranslations("history");
   const detailQuery = useQuery({
     queryKey: ["sessions", summary.id],
     queryFn: () => fetchSession(summary.id),
   });
+  const repeatableDayId = summary.workoutDayId;
 
   return (
     <Card className="space-y-2">
@@ -155,9 +206,21 @@ function SelectedSessionCard({ summary }: { summary: SessionSummary }) {
           ))}
         </ul>
       )}
-      <Button asChild variant="outline" size="sm">
-        <Link href={`/session/${summary.id}`}>{t("viewFullDetail")}</Link>
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/session/${summary.id}`}>{t("viewFullDetail")}</Link>
+        </Button>
+        {repeatableDayId ? (
+          <Button
+            variant="default"
+            size="sm"
+            disabled={isRepeating}
+            onClick={() => onRepeat(repeatableDayId)}
+          >
+            {isRepeating ? t("repeatWorkoutPending") : t("repeatWorkout")}
+          </Button>
+        ) : null}
+      </div>
     </Card>
   );
 }

@@ -368,6 +368,8 @@
     "sessionFinishedAt": "Ended: {time}",
     "setCount": "{count} sets",
     "viewFullDetail": "View full detail",
+    "repeatWorkout": "Repeat workout",
+    "repeatWorkoutPending": "Starting...",
     "weekday": {
       "mon": "Mon",
       "tue": "Tue",
