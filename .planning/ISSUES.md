@@ -30,14 +30,6 @@ This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) w
 
 **Trigger to reopen:** None — resolved at execution time.
 
-### i-5 — Defer next-intl 3 -> 4 major bump (PR #2)
-
-**PR:** https://github.com/GTRows/workout-hub/pull/2
-**Closes vuln alerts:** #8 and #11 (open redirect, severity medium)
-**Reason for defer:** Major API change; requires migration of `frontend/messages/*.json` and `i18n/request.ts`. Out of v0.3 self-hosted-contract scope. The open-redirect risk is mitigated for v0.3 by the operator's reverse-proxy configuration (Caddy / nginx header rewrite); documented in Phase 9 README.
-
-**Trigger to reopen:** v0.4 frontend work OR a careful next-intl 4 migration session.
-
 ### i-6b — Defer Next.js 16.x major bump (successor to i-6)
 
 **Context:** i-6 was named "Next 15 -> 16" but the Phase 40-02 standalone
@@ -328,6 +320,16 @@ that audit and can be reused as a starting reference.
 - **Status**: Open
 
 ## Closed
+
+### i-5 — Defer next-intl 3 -> 4 major bump (PR #2)
+
+**PR:** https://github.com/GTRows/workout-hub/pull/2
+**Closes vuln alerts:** #8 and #11 (open redirect, severity medium)
+**Reason for defer:** Major API change; requires migration of `frontend/messages/*.json` and `i18n/request.ts`. Out of v0.3 self-hosted-contract scope. The open-redirect risk is mitigated for v0.3 by the operator's reverse-proxy configuration (Caddy / nginx header rewrite); documented in Phase 9 README.
+
+**Trigger to reopen:** v0.4 frontend work OR a careful next-intl 4 migration session.
+
+*Closed by Phase 40 Plan 03: bumped `next-intl` from `^3.26.0` to `^4.11.1` in `frontend/package.json` and regenerated `frontend/pnpm-lock.yaml`. The 4.0 release notes (`https://next-intl.dev/blog/next-intl-4-0`, March 2025) document 13 breaking-change surfaces; the plan-author audit found ZERO of them require source-file edits in this codebase. Specifically: `frontend/src/i18n/request.ts` already returns `{ locale, messages }` and `await requestLocale` (post-3.22 shape); `frontend/src/components/providers.tsx` and the 25 test files explicitly pass `messages` to `<NextIntlClientProvider>` (still valid in 4.x; auto-inheritance is opt-in cleanup); the codebase doesn't use locale-based routing, `defineRouting`, `next-intl/middleware`, `next-intl/navigation`, `format.relativeTime`, or any 3.x deprecated API removed in 4.0. The pre-existing fear documented in the original i-5 entry ("requires migration of `frontend/messages/*.json` and `i18n/request.ts`") proved conservative on closer audit — both files are 4.x-valid unchanged. The bump closes the open-redirect vuln alerts #8 and #11 referenced in the original entry. Runtime stays on Next 15.1+; next-intl 4.11.1 peers `next ^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0`, so the install is clean against the existing `next: ^15.1.0` pin (resolves to 15.5.x backport line) AND the bump is forward-compatible with the eventual i-6b (Next 16) closure. Mirror precedent: this is the FIRST runtime bump in Phase 40 (40-01 deferred i-8 -> i-8b; 40-02 deferred i-6 -> i-6b); the deferral playbook stays available for future major-version blockers.*
 
 ### i-4 — Frontend per-request HTTP metrics not yet exposed (Phase 4 follow-up)
 

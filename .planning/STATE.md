@@ -19,7 +19,7 @@ Progress: v1.0 ____________________  0% (0/7 phases planned)
 - See: `.planning/milestones/v0.5-ROADMAP.md` for full v0.5 archive
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/ROADMAP.md` for current roadmap (v1.0 outlined)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-5, i-6b, i-7b, i-8b, i-13, i-14, i-15 open; i-1, i-2, i-4, i-6, i-7, i-8, i-9, i-10, i-12 closed)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-13, i-14, i-15 open; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
 **Current focus:** v1.0 release hardening - Playwright e2e tests (Phase 38), testcontainers 1.x -> 2.x major bump (Phase 39, i-7), framework majors (Phase 40, i-5 next-intl 4 + i-6 Next 16 + i-8 Spring Boot 4), security hardening (Phase 41, refresh-token hash collisions + brute-force lockout finalization + Netty 4.2 bump per i-14), docs completion (Phase 42), backup/restore drill (Phase 43), v1.0.0 release (Phase 44).
@@ -61,7 +61,25 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
 
 - i-3: documentation note on `.gitignore` `data/` glob-form correction. Stays carried as audit reference.
 - i-4: closed by v0.6 Phase 35 (frontend-http-metrics).
-- i-5: closed by v1.0 Phase 40 (framework-majors).
+- i-5: closed by v1.0 Phase 40 Plan 03 (framework-majors). Bumped
+  `next-intl` from `^3.26.0` to `^4.11.1` in `frontend/package.json`
+  and regenerated `frontend/pnpm-lock.yaml`. Audit of the 4.0 release
+  notes (next-intl.dev/blog/next-intl-4-0, March 2025) found 13
+  breaking-change surfaces; ZERO required source-file edits in this
+  codebase because (a) `frontend/src/i18n/request.ts` already returns
+  `{ locale, messages }` from `getRequestConfig` and `await
+  requestLocale` (post-3.22 shape), (b) `NextIntlClientProvider` 4.x
+  auto-inheritance is opt-in cleanup (the 27 explicit `messages={...}`
+  call sites continue to work), (c) the codebase doesn't use
+  locale-based routing, `defineRouting`, `next-intl/middleware`,
+  `next-intl/navigation`, `format.relativeTime`, or any 3.x deprecated
+  API removed in 4.0. Closes open-redirect vuln alerts #8 and #11
+  referenced in the original i-5 entry. Runtime stays on Next 15.x;
+  next-intl 4.11.1 peers `next ^12.0.0 || ^13.0.0 || ^14.0.0 ||
+  ^15.0.0 || ^16.0.0`, install is clean. Forward-compatible with the
+  eventual i-6b (Next 16) closure: a future plan that absorbs
+  Middleware->Proxy + Suspense gating + lockfile-resolution probe with
+  next@^16 + next-intl@^4 co-installed is unblocked.
 - i-6: closed by v1.0 Phase 40 Plan 02 (framework-majors) re-defer
   playbook. Plan-author audited `https://registry.npmjs.org/next-intl` on
   2026-05-09 and confirmed zero `next-intl@3.x` versions list
