@@ -41,6 +41,7 @@ A user can log a workout end-to-end on a phone (mid-set), see prior performance 
 - [ ] v0.6 (Phases 31-37): charts/stats (volume, 1RM Epley, weight, frequency heatmap, PR list, streak), PWA polish, web push, rest-timer notifications, frontend HTTP metrics (i-4), error states + perf budgets, structured-logging test fix (i-9)
 - [ ] v1.0 (Phases 38-44): Playwright e2e, testcontainers 2.x (i-7), framework majors (Spring Boot 4 i-8, Next 16 i-6, next-intl 4 i-5), security hardening, docs completion, backup/restore drill, `v1.0.0` release
 - [ ] Bump SpringDoc to >= 2.7 (i-13): revert the v0.4 `OpenApiCustomizer` workaround once SpringDoc clears the Spring 6.2 `ControllerAdviceBean(Object)` removal
+- [ ] v1.1 (Phases 45-50): close the four v1.0 carry-forward issues - i-13 SpringDoc 2.7+ (Phase 45), i-8b Spring Boot 4 via Jackson 2 -> 3 migration first (Phase 46 preparatory + Phase 47 SB4 bump), i-6b Next 16 (Phase 48 with middleware->proxy rename, Suspense-wrap login, engines.node 20.9 bump, images.localPatterns audit), i-15 Lighthouse CI workflow + bundle-size script + bundle-analyzer dep (Phase 49; protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits user-pre-approved), `v1.1.0` release (Phase 50)
 
 ### Out of Scope
 
@@ -105,4 +106,4 @@ A user can log a workout end-to-end on a phone (mid-set), see prior performance 
 | ApiError typed `code` curation: hand-write `@Schema(allowableValues = ...)` enumerating 4 Phase-15-04 codes | `ApiErrorCode` Java enum extraction deferred to Phase 42 (durable i-NEW-A drift fix); 19-04 ships annotation + CI-asserted enum | - Pending (revisit at Phase 42)  |
 
 ---
-*Last updated: 2026-05-07 after v0.4 milestone close (backend feature completion shipped; pivoting to v0.5 frontend completion)*
+*Last updated: 2026-05-09 after v1.1 milestone open (deferred debt closure; Phases 45-50 outlined to close i-13 / i-8b / i-6b / i-15 and cut v1.1.0)*

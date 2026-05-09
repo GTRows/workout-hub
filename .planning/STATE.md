@@ -2,14 +2,14 @@
 
 ## Current Position
 
-Milestone: v1.0 Release Hardening (SHIPPED)
-Phase: 44 of 44 (release-v1-0) - complete
-Plan: 44-01 release-v1-0 - complete
-Status: v1.0 closed at v1.0.0 (tag cac37c1; 9/9 plans across Phases 38-44). Annotated tag `v1.0.0` created locally pointing at cac37c1; tag push to fire `.github/workflows/release.yml` queued for maintainer-side execution per `IDENTITY.yaml#release.draft_first: true`. Project-complete state: v1.0 was the final planned milestone in the GSD roadmap. v1.1+ scope is not yet opened.
-Last activity: 2026-05-09 - v1.0 milestone bookkeeping commit close. Marked Phases 38-44 as complete in ROADMAP.md (collapsed to `<details>` archive block mirroring v0.4 / v0.5 / v0.6 pattern); archived v1.0 to `.planning/milestones/v1.0-ROADMAP.md` mirroring the v0.6 archive structure; prepended the v1.0 shipped entry to MILESTONES.md (date 2026-05-09, tag v1.0.0 at cac37c1); resolved the i-12 STATE.md / ISSUES.md drift in favour of the v0.4 archive (i-12 closed during v0.4 by post-tag hotfix d3d83d8 dropping ID preservation in full-export import to avoid the Hibernate detached-entity trap); advanced this STATE.md cursor to project-complete.
+Milestone: v1.1 Deferred Debt Closure (ACTIVE)
+Phase: 45 of 50 (springdoc-2.7-bump) - not started
+Plan: 45-01 springdoc-2.7-bump - not started
+Status: v1.1 milestone opened to close the four remaining v1.0 carry-forward issues (i-13 SpringDoc 2.7+, i-8b Spring Boot 4 via Jackson 2 -> 3 migration first, i-6b Next 16, i-15 Lighthouse CI + bundle-size + bundle-analyzer). Six phases scoped: 45 springdoc-2.7 (closes i-13), 46 jackson-2-to-3-migration (preparatory for SB4), 47 spring-boot-4 (closes i-8b), 48 next-16 (closes i-6b), 49 lighthouse-ci (closes i-15; user pre-approved the protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits), 50 release-v1-1 (cut v1.1.0). Phase 45 is the next phase to plan via `/gsd:plan-phase 45`.
+Last activity: 2026-05-09 - v1.1 milestone-opening bookkeeping commit. Re-opened ROADMAP.md with v1.1 as the Active section (kept v0.3..v1.0 archived `<details>` blocks); added the 6 phase outlines (45 springdoc-2.7, 46 jackson-2-to-3-migration, 47 spring-boot-4, 48 next-16, 49 lighthouse-ci, 50 release-v1-1); appended the v1.1 entry to PROJECT.md Active list (mirroring the v0.5/v0.6/v1.0 pattern); advanced this STATE.md cursor from project-complete to v1.1 Phase 45 not-started. No source code edits, no protected-file edits in this bookkeeping commit; the Phase 49 protected-path edits and the Phase 50 IDENTITY/CHANGELOG/package.json/pom.xml lockstep edits land at execution time.
 
-Progress: v1.0 ####################  100% (9/9 plans complete; 7/7 phases shipped)
-          v1.0 - Phases 38-44 SHIPPED
+Progress: v1.1 ____________________    0% (0/? plans complete; 0/6 phases shipped)
+          v1.1 - Phase 45 (springdoc-2.7-bump) NOT STARTED
 
 ## Project Reference
 
@@ -19,11 +19,11 @@ Progress: v1.0 ####################  100% (9/9 plans complete; 7/7 phases shippe
 - See: `.planning/milestones/v0.5-ROADMAP.md` for full v0.5 archive
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/milestones/v1.0-ROADMAP.md` for full v1.0 archive
-- See: `.planning/ROADMAP.md` for archived roadmap (all milestones v0.3 through v1.0 shipped)
-- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-13, i-15 open; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12, i-14 closed)
+- See: `.planning/ROADMAP.md` for the active roadmap (v0.3 through v1.0 shipped and archived; v1.1 active with Phases 45-50 outlined)
+- See: `.planning/ISSUES.md` for open deferred issues (i-3, i-6b, i-7b, i-8b, i-13, i-15 open; i-6b/i-8b/i-13/i-15 scheduled for v1.1; i-1, i-2, i-4, i-5, i-6, i-7, i-8, i-9, i-10, i-12, i-14 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
-**Current focus:** Project-complete at v1.0.0. Future work (if opened as v1.1+) would address the carried-forward open issues: i-3 (`.gitignore` `data/` glob audit reference), i-6b (Next 16 jump; closure plan must rename middleware->proxy + Suspense-wrap login + bump engines.node + audit images.localPatterns + decide Turbopack vs --webpack), i-7b (Testcontainers 2.0.0 jump on upstream GA), i-8b (Spring Boot 4.0.x jump via either Path A `spring-boot-jackson2` compat module + HttpMessageConverter probe or Path B Jackson 2 -> Jackson 3 codebase migration across 36 files), i-13 (SpringDoc >= 2.7 to remove the ControllerAdviceBean workaround in OpenApiConfig), i-15 (Lighthouse CI workflow + scripts/check-bundle-size.mjs + @next/bundle-analyzer dev dep for perf-budget gating).
+**Current focus:** v1.1 Deferred Debt Closure active. The milestone closes the four open carry-forward issues from v1.0: i-13 (Phase 45 springdoc-2.7), i-8b (Phase 46 jackson-2-to-3-migration preparatory + Phase 47 spring-boot-4), i-6b (Phase 48 next-16), i-15 (Phase 49 lighthouse-ci; protected `.github/workflows/**` + `scripts/**` + `frontend/package.json` edits user-pre-approved). Phase 50 cuts v1.1.0. The two remaining open issues NOT in v1.1 scope are i-3 (`.gitignore` `data/` glob audit reference; documentation note only) and i-7b (Testcontainers 2.0.0 jump; trigger blocked on upstream Maven Central GA). Phase 45 is the next-up phase to plan via `/gsd:plan-phase 45`.
 
 ## Accumulated Context
 
@@ -131,8 +131,8 @@ The v0.6 cycle delivered seven phases (31-37) across 11 plans in a single workin
 
 ## Session Continuity
 
-Last session: 2026-05-09 - v1.0 milestone archived; v1.0.0 tag at cac37c1.
-Stopped at: v1.0 close complete; project at the GSD-roadmap end state. Maintainer to push the local annotated tag `v1.0.0` to fire `.github/workflows/release.yml` for the multi-arch GHCR publish; the resulting draft GitHub Release is published manually per `IDENTITY.yaml#release.draft_first: true`.
+Last session: 2026-05-09 - v1.1 milestone opened (deferred debt closure).
+Stopped at: v1.1 milestone-opening bookkeeping commit landed (ROADMAP.md re-opened with v1.1 active section + 6 phase outlines; PROJECT.md Active list extended with the v1.1 entry; this STATE.md cursor advanced from project-complete to v1.1 Phase 45 not-started). Next action: `/gsd:plan-phase 45` to author `.planning/phases/45-springdoc-2.7-bump/45-01-PLAN.md`.
 Resume file: None.
 
 ## Reference Documents
