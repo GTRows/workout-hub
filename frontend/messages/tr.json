@@ -117,7 +117,17 @@
     "dailyFatGGoal": "Yag (g/gun)",
     "logoutHeading": "Hesap",
     "loadError": "Profil bilgisi yuklenemedi.",
-    "retry": "Tekrar dene"
+    "retry": "Tekrar dene",
+    "notifications": {
+      "title": "Bildirimler",
+      "description": "Antrenman, kilo ve takviye hatirlatmalari icin bu cihaz uzerinden push.",
+      "statusGranted": "Bu cihazda aktif",
+      "statusDefault": "Izin gerekli",
+      "statusDenied": "Izin reddedildi - tarayici site verilerini sifirlayin",
+      "statusUnsupported": "Bu tarayicida desteklenmiyor",
+      "disable": "Devre disi birak",
+      "testButton": "Test bildirimi gonder"
+    }
   },
   "nutrition": {
     "title": "Beslenme",
@@ -209,7 +219,12 @@
     "title": "Bildirim izni",
     "description": "Antrenman hatirlaticilari ve dinlenme zamanlayicisi icin izin ver.",
     "enable": "Izin ver",
-    "pending": "Bekleniyor..."
+    "pending": "Bekleniyor...",
+    "test": {
+      "success": "Test bildirimi gonderildi (alici: {count})",
+      "zero": "Henuz abone olunmadigi icin gonderilemedi",
+      "error": "Test bildirimi gonderilemedi"
+    }
   },
   "supplements": {
     "title": "Takviyeler",

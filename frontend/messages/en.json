@@ -117,7 +117,17 @@
     "dailyFatGGoal": "Fat (g/day)",
     "logoutHeading": "Account",
     "loadError": "Could not load your profile.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Push reminders for workouts, weight, and supplements on this device.",
+      "statusGranted": "Active on this device",
+      "statusDefault": "Permission needed",
+      "statusDenied": "Permission denied - clear browser site data to retry",
+      "statusUnsupported": "Not supported on this browser",
+      "disable": "Disable",
+      "testButton": "Send test notification"
+    }
   },
   "nutrition": {
     "title": "Nutrition",
@@ -209,7 +219,12 @@
     "title": "Notification permission",
     "description": "Allow workout reminders and the rest timer to notify you.",
     "enable": "Allow",
-    "pending": "Requesting..."
+    "pending": "Requesting...",
+    "test": {
+      "success": "Test notification sent (recipients: {count})",
+      "zero": "No subscriptions yet - nothing to send",
+      "error": "Failed to send test notification"
+    }
   },
   "supplements": {
     "title": "Supplements",
