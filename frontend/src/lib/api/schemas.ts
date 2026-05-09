@@ -462,6 +462,23 @@ export const fullExportSchema = z.object({
 
 export type FullExport = z.infer<typeof fullExportSchema>;
 
+export const vapidPublicKeyResponseSchema = z.object({
+  publicKey: z.string(),
+});
+
+export type VapidPublicKeyResponse = z.infer<typeof vapidPublicKeyResponseSchema>;
+
+export const pushSubscribeRequestSchema = z.object({
+  endpoint: z.string().min(1),
+  keys: z.object({
+    p256dh: z.string().min(1),
+    auth: z.string().min(1),
+  }),
+  userAgent: z.string().optional(),
+});
+
+export type PushSubscribeRequest = z.infer<typeof pushSubscribeRequestSchema>;
+
 export type WeeklyVolume = z.infer<typeof weeklyVolumeSchema>;
 export type OneRmPoint = z.infer<typeof oneRmPointSchema>;
 export type Streak = z.infer<typeof streakSchema>;
