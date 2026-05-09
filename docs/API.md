@@ -160,5 +160,12 @@ layer:
   by basic-auth at the proxy if the deployment requires it.
 
 This stance is the v0.4 verdict from the [Phase 19
-audit](../.planning/phases/19-api-contract-docs/19-01-AUDIT.md) Section 4D
-and is reviewed at v1.0 (Phase 42).
+audit](../.planning/phases/19-api-contract-docs/19-01-AUDIT.md) Section 4D,
+re-confirmed at v1.0 (Phase 42 plan 01) without source change.
+
+## Related
+
+- [`DATA_SCHEMA.md`](DATA_SCHEMA.md) — Postgres schema overview, migration
+  history, and the per-user uniqueness constraints that back
+  `SET_NUMBER_DUPLICATE`, `SESSION_ALREADY_ACTIVE`, and the
+  `MetricsService` 200/201 upsert split.
