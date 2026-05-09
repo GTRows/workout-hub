@@ -1,9 +1,11 @@
 // Minimal service worker (scope: /). Precaches the offline shell on
 // install and serves /offline for any navigation that fails while the
-// network is down. API requests are never cached. The cache key is
-// versioned (wh-shell-vN); bumping it drops the previous cache on
+// network is down. API requests are never cached. Handles push events
+// from the WebPushNotificationDispatcher payload {title, body, url}
+// and routes notification clicks to the embedded url. The cache key
+// is versioned (wh-shell-vN); bumping it drops the previous cache on
 // activate.
-const CACHE = "wh-shell-v2";
+const CACHE = "wh-shell-v3";
 const SHELL = ["/offline", "/manifest.webmanifest", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {
@@ -40,4 +42,46 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(caches.match(req).then((cached) => cached ?? fetch(req)));
+});
+
+self.addEventListener("push", (event) => {
+  let payload = { title: "WorkoutHub", body: "", url: "/dashboard" };
+  if (event.data) {
+    try {
+      payload = { ...payload, ...event.data.json() };
+    } catch (_err) {
+      payload.body = event.data.text();
+    }
+  }
+  const opts = {
+    body: payload.body,
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    data: { url: payload.url || "/dashboard" },
+    tag: "wh-reminder",
+    renotify: false,
+  };
+  event.waitUntil(self.registration.showNotification(payload.title, opts));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || "/dashboard";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((all) => {
+      for (const c of all) {
+        try {
+          const u = new URL(c.url);
+          if (u.origin === self.location.origin) {
+            c.focus();
+            c.navigate(target).catch(() => {});
+            return;
+          }
+        } catch (_err) {
+          /* ignore non-URL clients */
+        }
+      }
+      return self.clients.openWindow(target);
+    })
+  );
 });
