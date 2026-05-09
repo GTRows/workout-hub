@@ -1,12 +1,9 @@
 import { api } from "@/lib/api/client";
-
-type VapidResponse = { publicKey: string };
-
-type SubscribeBody = {
-  endpoint: string;
-  keys: { p256dh: string; auth: string };
-  userAgent?: string;
-};
+import {
+  pushSubscribeRequestSchema,
+  vapidPublicKeyResponseSchema,
+  type PushSubscribeRequest,
+} from "@/lib/api/schemas";
 
 function urlBase64ToArrayBuffer(base64String: string): ArrayBuffer {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -32,8 +29,9 @@ export async function subscribePush(): Promise<void> {
     throw new Error("Push not supported");
   }
 
-  const { publicKey } = await api.request<VapidResponse>({
+  const { publicKey } = await api.request({
     path: "/api/push/vapid-public-key",
+    schema: vapidPublicKeyResponseSchema,
   });
   if (!publicKey) throw new Error("VAPID public key not configured");
 
@@ -43,7 +41,7 @@ export async function subscribePush(): Promise<void> {
     applicationServerKey: urlBase64ToArrayBuffer(publicKey),
   });
 
-  const body: SubscribeBody = {
+  const body: PushSubscribeRequest = {
     endpoint: subscription.endpoint,
     keys: {
       p256dh: bufferToBase64Url(subscription.getKey("p256dh")),
@@ -55,6 +53,6 @@ export async function subscribePush(): Promise<void> {
   await api.request({
     method: "POST",
     path: "/api/push/subscribe",
-    body,
+    body: pushSubscribeRequestSchema.parse(body),
   });
 }
