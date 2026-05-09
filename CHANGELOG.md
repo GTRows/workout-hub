@@ -17,6 +17,145 @@ and uses it as the GitHub release notes. Do not change the heading format.
 ### Fixed
 ### Security
 
+## [1.0.0] - 2026-05-09
+
+Production-ready release. Closes the v1.0 release-hardening deliverables
+across phases 38-43: end-to-end test scaffolding (Phase 38), test-
+infrastructure cumulative-fix bump from testcontainers 1.20.4 to 1.21.3
+(Phase 39, closes i-7; opens i-7b for the 2.x major bump), framework-
+major next-intl 3 -> 4 migration plus Spring Boot 4 and Next 16 re-
+deferral playbooks (Phase 40, closes i-5; opens i-6b and i-8b), security
+hardening with Netty 4.1.133.Final -> 4.2.13.Final and refresh-token /
+brute-force / rate-limit posture lock-in (Phase 41, closes i-14),
+documentation completion with new DATA_SCHEMA.md plus API.md /
+DEPLOYMENT.md / README.md / VAPID.md refresh (Phase 42), and a
+backup-restore drill runbook with BACKUP.md cron refresh and a populated
+MIGRATION.md `## v1.0.0` section (Phase 43). Operators upgrade with a
+normal `docker compose pull && docker compose up -d`; no Flyway
+migrations, no env-var changes, no compose-topology change. After
+upgrade, the new `docs/BACKUP_RESTORE_DRILL.md` runbook is the
+recommended quarterly verification cadence.
+
+### Added
+
+- End-to-end test scaffolding under `frontend/e2e/`: locale-stable
+  Playwright selectors with i18n-aware matchers, `loginAsAdmin` fixture,
+  session-save-resume spec exercising the offline-first IndexedDB
+  drain, and an e2e README documenting the local-run cadence (Phase 38).
+- `docs/DATA_SCHEMA.md` (new): V1..V28 schema reference for operators
+  auditing the database surface (Phase 42).
+- `docs/BACKUP_RESTORE_DRILL.md` (new): operator-runnable runbook for
+  verifying backup integrity quarterly via a throwaway Postgres
+  container. Both `pg_dump` sidecar (custom format, `pg_restore`) and
+  `scripts/backup.sh` (gzipped SQL, `psql`-piped) drill modes
+  documented (Phase 43).
+- `docs/MIGRATION.md` `## v1.0.0` entry: required-env-var changes
+  (none), schema-and-data migration (no new schema), compose-runtime
+  changes (Netty bump only), one-shot commands (none required;
+  recommends running the new restore drill after upgrade), rollback
+  (Phase 43).
+- `docs/BACKUP.md` "Verify your backups" sub-section cross-linking
+  the drill, plus a parallel cron paragraph for the `pg_dump` sidecar's
+  internal `SCHEDULE` (Phase 43).
+- `docs/DEPLOYMENT.md` and `README.md` cross-link entries pointing at
+  `BACKUP_RESTORE_DRILL.md` from the "What's not here" / "Documentation
+  map" sections (Phase 43).
+
+### Changed
+
+- Bumped `org.testcontainers:testcontainers` from `1.20.4` to `1.21.3`
+  (latest stable 1.x as of 2026-05-09). `AbstractIntegrationTest` API
+  surface preserved; all 10 migration tests inherit unchanged. The 2.x
+  major bump is re-deferred as i-7b (no upstream artifact published on
+  Maven Central). Closes i-7 (Phase 39).
+- Bumped `next-intl` from `^3.26.0` to `^4.11.1` and regenerated
+  `frontend/pnpm-lock.yaml`. Plan-author audit of the 4.0 release notes
+  found 13 breaking-change surfaces but ZERO required source-file edits
+  in this codebase: `frontend/src/i18n/request.ts` already returns the
+  post-3.22 `{ locale, messages }` shape, and the codebase doesn't use
+  locale-based routing, `defineRouting`, `next-intl/middleware`,
+  `next-intl/navigation`, or `format.relativeTime`. Closes i-5 plus the
+  open-redirect vuln alerts #8 and #11 (Phase 40-03).
+- Spring Boot 3.5 -> 4.0 attempt rolled back (commits 75c3ea1..e49e1dc)
+  after the Jackson 2 vs Jackson 3 default-classpath shift surfaced.
+  Runtime stays pinned at Spring Boot 3.5.14 (the tail of the 3.5.x
+  patch line on Maven Central). The major-version jump is re-deferred
+  as i-8b with the 36-file Jackson-2 migration analysis carried
+  forward verbatim (Phase 40-01).
+- Next 15 -> 16 jump re-deferred as i-6b: the 3.x next-intl line tops
+  out at `next ^15.0.0`, and bundling Next 16 with next-intl 4 in the
+  same commit violates the roadmap's "in sequence (each its own commit
+  and test pass)" rule. Frontend stays on Next 15.x (latest backport
+  `15.5.18` per the npm `backport` dist-tag) (Phase 40-02).
+- `docs/API.md`, `docs/DEPLOYMENT.md`, `docs/VAPID.md`, and `README.md`
+  refreshed for v1.0 alignment: API surface fully enumerated against
+  the controller layer at HEAD, deployment runbook updated for the
+  Netty 4.2 baseline and the new backup drill cross-link, and the
+  `vapid-keygen.sh` stale reference corrected (Phase 42).
+
+### Fixed
+
+- N/A — v1.0 is hardening + docs work; no production bug closures.
+
+### Security
+
+- Bumped `<netty.version>` from `4.1.133.Final` to `4.2.13.Final` in
+  `backend/pom.xml`. Closes CVE-2026-42577 (epoll RST DoS); the
+  `.trivyignore` suppression block for that CVE is removed in the
+  same release window. The runtime is API-stable for this codebase's
+  consumers — Spring MVC + Tomcat servlet stack with no Reactor Netty
+  on the request path; the only Netty consumer is
+  `async-http-client:2.12.4` for outbound web push. Closes i-14
+  (Phase 41).
+- Refresh-token hashing posture lock-in: SHA-256 hex over the full JWT
+  bytes via `MessageDigest.getInstance("SHA-256")` and
+  `HexFormat.of().formatHex(...)`, persisted in
+  `refresh_tokens.token_hash VARCHAR(128) UNIQUE` (V7 migration). The
+  2026-05-04 "refresh-token hash collisions" debt is superseded — those
+  tests pass on `96d81b0`. Tightening to bcrypt or Argon2 was rejected
+  because refresh tokens carry full JWT entropy at issuance and the
+  hash is a fingerprint for DB lookup, not a password derivation
+  (Phase 41).
+- Brute-force lockout posture lock-in: `BruteForceGuard` enforces 10
+  failures / 15-minute window / 60-minute lockout, throws HTTP 423 via
+  `ResponseStatusException(HttpStatus.LOCKED, ...)`, and records every
+  login outcome in `login_attempts` (V15 migration) via
+  `@Transactional(propagation = REQUIRES_NEW)`. Threshold-tightening
+  and (email, IP)-keyed lockout were rejected as v1.0 scope creep
+  (Phase 41).
+- Rate-limiting posture lock-in: zero generic in-process rate limiter;
+  the Self-Hosted Contract delegates rate limiting to the operator's
+  reverse proxy. The only in-process throttle is `BruteForceGuard` on
+  the password-grant path. Adding a generic rate limiter was rejected
+  because it would duplicate operator-layer enforcement and contradict
+  the "never assume public exposure" tailnet-only posture (Phase 41).
+
+### Known Issues (carried forward)
+
+Tracked in `.planning/ISSUES.md`:
+
+- i-3: documentation note on `.gitignore` `data/` glob-form correction
+  (resolved at execution time; carried for audit).
+- i-6b (NEW in v1.0): Next.js 16.x major bump deferred until a closure
+  plan probes the lockfile resolution with co-installed `next@^16` and
+  `next-intl@^4`, renames `frontend/src/middleware.ts` -> `proxy.ts`,
+  wraps `frontend/src/app/(auth)/login/page.tsx` in `<Suspense>`,
+  bumps `engines.node: ">=20.9.0"`, and exercises the protected-file
+  pre-authorisation flow.
+- i-7b (NEW in v1.0): testcontainers 2.0.0 major bump deferred until
+  upstream Maven Central publishes 2.0.0 GA.
+- i-8b (NEW in v1.0): Spring Boot 4.0.x major bump deferred until
+  either a `spring-boot-jackson2` compat-module CI probe completes
+  successfully OR a Jackson 2 -> Jackson 3 codebase migration sub-plan
+  absorbs the 36-file refactor.
+- i-12: `FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport`
+  returns 500 on a freshly-seeded user; CI is the authoritative gate.
+- i-13: SpringDoc 2.6.0 ControllerAdviceBean workaround should be
+  removed once SpringDoc 2.7+ ships against Spring Boot 3.5.x.
+- i-15: Lighthouse CI workflow + bundle-size enforcement script + the
+  `@next/bundle-analyzer` devDependency deferred — all three require
+  edits to protected paths.
+
 ## [0.6.0] - 2026-05-09
 
 Operational maturity release. Closes the v0.6 deliverables across phases
