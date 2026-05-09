@@ -59,13 +59,6 @@ This preserves the plan's intent (only `.gitkeep` files tracked under `data/`) w
 
 **Trigger to reopen:** Spring Boot 3.4 EOL OR v0.6 (Operational Maturity) milestone OR a security-driven need.
 
-### i-9 — StructuredLoggingTest cannot capture ECS JSON under @SpringBootTest
-
-**Disabled in:** `backend/src/test/java/com/workouthub/common/logging/StructuredLoggingTest.java`
-**Reason:** The test boots a minimal `@SpringBootConfiguration` with `WebEnvironment.NONE` and `@ActiveProfiles("prod")` to exercise the Spring Boot 3.4 native ECS structured logging customizer. Even with `OutputCaptureExtension` (which intercepts stdout before Logback starts), the test still finds no JSON line in captured output. Likely cause: the minimal configuration does not trigger Spring Boot's `LoggingApplicationListener` reconfiguration to ECS, so the test runs with default human-readable logback layout. ECS output works correctly at real runtime (`docker compose up` boots the full `WorkoutHubApplication` and emits ECS JSON).
-
-**Trigger to reopen:** Redesign the test to boot the full `WorkoutHubApplication` (probably with a Testcontainers postgres) so the prod logging system actually activates. Likely v0.4 testing-infra session.
-
 ### i-12: FullExportImportIntegrationTest.importRoundTripPreservesPlansFromExport returns 500
 
 - **What**: GET /api/export/full returns HTTP 500 when called for a freshly-seeded user with one day-less plan, no sessions, no metrics. Test asserts 200 at line 134 of FullExportImportIntegrationTest.java.
@@ -156,3 +149,18 @@ populates from entity; `FullImportService.insertSessions` reads null-safely;
 `SessionSetsService.recomputePrForExerciseHistory` is invoked once per
 distinct touched (user, exerciseId) pair after the insert loop as a
 safety net for legacy payloads.*
+
+### i-9 — StructuredLoggingTest cannot capture ECS JSON under @SpringBootTest
+
+**Disabled in:** `backend/src/test/java/com/workouthub/common/logging/StructuredLoggingTest.java`
+**Reason:** The test boots a minimal `@SpringBootConfiguration` with `WebEnvironment.NONE` and `@ActiveProfiles("prod")` to exercise the Spring Boot 3.4 native ECS structured logging customizer. Even with `OutputCaptureExtension` (which intercepts stdout before Logback starts), the test still finds no JSON line in captured output. Likely cause: the minimal configuration does not trigger Spring Boot's `LoggingApplicationListener` reconfiguration to ECS, so the test runs with default human-readable logback layout. ECS output works correctly at real runtime (`docker compose up` boots the full `WorkoutHubApplication` and emits ECS JSON).
+
+**Trigger to reopen:** Redesign the test to boot the full `WorkoutHubApplication` (probably with a Testcontainers postgres) so the prod logging system actually activates. Likely v0.4 testing-infra session.
+
+*Closed by Phase 37 Plan 01: StructuredLoggingTest now extends
+AbstractIntegrationTest and boots WorkoutHubApplication.class under
+@ActiveProfiles("prod") + Testcontainers Postgres, so
+LoggingApplicationListener reconfigures the logging system to ECS-format JSON.
+@Disabled removed; both contract assertions (JSON shape with @timestamp +
+message; deny-listed authorization MDC value masked from stdout) run on every
+CI build.*
