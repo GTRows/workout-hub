@@ -504,7 +504,11 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "error": "Something went wrong",
+    "errorHint": "Try again, or return to the dashboard.",
+    "tryAgain": "Try again",
+    "goHome": "Dashboard"
   },
   "achievements": {
     "title": "Achievements",

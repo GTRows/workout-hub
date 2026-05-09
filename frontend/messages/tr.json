@@ -504,7 +504,11 @@
     "save": "Kaydet",
     "cancel": "Iptal",
     "delete": "Sil",
-    "edit": "Duzenle"
+    "edit": "Duzenle",
+    "error": "Bir seyler ters gitti",
+    "errorHint": "Tekrar dene veya panele don.",
+    "tryAgain": "Tekrar dene",
+    "goHome": "Panele don"
   },
   "achievements": {
     "title": "Basarimlar",
