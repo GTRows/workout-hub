@@ -131,3 +131,74 @@ describe("api client ApiError propagation", () => {
     });
   });
 });
+
+describe("api client returnStatus overload", () => {
+  beforeEach(() => {
+    clearTokens();
+    window.localStorage.clear();
+  });
+
+  it("propagates the HTTP status alongside the parsed body when returnStatus:true", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(201, { id: "abc", value: 42 }));
+
+    const api = createApiClient({ baseUrl: "http://api", fetchImpl });
+    const result = await api.request({
+      path: "/api/things",
+      method: "POST",
+      body: { value: 42 },
+      auth: false,
+      returnStatus: true,
+    });
+
+    expect(result).toEqual({
+      data: { id: "abc", value: 42 },
+      status: 201,
+    });
+  });
+
+  it("returns { data: undefined, status: 204 } for a 204 response when returnStatus:true", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    const api = createApiClient({ baseUrl: "http://api", fetchImpl });
+    const result = await api.request({
+      path: "/api/things/abc",
+      method: "DELETE",
+      auth: false,
+      returnStatus: true,
+    });
+
+    expect(result).toEqual({ data: undefined, status: 204 });
+  });
+
+  it("still throws ApiError on a 4xx response when returnStatus:true", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(409, {
+        timestamp: "2026-05-07T00:00:00Z",
+        status: 409,
+        error: "Conflict",
+        message: "Already exists",
+        code: "DUPLICATE",
+        path: "/api/things",
+      })
+    );
+
+    const api = createApiClient({ baseUrl: "http://api", fetchImpl });
+    await expect(
+      api.request({
+        path: "/api/things",
+        method: "POST",
+        body: {},
+        auth: false,
+        returnStatus: true,
+      })
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      status: 409,
+      code: "DUPLICATE",
+    });
+  });
+});

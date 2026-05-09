@@ -31,7 +31,10 @@ type RequestOptions<R> = {
   auth?: boolean;
   query?: Record<string, string | number | boolean | undefined>;
   signal?: AbortSignal;
+  returnStatus?: boolean;
 };
+
+export type RequestWithStatus<R> = { data: R; status: number };
 
 type ClientDeps = {
   baseUrl?: string;
@@ -96,7 +99,13 @@ export function createApiClient(deps: ClientDeps = {}) {
     return res;
   }
 
-  async function request<R = unknown>(opts: RequestOptions<R>): Promise<R> {
+  function request<R = unknown>(
+    opts: RequestOptions<R> & { returnStatus: true }
+  ): Promise<RequestWithStatus<R>>;
+  function request<R = unknown>(opts: RequestOptions<R>): Promise<R>;
+  async function request<R = unknown>(
+    opts: RequestOptions<R>
+  ): Promise<R | RequestWithStatus<R>> {
     const qs =
       opts.query && Object.keys(opts.query).length > 0
         ? "?" +
@@ -114,9 +123,11 @@ export function createApiClient(deps: ClientDeps = {}) {
     if (opts.body !== undefined) init.body = JSON.stringify(opts.body);
 
     const res = await raw(`${baseUrl}${opts.path}${qs}`, init, opts.auth !== false);
+    const status = res.status;
 
-    if (res.status === 204) {
-      return undefined as R;
+    if (status === 204) {
+      const data = undefined as R;
+      return opts.returnStatus === true ? { data, status } : data;
     }
 
     const text = await res.text();
@@ -126,13 +137,11 @@ export function createApiClient(deps: ClientDeps = {}) {
       const parsed = apiErrorSchema.safeParse(json);
       const message = parsed.success ? parsed.data.message : res.statusText;
       const code = parsed.success ? parsed.data.code : undefined;
-      throw new ApiError(res.status, json, message, code);
+      throw new ApiError(status, json, message, code);
     }
 
-    if (opts.schema) {
-      return opts.schema.parse(json);
-    }
-    return json as R;
+    const data: R = opts.schema ? opts.schema.parse(json) : (json as R);
+    return opts.returnStatus === true ? { data, status } : data;
   }
 
   return { request, raw, refreshAccessToken };
