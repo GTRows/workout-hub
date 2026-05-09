@@ -57,6 +57,9 @@ const messages = {
   prs: {
     empty: "No records yet.",
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function sampleHeatmap(weeks = 12) {

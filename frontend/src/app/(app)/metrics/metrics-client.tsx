@@ -24,6 +24,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PrToast } from "@/components/pr-toast";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 
 type Range = "week" | "month" | "all";
 
@@ -246,7 +247,7 @@ export function MetricsClient() {
       </Card>
 
       {metricsQuery.isLoading ? (
-        <p className="text-muted-foreground">{t("loading")}</p>
+        <RouteSkeleton variant="metrics" />
       ) : metrics.length === 0 ? (
         <Card>
           <CardDescription>{t("empty")}</CardDescription>

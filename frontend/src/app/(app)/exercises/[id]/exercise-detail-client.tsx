@@ -9,6 +9,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { ExerciseMedia } from "@/components/exercise-media";
 import { ExercisePersonalRecordCard } from "@/components/exercise-personal-record-card";
 import { ExerciseProgressChart } from "@/components/exercise-progress-chart";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 
 export function ExerciseDetailClient({ id }: { id: string }) {
   const t = useTranslations("exercises");
@@ -19,7 +20,7 @@ export function ExerciseDetailClient({ id }: { id: string }) {
     queryFn: () => fetchExerciseDetail(id),
   });
 
-  if (query.isLoading) return <p className="text-muted-foreground">{t("loading")}</p>;
+  if (query.isLoading) return <RouteSkeleton variant="exercise-detail" />;
   if (query.isError || !query.data) {
     return <p className="text-destructive">{t("notFound")}</p>;
   }

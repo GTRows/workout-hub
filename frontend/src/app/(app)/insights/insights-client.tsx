@@ -28,6 +28,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Heatmap } from "@/components/heatmap";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { pickLocaleField } from "@/lib/locale";
 
 const VOLUME_RANGE_TO_WEEKS = {
@@ -280,7 +281,7 @@ export function InsightsClient() {
           ))}
         </div>
         {volumeQuery.isLoading ? (
-          <p className="text-muted-foreground">{t("loading")}</p>
+          <RouteSkeleton variant="insights" />
         ) : (
           <div
             className="h-56 w-full"

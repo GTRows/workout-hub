@@ -53,6 +53,9 @@ const messages = {
     deleteAction: "Delete",
     deleteConfirm: "Delete this entry?",
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement) {

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { NotificationsSection } from "./notifications-section";
 import { SupplementsSection } from "./supplements-section";
 import { WebhookTokensSection } from "./webhook-tokens-section";
@@ -84,7 +85,7 @@ export function ProfileClient() {
   }
 
   if (meQuery.isLoading || !meQuery.data) {
-    return <p className="text-muted-foreground">{t("loading")}</p>;
+    return <RouteSkeleton variant="profile" />;
   }
 
   const submit = () => {

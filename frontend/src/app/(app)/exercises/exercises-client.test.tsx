@@ -54,6 +54,9 @@ const messages = {
     musclePrimary: "Primary",
     muscleSecondary: "Secondary",
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement) {

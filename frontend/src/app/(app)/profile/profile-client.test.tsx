@@ -63,6 +63,9 @@ const messages = {
       generic: "Something went wrong. Please try again.",
     },
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement) {

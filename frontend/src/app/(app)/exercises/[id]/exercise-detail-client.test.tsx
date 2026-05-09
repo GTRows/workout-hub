@@ -75,6 +75,9 @@ const messages = {
     progressChartTooltipSets: "Sets: {count}",
     progressChartTooltipReps: "Top reps: {count}",
   },
+  common: {
+    loading: "Loading",
+  },
 };
 
 function renderClient(ui: ReactElement): ReturnType<typeof render> {

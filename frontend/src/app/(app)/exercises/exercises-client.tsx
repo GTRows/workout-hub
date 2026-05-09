@@ -10,6 +10,7 @@ import { pickLocaleField } from "@/lib/locale";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 
 const CATEGORIES = ["push", "pull", "legs", "cardio", "core", "forearm"] as const;
 const EQUIPMENTS = [
@@ -96,7 +97,7 @@ export function ExercisesClient() {
       </div>
 
       {listQuery.isLoading ? (
-        <p className="text-muted-foreground">{t("loading")}</p>
+        <RouteSkeleton variant="exercises" />
       ) : list.length === 0 ? (
         <p className="text-muted-foreground">{t("empty")}</p>
       ) : (
