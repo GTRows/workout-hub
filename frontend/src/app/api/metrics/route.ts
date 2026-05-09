@@ -1,3 +1,5 @@
+import { getRegistry } from "@/lib/metrics/registry";
+
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
@@ -26,7 +28,8 @@ export function GET() {
     "# TYPE workouthub_frontend_start_time_seconds gauge",
     `workouthub_frontend_start_time_seconds ${(startTime / 1000).toFixed(3)}`,
   ];
-  return new Response(lines.join("\n") + "\n", {
+  const body = lines.join("\n") + "\n" + getRegistry().renderProm();
+  return new Response(body, {
     status: 200,
     headers: { "content-type": "text/plain; version=0.0.4; charset=utf-8" },
   });
