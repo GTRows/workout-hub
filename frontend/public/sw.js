@@ -1,7 +1,9 @@
-// Minimal service worker: caches the offline shell and serves /offline
-// for any navigation that fails while the network is down. API requests
-// are never cached.
-const CACHE = "wh-shell-v1";
+// Minimal service worker (scope: /). Precaches the offline shell on
+// install and serves /offline for any navigation that fails while the
+// network is down. API requests are never cached. The cache key is
+// versioned (wh-shell-vN); bumping it drops the previous cache on
+// activate.
+const CACHE = "wh-shell-v2";
 const SHELL = ["/offline", "/manifest.webmanifest", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {
