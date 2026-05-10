@@ -15,11 +15,13 @@ module.exports = {
       // and never started the server, which surfaced as a Chrome interstitial.
       startServerCommand: "pnpm start",
       startServerReadyPattern: "Ready in",
+      // /_not-found is intentionally served with HTTP 404, which Lighthouse
+      // treats as ERRORED_DOCUMENT_REQUEST. The route surfaces as a soft 404
+      // to users and isn't on a Core Web Vitals path; auditing it is noise.
       url: [
         "http://localhost:3000/login",
         "http://localhost:3000/",
         "http://localhost:3000/offline",
-        "http://localhost:3000/_not-found",
       ],
       numberOfRuns: 3,
       settings: {
