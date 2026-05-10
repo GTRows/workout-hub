@@ -131,7 +131,7 @@ jobs:
           echo "${{ steps.build.outputs.digest }}" > "${{ runner.temp }}/digests/${{ matrix.component }}.txt"
 
       - name: Upload digest artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digest-${{ matrix.component }}
           path: ${{ runner.temp }}/digests/${{ matrix.component }}.txt
