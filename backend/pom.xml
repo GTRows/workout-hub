@@ -93,9 +93,14 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- Spring Boot 4 modular autoconfigure split moved Flyway support
+             to a dedicated spring-boot-flyway module; the starter brings in
+             flyway-core + the autoconfigure jar so migrations actually run
+             before Hibernate's schema validation. flyway-database-postgresql
+             stays explicit for the postgres-flavoured Flyway extensions. -->
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
