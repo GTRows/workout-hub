@@ -9,7 +9,11 @@
 module.exports = {
   ci: {
     collect: {
-      startServerCommand: "pnpm --filter ./frontend start",
+      // lhci autorun is invoked with cwd=frontend/ (see .github/workflows/lighthouse.yml),
+      // so a plain `pnpm start` runs the frontend package's start script directly.
+      // The previous --filter ./frontend resolved to frontend/frontend/ from that cwd
+      // and never started the server, which surfaced as a Chrome interstitial.
+      startServerCommand: "pnpm start",
       startServerReadyPattern: "Ready in",
       url: [
         "http://localhost:3000/login",
