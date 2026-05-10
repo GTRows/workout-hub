@@ -2,24 +2,24 @@
 
 ## Current Position
 
-Milestone: v1.1 Deferred Debt Closure (CLOSED 2026-05-09)
-Phase: 50 of 50 (release-v1-1) - SHIPPED 2026-05-09
-Plan: 50-01 release-v1-1 - shipped 2026-05-09 (v1.1.0 cut at sha `53082ab`; annotated tag `v1.1.0` created locally; multi-arch GHCR publish queued for maintainer-side tag push per `IDENTITY.yaml#release.draft_first: true`)
-Status: v1.1 milestone CLOSED. All planned phases (45-50) shipped; all four open carry-forward issues from v1.0 closed in this milestone (i-13 Phase 45 springdoc-2.7-bump, i-8b Phase 47 spring-boot-4-with-jackson-3, i-6b Phase 48 next-16, i-15 Phase 49 lighthouse-ci). Phase 46 deferred-into-47 per the HEAD audit that found four blockers preventing a Spring Boot 3.5-compatible Jackson 3 source-only intermediate state. v1.1.0 cut at sha `53082ab` on 2026-05-09 with annotated tag `v1.1.0` created locally; multi-arch GHCR publish via `.github/workflows/release.yml` is queued for maintainer-side tag push. Project-complete state restored: no active milestone. Two issues remain open as carry-forward (i-3 audit reference; i-7b Testcontainers 2.x trigger blocked on upstream Maven Central GA).
-Last activity: 2026-05-09 - v1.1 milestone bookkeeping commit (collapse Phases 45-50 into ROADMAP archive block; archive v1.1 to `.planning/milestones/v1.1-ROADMAP.md`; record v1.1 shipped entry in MILESTONES.md; update STATE.md cursor to project-complete).
+Milestone: v1.1.1 Hot-fix (SHIPPED 2026-05-11) — non-roadmap
+Phase: None (hot-fix; no roadmap phase opened)
+Plan: PR #32 (`fix/jackson3-classpath`) — 5 fix commits + release cut at sha `9cce9fa`; annotated tag `v1.1.1` pushed; Release workflow green; multi-arch GHCR images at `ghcr.io/gtrows/workouthub-{backend,frontend}:1.1.1`; draft GitHub Release awaiting maintainer-side Publish click per `IDENTITY.yaml#release.draft_first: true`.
+Status: v1.1.1 hot-fix SHIPPED. v1.1.0 had cut at sha `53082ab` against a never-CI-validated Phase 47 (Spring Boot 4 + Jackson 3) commit; the GHCR publish workflow surfaced multiple integration gaps that v1.1.1 closed: (1) `spring-boot-starter-jackson` opt-in dep added (Spring Boot 4 ships Jackson 2 by default); (2) `spring-boot-starter-webmvc-test` + `spring-boot-starter-flyway` deps added (Spring Boot 4 modular autoconfigure split); (3) 49 test files migrated to `org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc`; (4) 3 main files reverted from `tools.jackson.annotation.*` to `com.fasterxml.jackson.annotation.*` (annotations namespace unchanged in Jackson 3); (5) `JacksonConfig` simplified to `changeDefaultPropertyInclusion` (ObjectMapper immutable in Jackson 3); (6) `@EnableWebSecurity` added to `SecurityConfig` (Spring Security 7 no longer auto-exposes `HttpSecurity`); (7) `RestTimerScheduler.claimDueBatch` self-call replaced with explicit `repository.saveAll(due)` (Hibernate 7 stricter flushing); (8) `OpenApiCustomizer apiErrorSchemaCustomizer` bean restored + `springdoc.override-with-generic-response: false` opt-out restored (SpringDoc 3.0.x doesn't surface `@ControllerAdvice` schemas under SB4); (9) `.lighthouserc.cjs` `startServerCommand` fixed (was `pnpm --filter ./frontend start` from cwd `frontend/`, never started Next.js since Phase 49); (10) `.lighthouserc.cjs` URL list dropped `/_not-found` (Next.js 404 → Lighthouse `ERRORED_DOCUMENT_REQUEST`). Repo flipped PRIVATE → PUBLIC during the cycle to dodge the Actions-minutes-exhausted billing block; 13 stale Dependabot PRs closed in the same cleanup. Project-complete state restored. Two issues remain open as carry-forward (i-3 audit reference; i-7b Testcontainers 2.x trigger blocked on upstream Maven Central GA).
+Last activity: 2026-05-11 - v1.1.1 cut at sha `9cce9fa` with annotated tag `v1.1.1` pushed; Release workflow run `25639961444` completed green (5/5 jobs: Verify changelog entry, Test, Build and push frontend, Build and push backend, Draft GitHub Release).
 
-Progress: v1.1 ####################   100% (6/6 plans complete; 6/6 phases shipped; v1.1.0 cut at 53082ab)
+Progress: Project complete. v1.1.1 hot-fix SHIPPED on top of v1.1 close.
 
 ## Project Reference
 
-- See: `.planning/MILESTONES.md` for shipped milestone log
+- See: `.planning/MILESTONES.md` for shipped milestone log (v1.1.1 hot-fix entry at the top)
 - See: `.planning/milestones/v0.3-ROADMAP.md` for full v0.3 archive
 - See: `.planning/milestones/v0.4-ROADMAP.md` for full v0.4 archive
 - See: `.planning/milestones/v0.5-ROADMAP.md` for full v0.5 archive
 - See: `.planning/milestones/v0.6-ROADMAP.md` for full v0.6 archive
 - See: `.planning/milestones/v1.0-ROADMAP.md` for full v1.0 archive
 - See: `.planning/milestones/v1.1-ROADMAP.md` for full v1.1 archive
-- See: `.planning/ROADMAP.md` for the archived roadmap (all milestones v0.3 through v1.1 shipped and archived)
+- See: `.planning/ROADMAP.md` for the archived roadmap (all milestones v0.3 through v1.1 shipped and archived; v1.1.1 was a non-roadmap hot-fix)
 - See: `.planning/ISSUES.md` for open deferred issues (i-3, i-7b open; i-1, i-2, i-4, i-5, i-6, i-6b, i-7, i-8, i-8b, i-9, i-10, i-12, i-13, i-14, i-15 closed)
 
 **Core value:** A user can log a workout end-to-end on a phone (mid-set), see prior performance for each exercise, and export the full history as a JSON snapshot Claude can ingest as context. Offline-first execution and self-hosted data ownership are non-negotiable.
