@@ -83,6 +83,12 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: method
   paths-to-match: /api/**
+  # Phase 45 deleted this opt-out on the assumption that SpringDoc 2.7+ would
+  # surface ApiError via the default path. Under SpringDoc 3.0.3 + Spring Boot 4
+  # the default still wraps @ExceptionHandler return bodies in a generic Object
+  # response, so the schema disappears from components.schemas. Restore the
+  # opt-out to keep the OpenApi surface (and OpenApiSurfaceIntegrationTest) green.
+  override-with-generic-response: false
 
 logging:
   level:

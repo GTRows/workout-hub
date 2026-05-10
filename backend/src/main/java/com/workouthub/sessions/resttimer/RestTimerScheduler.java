@@ -72,14 +72,18 @@ public class RestTimerScheduler {
         log.info("rest-timer dispatch tick processed={}", due.size());
     }
 
-    @Transactional
+    // Self-call (runOnce -> claimDueBatch) bypasses Spring's transactional
+    // proxy, so the @Transactional annotation alone never opened a tx and
+    // dispatchedAt never persisted under Hibernate 7's stricter flushing.
+    // Use Spring Data's saveAll to commit the dispatchedAt update explicitly
+    // before the dispatch loop runs.
     protected List<RestTimerSchedule> claimDueBatch() {
         Instant now = Instant.now(clock);
         List<RestTimerSchedule> due = repository.findDueBatch(now, PageRequest.of(0, BATCH_SIZE));
         for (RestTimerSchedule row : due) {
             row.setDispatchedAt(now);
         }
-        return due;
+        return repository.saveAll(due);
     }
 
     @Scheduled(fixedDelayString = "${app.rest-timer.cleanup-interval-ms:300000}")

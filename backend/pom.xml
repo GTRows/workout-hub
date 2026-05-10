@@ -77,6 +77,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- Jackson 3 opt-in starter. Spring Boot 4.x ships Jackson 2 by default
+             for backward compat; this brings in tools.jackson:* on the classpath
+             so the codebase's tools.jackson.databind / datatype.jsr310 / core
+             imports resolve. jackson-annotations stays at com.fasterxml.jackson
+             namespace for backward compat per the Jackson 3 design. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -84,9 +93,14 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- Spring Boot 4 modular autoconfigure split moved Flyway support
+             to a dedicated spring-boot-flyway module; the starter brings in
+             flyway-core + the autoconfigure jar so migrations actually run
+             before Hibernate's schema validation. flyway-database-postgresql
+             stays explicit for the postgres-flavoured Flyway extensions. -->
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -156,6 +170,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Spring Boot 4 split test autoconfigure into per-feature modules.
+             AutoConfigureMockMvc moved from spring-boot-test-autoconfigure to
+             spring-boot-webmvc-test, brought in by this starter. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
