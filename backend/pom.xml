@@ -77,6 +77,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- Jackson 3 opt-in starter. Spring Boot 4.x ships Jackson 2 by default
+             for backward compat; this brings in tools.jackson:* on the classpath
+             so the codebase's tools.jackson.databind / datatype.jsr310 / core
+             imports resolve. jackson-annotations stays at com.fasterxml.jackson
+             namespace for backward compat per the Jackson 3 design. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springdoc</groupId>

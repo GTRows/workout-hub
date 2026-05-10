@@ -3,7 +3,7 @@ package com.workouthub.common.config;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import tools.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.datatype.jsr310.JavaTimeModule;
 
