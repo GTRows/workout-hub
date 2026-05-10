@@ -17,6 +17,86 @@ and uses it as the GitHub release notes. Do not change the heading format.
 ### Fixed
 ### Security
 
+## [1.1.1] - 2026-05-11
+
+Hot-fix release closing the v1.1.0 ship-blocker. The v1.1.0 release commit
+shipped without a green CI run; once the GHCR publish workflow tried to fire
+it surfaced multiple Spring Boot 4 + Jackson 3 + SpringDoc 3 + Next 16 +
+Lighthouse CI integration gaps that Phase 47-49 missed. v1.1.1 closes every
+one of them so `mvn verify` and the full CI matrix go green again.
+Operators upgrade with `docker compose pull && docker compose up -d`; no
+Flyway migrations, no env-var changes, no compose-topology change.
+
+### Added
+
+- `spring-boot-starter-jackson` dep in `backend/pom.xml`. Spring Boot 4 ships
+  Jackson 2 by default; Jackson 3 is opt-in via this starter, which brings
+  `tools.jackson:*` onto the classpath so the codebase's `tools.jackson.databind`,
+  `tools.jackson.datatype.jsr310`, and `tools.jackson.core` imports actually
+  resolve. Without it, every Jackson 3 source file was unresolved at compile
+  time and the v1.1.0 backend build failed in CI.
+- `spring-boot-starter-webmvc-test` dep (test scope) in `backend/pom.xml`.
+  Spring Boot 4's modular autoconfigure split moved `AutoConfigureMockMvc`
+  from `spring-boot-test-autoconfigure` to the new `spring-boot-webmvc-test`
+  module. 49 test files were migrated to
+  `org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc`
+  in the same fix.
+- `spring-boot-starter-flyway` dep in `backend/pom.xml`. Spring Boot 4 also
+  modularized Flyway support; without the starter the Flyway autoconfigure
+  jar never loaded, migrations never ran, and Hibernate's schema validation
+  failed on every test class with `missing table [achievements]`.
+- `OpenApiCustomizer apiErrorSchemaCustomizer` bean restored in
+  `backend/src/main/java/com/workouthub/common/config/OpenApiConfig.java`.
+  SpringDoc 3.0.x under Spring Boot 4 stops surfacing `@ControllerAdvice`
+  `ExceptionHandler` response bodies in `components.schemas`, even with
+  `springdoc.override-with-generic-response=false`. The customizer fires
+  after SpringDoc's scan and re-registers `ApiError` + nested `FieldError`,
+  which keeps `OpenApiSurfaceIntegrationTest` green and the typed
+  `ApiError.code` enum visible to API consumers.
+- `springdoc.override-with-generic-response: false` restored in
+  `backend/src/main/resources/application.yml`. Belt-and-braces with the
+  customizer above.
+
+### Changed
+
+- Reverted `JsonProperty`, `JsonAlias`, `JsonValue`, `JsonCreator`, and
+  `JsonInclude` imports across `JacksonConfig`, `SupplementTiming`, and
+  `ScalePayload` from `tools.jackson.annotation.*` back to
+  `com.fasterxml.jackson.annotation.*`. `jackson-annotations` keeps the
+  legacy namespace in Jackson 3 by design for backward compatibility;
+  Phase 47 incorrectly rewrote it.
+- Simplified `JacksonConfig.jacksonBuilderCustomizer` to only set
+  `JsonInclude.Include.NON_NULL` via Jackson 3's
+  `changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(...))`.
+  `JavaTimeModule` is now built into Jackson 3 core, and
+  `WRITE_DATES_AS_TIMESTAMPS` moved to `DateTimeFeature` and defaults to
+  `false`, so the explicit `addModules` and `disable` calls were no-ops.
+  `serializationInclusion` was removed when ObjectMapper became immutable.
+- Added `@EnableWebSecurity` to `SecurityConfig`. Spring Security 7 paired
+  with Spring Boot 4's modular autoconfigure split no longer auto-exposes
+  `HttpSecurity` from `spring-boot-starter-security` alone, so
+  `securityFilterChain(HttpSecurity http)` failed to autowire and every
+  Spring context that loaded full web security failed to start.
+
+### Fixed
+
+- `RestTimerScheduler.claimDueBatch` self-call via `runOnce` bypassed
+  Spring's transactional proxy; under Hibernate 7's stricter flushing
+  the dirty `dispatchedAt` write was silently dropped, surfacing as
+  `RestTimerSchedulerIntegrationTest.schedulerFiresOnceForADueRowAndMarksDispatchedAt`
+  asserting `Expecting actual not to be null`. Made the persistence
+  explicit via `repository.saveAll(due)`.
+- `.lighthouserc.cjs` `startServerCommand` was `pnpm --filter ./frontend start`,
+  but `lhci autorun` runs with cwd `frontend/`, so the filter resolved to
+  `frontend/frontend/` and never started the Next.js server. Lighthouse
+  then hit `localhost:3000` against nothing and surfaced as
+  `Chrome prevented page load with an interstitial` on every PR run since
+  the Phase 49 ship. Replaced with a bare `pnpm start`.
+- `.lighthouserc.cjs` audited URL list dropped `/_not-found`. Next.js
+  serves that route with HTTP 404, which Lighthouse treats as
+  `ERRORED_DOCUMENT_REQUEST`. The remaining `/login`, `/`, `/offline`
+  routes still cover the Core Web Vitals unauthenticated surface.
+
 ## [1.1.0] - 2026-05-09
 
 Framework-major and observability release. Closes the v1.1 deliverables across
