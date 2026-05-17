@@ -36,8 +36,8 @@ importers:
         specifier: ^4.0.10
         version: 4.4.2
       lucide-react:
-        specifier: ^1.11.0
-        version: 1.11.0(react@19.2.5)
+        specifier: ^1.16.0
+        version: 1.16.0(react@19.2.5)
       next:
         specifier: ^16.2.6
         version: 16.2.6(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -3168,8 +3168,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  lucide-react@1.11.0:
-    resolution: {integrity: sha512-UOhjdztXCgdBReRcIhsvz2siIBogfv/lhJEIViCpLt924dO+GDms9T7DNoucI23s6kEPpe988m5N0D2ajnzb2g==}
+  lucide-react@1.16.0:
+    resolution: {integrity: sha512-dYwyPzb4MEKpGUmNYk3WKWPnMrHs3FKM+q94kAnJrcDIqqn1hq2xY8scaS2ovsOCM5D51ey2gaRG3PBb1vgoYQ==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -4009,8 +4009,8 @@ packages:
   third-party-web@0.26.7:
     resolution: {integrity: sha512-buUzX4sXC4efFX6xg2bw6/eZsCUh8qQwSavC4D9HpONMFlRbcHhD8Je5qwYdCpViR6q0qla2wPP+t91a2vgolg==}
 
-  third-party-web@0.29.0:
-    resolution: {integrity: sha512-nBDSJw5B7Sl1YfsATG2XkW5qgUPODbJhXw++BKygi9w6O/NKS98/uY/nR/DxDq2axEjL6halHW1v+jhm/j1DBQ==}
+  third-party-web@0.29.2:
+    resolution: {integrity: sha512-fegtha91tq2DHphyoiBXVHjVi2YG9zFaRnboT9C28tO1en9Y3wJsfspuy40F+u5wl3hHVbw7cnd1b67kEGHb8g==}
 
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
@@ -5162,7 +5162,7 @@ snapshots:
   '@paulirish/trace_engine@0.0.53':
     dependencies:
       legacy-javascript: 0.0.1
-      third-party-web: 0.29.0
+      third-party-web: 0.29.2
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -7549,7 +7549,7 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  lucide-react@1.11.0(react@19.2.5):
+  lucide-react@1.16.0(react@19.2.5):
     dependencies:
       react: 19.2.5
 
@@ -8540,7 +8540,7 @@ snapshots:
 
   third-party-web@0.26.7: {}
 
-  third-party-web@0.29.0: {}
+  third-party-web@0.29.2: {}
 
   through@2.3.8: {}
 
