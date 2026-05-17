@@ -15,7 +15,7 @@ jobs:
     name: bundle-size (per-route 250KB ceiling)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v6
         with:
@@ -42,7 +42,7 @@ jobs:
     name: lighthouse (Core Web Vitals)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v6
         with:
