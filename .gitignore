@@ -3,6 +3,12 @@
 .claude/.setup-complete
 .claude/scheduled_tasks.lock
 
+# Codex local settings and runtime state (user-specific, not shared)
+.Codex/settings.local.json
+.Codex/.setup-complete
+.Codex/setup-followups.md
+.Codex/scheduled_tasks.lock
+
 # oh-my-claudecode plugin local state (sessions, memory)
 .omc/
 
@@ -73,9 +79,13 @@ htmlcov/
 # Snapshots taken by /gtr:update before applying breaking migrations
 .claude/commands.pre-*/
 .claude/migration-log.md
+.Codex/commands.pre-*/
+.Codex/migration-log.md
 
 # Token usage telemetry (per-clone, never shipped)
 .claude/usage-log.jsonl
+.Codex/usage-log.jsonl
 
 # Hook block audit (per-clone, never shipped)
 .claude/hook-audit.log
+.Codex/hook-audit.log

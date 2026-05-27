@@ -1,0 +1,72 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"/Users/gtrows/workspace/workout-hub/.Codex/hooks/pre_guard_release_files.py\"",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "python3 \"/Users/gtrows/workspace/workout-hub/.Codex/hooks/pre_guard_security.py\"",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "python3 \"/Users/gtrows/workspace/workout-hub/.Codex/hooks/pre_guard_env_secrets.py\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"/Users/gtrows/workspace/workout-hub/.Codex/hooks/post_validate_syntax.py\"",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"/Users/gtrows/workspace/workout-hub/.Codex/hooks/session_check_setup.py\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"/Users/gtrows/workspace/workout-hub/.Codex/hooks/pre_check_setup.py\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"/Users/gtrows/workspace/workout-hub/.Codex/hooks/session_log_usage.py\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

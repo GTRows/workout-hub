@@ -1,0 +1,37 @@
+{
+  "capabilities": [
+    {
+      "id": "browser@openai-bundled",
+      "purpose": "Open, inspect, click, and screenshot local web targets."
+    },
+    {
+      "id": "github@openai-curated",
+      "purpose": "Inspect repositories, PRs, issues, CI, and publish branches."
+    },
+    {
+      "id": "figma@openai-curated",
+      "purpose": "Create diagrams, design files, and design-system artifacts."
+    },
+    {
+      "id": "documents@openai-primary-runtime",
+      "purpose": "Create, edit, render, and verify document artifacts."
+    },
+    {
+      "id": "presentations@openai-primary-runtime",
+      "purpose": "Create, edit, render, and verify presentation decks."
+    },
+    {
+      "id": "spreadsheets@openai-primary-runtime",
+      "purpose": "Create, edit, analyze, and verify spreadsheet artifacts."
+    }
+  ],
+  "note": "Codex capabilities are session-provided. Verify availability in the active Plugins/Skills list; there is no project-local install step.",
+  "plugins": [
+    "browser@openai-bundled",
+    "github@openai-curated",
+    "figma@openai-curated",
+    "documents@openai-primary-runtime",
+    "presentations@openai-primary-runtime",
+    "spreadsheets@openai-primary-runtime"
+  ]
+}
