@@ -15,7 +15,7 @@ jobs:
     name: backend (mvn verify)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-java@v4
         with:
@@ -39,7 +39,7 @@ jobs:
     name: frontend (lint + typecheck + test)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v6
         with:
@@ -79,7 +79,7 @@ jobs:
     name: gitleaks (secret scan)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
@@ -91,7 +91,7 @@ jobs:
     name: trivy fs (filesystem CVE scan)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
@@ -109,7 +109,7 @@ jobs:
       matrix:
         component: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build image
         run: docker build -t workouthub-${{ matrix.component }}:ci ./${{ matrix.component }}
       - uses: aquasecurity/trivy-action@v0.36.0
@@ -139,7 +139,7 @@ jobs:
       APP_JWT_SECRET: ci-test-jwt-secret-32-bytes-min-0123456789abcdef
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Materialize CI dotenv
         run: env | grep -E '^(BIND_ADDR|BACKEND_PORT|FRONTEND_PORT|POSTGRES_|SPRING_|SERVER_PORT|APP_JWT_SECRET|NEXT_PUBLIC_)' > dotenv.tmp && mv dotenv.tmp .env
       - name: Validate compose config
@@ -153,7 +153,7 @@ jobs:
       matrix:
         component: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ${{ matrix.component }}/Dockerfile
@@ -162,7 +162,7 @@ jobs:
     name: actionlint (workflow lint)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run actionlint
         run: |
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
@@ -172,7 +172,7 @@ jobs:
     name: shellcheck (scripts)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run shellcheck
         run: |
           if [ -d scripts ] && find scripts -name '*.sh' -print -quit | grep -q .; then
