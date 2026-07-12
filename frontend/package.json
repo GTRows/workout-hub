@@ -37,7 +37,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/eslintrc": "^3.3.6",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^16.2.6",
     "@playwright/test": "^1.49.0",
@@ -50,8 +50,8 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.0",
     "@vitest/coverage-v8": "^2.1.0",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.6",
+    "eslint": "^10.7.0",
+    "eslint-config-next": "^16.2.10",
     "fake-indexeddb": "^6.0.0",
     "jsdom": "^25.0.0",
     "sharp": "0.34.2",
